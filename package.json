@@ -16,6 +16,7 @@
     "@vueuse/nuxt": "^10.9.0",
     "chart.js": "^4.4.2",
     "nuxt": "^3.13.0",
+    "nuxt-auth-sanctum": "^0.6.6",
     "pinia": "^2.1.7",
     "vue-chartjs": "^5.3.0"
   },

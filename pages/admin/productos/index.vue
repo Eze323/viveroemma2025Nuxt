@@ -118,7 +118,7 @@
 import { ref, reactive } from 'vue';
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin' || 'encargado'
 });
 
 // Filters state

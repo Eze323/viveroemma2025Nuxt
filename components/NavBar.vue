@@ -13,11 +13,11 @@
           class="text-gray-700 hover:text-primary font-medium text-sm transition duration-300">
           {{ item.name }}
         </NuxtLink>
-        <NuxtLink 
+        <!-- <NuxtLink 
           to="/auth/login" 
           class="btn btn-primary text-sm">
           Iniciar Sesión
-        </NuxtLink>
+        </NuxtLink> -->
       </nav>
       
       <!-- Mobile Navigation Button -->
@@ -36,12 +36,12 @@
           @click="isMenuOpen = false">
           {{ item.name }}
         </NuxtLink>
-        <NuxtLink 
+        <!-- <NuxtLink 
           to="/auth/login" 
           class="block py-2 text-primary font-medium mt-4"
           @click="isMenuOpen = false">
           Iniciar Sesión
-        </NuxtLink>
+        </NuxtLink> -->
       </div>
     </div>
   </header>
@@ -54,9 +54,9 @@ const isMenuOpen = ref(false);
 
 const navItems = [
   { name: 'Inicio', path: '/' },
-  { name: 'Productos', path: '/productos' },
-  { name: 'Servicios', path: '/servicios' },
-  { name: 'Nosotros', path: '/nosotros' },
-  { name: 'Contacto', path: '/contacto' }
+  // { name: 'Productos', path: '/productos' },
+  // { name: 'Servicios', path: '/servicios' },
+  // { name: 'Nosotros', path: '/nosotros' },
+  // { name: 'Contacto', path: '/contacto' }
 ];
 </script>

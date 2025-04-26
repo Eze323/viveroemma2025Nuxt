@@ -19,7 +19,7 @@
 
           <!-- Development mode notice -->
           <div v-if="isDev" class="bg-blue-50 text-blue-700 p-3 rounded-md text-sm">
-            Modo desarrollo: Use admin@example.com / password para acceder como administrador
+            <!-- Modo desarrollo: Use admin@example.com / password para acceder como administrador -->
           </div>
           
           <!-- Email field -->

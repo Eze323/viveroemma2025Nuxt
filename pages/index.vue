@@ -138,7 +138,7 @@
                 <Icon name="heroicons:map-pin" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
                   <h4 class="font-bold text-gray-900">Dirección</h4>
-                  <p class="text-gray-600">Av. Principal 1234, Cuartel V, Moreno, Buenos Aires, Argentina</p>
+                  <p class="text-gray-600">Cnel. Emeterio de Escalada 10565, B1744 Cuartel V, Provincia de Buenos Aires</p>
                 </div>
               </div>
               
@@ -146,9 +146,8 @@
                 <Icon name="heroicons:clock" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
                   <h4 class="font-bold text-gray-900">Horarios</h4>
-                  <p class="text-gray-600">Lunes a Viernes: 8:00 - 19:00</p>
-                  <p class="text-gray-600">Sábados: 9:00 - 18:00</p>
-                  <p class="text-gray-600">Domingos: 10:00 - 16:00</p>
+                  <p class="text-gray-600">Lunes a Sábado: 7:20 - 18:00</p>
+                  <p class="text-gray-600">Domingos: 8:00 - 12:00</p>
                 </div>
               </div>
               
@@ -181,9 +180,16 @@
           
           <div class="bg-gray-200 rounded-lg overflow-hidden h-96 shadow-lg">
             <!-- Google Maps embed would go here -->
-            <div class="w-full h-full bg-gray-300 flex items-center justify-center">
-              <p class="text-gray-600">Mapa de ubicación</p>
-            </div>
+            <iframe 
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.041380756593!2d-58.8047355!3d-34.5380952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bc97de6e6869bb%3A0xba563040b080cdf9!2sVivero%20Emma!5e0!3m2!1ses!2sar!4v1716842345678!5m2!1ses!2sar" 
+    width="100%" 
+    height="100%" 
+    style="border:0;" 
+    allowfullscreen="" 
+    loading="lazy" 
+    referrerpolicy="no-referrer-when-downgrade"
+    title="Ubicación de Vivero Emma"
+  ></iframe>
           </div>
         </div>
       </div>
