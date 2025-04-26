@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #2D6A4F;
+  --primary-light: #40916C;
+  --secondary-color: #B08968;
+  --accent-color: #FFB627;
+  --success-color: #1E8A4A;
+  --warning-color: #F4A100;
+  --error-color: #D64143;
+  --bg-color: #F8F9FA;
+  --text-dark: #1A1E21;
+  --text-light: #F8F9FA;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5 {
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.2;
+  }
+  
+  .serif-text {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-800;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.5;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-300 inline-flex items-center justify-center;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary-dark;
+  }
+  
+  .btn-outline {
+    @apply border border-primary text-primary hover:bg-primary hover:text-white;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+  }
+  
+  .input {
+    @apply px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+  
+  .container-custom {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Animations */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+.grow-enter-active,
+.grow-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.grow-enter-from,
+.grow-leave-to {
+  transform: scale(0.95);
+  opacity: 0;
+}
