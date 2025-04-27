@@ -70,7 +70,7 @@
     </section>
 
     <!-- Team section -->
-    <section class="py-12">
+    <!-- <section class="py-12">
       <div class="container-custom">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-gray-900 mb-4">Nuestro Equipo</h2>
@@ -105,7 +105,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- Certifications section -->
     <section class="py-12 bg-gray-50">
