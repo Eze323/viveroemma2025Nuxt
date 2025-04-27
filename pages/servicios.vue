@@ -122,21 +122,21 @@ const services = [
     id: 1,
     name: 'Diseño de Jardines',
     description: 'Creamos diseños personalizados que se adaptan a tu espacio y estilo de vida.',
-    price: '15,000',
-    image: 'https://images.pexels.com/photos/1029544/pexels-photo-1029544.jpeg'
+    price: '150,000',
+    image: 'https://arpasa.es/wp-content/uploads/2017/03/D1-848x480.jpg.webp'
   },
   {
     id: 2,
     name: 'Mantenimiento',
     description: 'Servicio regular de mantenimiento para mantener tu jardín en óptimas condiciones.',
-    price: '5,000',
-    image: 'https://images.pexels.com/photos/589/garden-grass-lawn-meadow.jpg'
+    price: '25,000',
+    image: 'https://www.plantlife.org.uk/wp-content/uploads/2024/05/Bulbous-buttercup-and-Meadow-saxifrage-David-and-Annette-Beeson-2.jpg'
   },
   {
     id: 3,
     name: 'Instalación de Riego',
     description: 'Sistemas de riego automatizados para un cuidado eficiente de tus plantas.',
-    price: '8,000',
+    price: '380,000',
     image: 'https://images.pexels.com/photos/2132777/pexels-photo-2132777.jpeg'
   }
 ];

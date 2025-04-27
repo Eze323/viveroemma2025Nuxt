@@ -13,7 +13,7 @@
             <a href="#" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:instagram" class="w-5 h-5" />
             </a>
-            <a href="https://api.whatsapp.com/send?phone=1167075529&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" class="text-white hover:text-accent transition-colors">
+            <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:whatsapp" class="w-5 h-5" />
             </a>
           </div>

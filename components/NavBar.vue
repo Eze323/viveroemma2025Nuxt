@@ -36,12 +36,12 @@
           @click="isMenuOpen = false">
           {{ item.name }}
         </NuxtLink>
-        <NuxtLink 
+        <!-- <NuxtLink 
           to="/auth/login" 
           class="block py-2 text-primary font-medium mt-4"
           @click="isMenuOpen = false">
           Iniciar Sesión
-        </NuxtLink>
+        </NuxtLink> -->
       </div>
     </div>
   </header>

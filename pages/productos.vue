@@ -196,15 +196,15 @@ const products = ref([
     id: 1,
     name: 'Monstera Deliciosa',
     category: 'Plantas de interior',
-    price: 2500,
+    price: '13.000',
     image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg'
   },
   {
     id: 2,
-    name: 'Ficus Lyrata',
+    name: 'Sansevieria',
     category: 'Plantas de interior',
-    price: 3200,
-    oldPrice: 3800,
+    price: '8.500',
+    oldPrice: '11.800',
     discount: 15,
     image: 'https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg'
   },
@@ -212,14 +212,14 @@ const products = ref([
     id: 3,
     name: 'Kit de Jardinería',
     category: 'Herramientas',
-    price: 1800,
+    price: '20.800',
     image: 'https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg'
   },
   {
     id: 4,
     name: 'Rosas Rojas',
     category: 'Flores',
-    price: 1200,
+    price: '4.200',
     image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg'
   }
 ]);

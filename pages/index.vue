@@ -158,7 +158,7 @@
                   <p class="text-gray-600">(+54) 11-5116-5807</p> 
                    <p class="text-gray-600">(+54) 11-5181-6570</p>
                    <p class="text-gray-600">
-                   <a href="https://api.whatsapp.com/send?phone=1167075529&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n">
+                   <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n">
                      <button>Chatea con nosotros en WhatsApp</button>
                     </a>
                   </p>
@@ -261,25 +261,25 @@ const products = [
   {
     name: 'Ficus Lyrata',
     category: 'Plantas de interior',
-    price: '2.500',
-    image: 'https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+    price: '20.000',
+    image: 'https://images.pexels.com/photos/6044736/pexels-photo-6044736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     name: 'Monstera Deliciosa',
     category: 'Plantas de interior',
-    price: '1.800',
+    price: '13.000',
     image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     name: 'Pino Enano',
     category: 'Árboles',
-    price: '3.200',
-    image: 'https://images.pexels.com/photos/1903965/pexels-photo-1903965.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+    price: '5.900',
+    image: 'https://www.grupoalgalia.es/wp-content/uploads/pino-enano-descubre-todo-sobre-esta-maravillosa-especie.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     name: 'Rosas Rojas',
     category: 'Flores',
-    price: '1.200',
+    price: '4.200',
     image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   }
 ];
