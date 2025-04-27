@@ -175,7 +175,7 @@
             </div>
             
             <NuxtLink 
-              to="https://maps.google.com" 
+              to="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.041380756593!2d-58.8047355!3d-34.5380952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bc97de6e6869bb%3A0xba563040b080cdf9!2sVivero%20Emma!5e0!3m2!1ses!2sar!4v1716842345678!5m2!1ses!2sar" 
               target="_blank" 
               class="btn btn-primary mt-8 inline-flex items-center"
             >
