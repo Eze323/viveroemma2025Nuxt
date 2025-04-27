@@ -137,7 +137,7 @@ const services = [
     name: 'Instalación de Riego',
     description: 'Sistemas de riego automatizados para un cuidado eficiente de tus plantas.',
     price: '380,000',
-    image: 'https://images.pexels.com/photos/2132777/pexels-photo-2132777.jpeg'
+    image: 'https://blog.homedepot.com.mx/wp-content/uploads/2019/09/riego1280x720-1024x576.jpg'
   }
 ];
 
