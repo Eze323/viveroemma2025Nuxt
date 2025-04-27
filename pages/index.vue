@@ -22,7 +22,7 @@
         </div>
         <div class="lg:w-1/2 relative animate-fade-in" style="animation-delay: 0.3s;">
           <img 
-            src="https://images.pexels.com/photos/1029544/pexels-photo-1029544.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+            src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
             alt="Vivero Emma - Plantas" 
             class="rounded-lg shadow-2xl relative z-10 max-w-full h-auto"
           />
@@ -154,18 +154,24 @@
               <div class="flex items-start">
                 <Icon name="heroicons:phone" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
-                  <h4 class="font-bold text-gray-900">Teléfono</h4>
-                  <p class="text-gray-600">(+54) 11-2345-6789</p>
-                </div>
+                  <h4 class="font-bold text-gray-900">Teléfono (Romy) - (José)</h4>
+                  <p class="text-gray-600">(+54) 11-5116-5807</p> 
+                   <p class="text-gray-600">(+54) 11-5181-6570</p>
+                   <p class="text-gray-600">
+                   <a href="https://api.whatsapp.com/send?phone=1167075529&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n">
+                     <button>Chatea con nosotros en WhatsApp</button>
+                    </a>
+                  </p>
+                  </div>
               </div>
               
-              <div class="flex items-start">
+              <!-- <div class="flex items-start">
                 <Icon name="heroicons:envelope" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
                   <h4 class="font-bold text-gray-900">Email</h4>
                   <p class="text-gray-600">info@viveroemma.com</p>
                 </div>
-              </div>
+              </div> -->
             </div>
             
             <NuxtLink 

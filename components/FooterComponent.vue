@@ -13,7 +13,7 @@
             <a href="#" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:instagram" class="w-5 h-5" />
             </a>
-            <a href="#" class="text-white hover:text-accent transition-colors">
+            <a href="https://api.whatsapp.com/send?phone=1167075529&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:whatsapp" class="w-5 h-5" />
             </a>
           </div>
@@ -37,16 +37,16 @@
           <address class="not-italic text-gray-300 space-y-2">
             <p class="flex items-start gap-2">
               <Icon name="heroicons:map-pin" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-              <span>Cuartel V, Moreno, Buenos Aires, Argentina</span>
+              <span>Cnel. Emeterio de Escalada 10565, B1744 Cuartel V, Provincia de Buenos Aires</span>
             </p>
             <p class="flex items-center gap-2">
               <Icon name="heroicons:phone" class="w-5 h-5 text-accent flex-shrink-0" />
-              <span>(+54) 11-2345-6789</span>
+              <span>(+54) 11-5116-5807</span>
             </p>
-            <p class="flex items-center gap-2">
+            <!-- <p class="flex items-center gap-2">
               <Icon name="heroicons:envelope" class="w-5 h-5 text-accent flex-shrink-0" />
               <span>info@viveroemma.com</span>
-            </p>
+            </p> -->
           </address>
         </div>
         
@@ -55,16 +55,12 @@
           <h3 class="text-lg font-bold mb-4">Horarios</h3>
           <ul class="text-gray-300 space-y-2">
             <li class="flex justify-between">
-              <span>Lunes - Viernes:</span>
-              <span>8:00 - 19:00</span>
-            </li>
-            <li class="flex justify-between">
-              <span>Sábados:</span>
-              <span>9:00 - 18:00</span>
+              <span>Lunes - Sábados:</span>
+              <span>7:20 - 18:00</span>
             </li>
             <li class="flex justify-between">
               <span>Domingos:</span>
-              <span>10:00 - 16:00</span>
+              <span>8:00 - 12:00</span>
             </li>
           </ul>
         </div>
@@ -91,6 +87,6 @@ const quickLinks = [
   { name: 'Servicios', path: '/servicios' },
   { name: 'Nosotros', path: '/nosotros' },
   { name: 'Contacto', path: '/contacto' },
-  { name: 'Blog', path: '/blog' }
+  // { name: 'Blog', path: '/blog' }
 ];
 </script>
