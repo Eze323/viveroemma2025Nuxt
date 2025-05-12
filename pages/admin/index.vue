@@ -44,10 +44,10 @@
     <!-- Charts and tables -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <div class="lg:col-span-2">
-        <SalesChart 
+        <!-- <SalesChart 
           title="Resumen de Ventas" 
           :data="chartData"
-        />
+        /> -->
       </div>
       <div>
         <TopSellersTable :sellers="topSellers" />

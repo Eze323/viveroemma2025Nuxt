@@ -110,18 +110,18 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useAuthStore } from '~/stores/auth';
-import { useRouter } from 'vue-router';
+
 
 definePageMeta({
   layout: 'default'
 });
 
 const authStore = useAuthStore();
-const router = useRouter();
+
 const isDev = process.dev;
 
 // Form data
-const email = ref(isDev ? 'admin@example.com' : '');
+const email = ref(isDev ? 'encargado@vivero.com' : '');
 const password = ref(isDev ? 'password' : '');
 const rememberMe = ref(false);
 const showPassword = ref(false);
@@ -161,7 +161,7 @@ const handleSubmit = async () => {
   
   try {
     await authStore.login(email.value, password.value);
-    router.push('/admin');
+    navigateTo('/admin');
   } catch (error) {
     console.error('Error de inicio de sesión:', error);
   }

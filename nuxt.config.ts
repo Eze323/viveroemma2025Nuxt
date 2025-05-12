@@ -61,7 +61,7 @@ export default defineNuxtConfig({
   // Runtime config for API URLs
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:8000/api'
+      apiBaseUrl: process.env.API_BASE_URL || 'https://viveroemma-production.up.railway.app/api'
     }
   },
   
