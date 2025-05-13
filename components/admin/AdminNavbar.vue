@@ -3,9 +3,10 @@
     <!-- Mobile sidebar trigger -->
     <button 
       @click="toggleSidebar" 
+      @touchstart="toggleSidebar" 
       class="md:hidden text-gray-500 hover:text-primary"
     >
-      <Icon name="heroicons:bars-3" class="w-6 h-6" />
+      <Icon :name="isOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'" class="w-6 h-6" />
     </button>
     
     <!-- Page title -->
@@ -78,11 +79,19 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+
+const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true,
+  },
+});
+
+const emit = defineEmits(['toggle-sidebar', 'update:isOpen']);
 
 const authStore = useAuthStore();
 const route = useRoute();
-const router = useRouter();
 const isUserMenuOpen = ref(false);
 
 // Get page title based on current route
@@ -90,21 +99,12 @@ const pageTitle = computed(() => {
   const pathMap = {
     '/admin': 'Dashboard',
     '/admin/vendedores': 'Vendedores',
-    '/admin/compradores': 'Compradores',
-    '/admin/productos': 'Productos',
-    '/admin/ventas': 'Ventas',
-    '/admin/facturas': 'Facturas',
-    '/admin/compras': 'Compras',
-    '/admin/embazado': 'Embazado',
-    '/admin/premios': 'Premios',
-    '/admin/perfil': 'Mi Perfil',
-    '/admin/configuracion': 'Configuración'
+    // ... (mantén tus rutas existentes)
   };
-  
   return pathMap[route.path] || 'Administración';
 });
 
-// Get user initials for avatar - now with proper client-side initialization
+// Get user initials
 const userInitials = ref('');
 onMounted(() => {
   const name = authStore.user?.name || 'Usuario';
@@ -114,14 +114,14 @@ onMounted(() => {
     .join('');
 });
 
-// Toggle sidebar in parent component
+// Toggle sidebar - CORRECCIÓN PRINCIPAL
 const toggleSidebar = () => {
-  emit('toggle-sidebar');
+  emit('toggle-sidebar'); // Esto coincide con lo que espera tu layout Admin
 };
 
-// Close dropdown when clicking outside
+// Cerrar menú al hacer click fuera
 const handleClickOutside = (event) => {
-  if (isUserMenuOpen.value) {
+  if (isUserMenuOpen.value && !event.target.closest('.relative')) {
     isUserMenuOpen.value = false;
   }
 };
@@ -134,11 +134,8 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-// Logout handler
 const logout = async () => {
   await authStore.logout();
-  router.push('/auth/login');
+  navigateTo('/auth/login');
 };
-
-const emit = defineEmits(['toggle-sidebar']);
 </script>

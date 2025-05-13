@@ -1,14 +1,14 @@
 <template>
   <div :class="[
-    'bg-white shadow-lg w-64 transition-all duration-300 z-30',
-    { '-ml-64 md:ml-0': !isOpen },
+    'fixed md:static inset-y-0 left-0 bg-white shadow-lg w-64 transition-all duration-300 z-30',
+    { '-translate-x-full md:translate-x-0': !isOpen },
   ]">
     <!-- Logo -->
     <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200">
       <NuxtLink to="/admin" class="flex items-center gap-2 font-bold text-primary text-xl">
         <span>Vivero Emma</span>
       </NuxtLink>
-      <button @click="toggleSidebar" class="md:hidden text-gray-500 hover:text-primary">
+      <button @click="$emit('toggle-sidebar')" class="md:hidden text-gray-500 hover:text-primary">
         <Icon name="heroicons:x-mark" class="w-5 h-5" />
       </button>
     </div>
@@ -27,13 +27,14 @@
     </div>
     
     <!-- Navigation menu -->
-    <nav class="p-4 space-y-1">
+    <nav class="p-4 space-y-1 overflow-y-auto" style="height: calc(100vh - 9rem)">
       <NuxtLink 
         v-for="item in filteredMenuItems" 
         :key="item.to" 
         :to="item.to"
         class="flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors"
         :class="{ 'bg-primary-50 text-primary font-medium': isActiveRoute(item.to) }"
+        @click="$emit('toggle-sidebar')"
       >
         <Icon :name="item.icon" class="w-5 h-5" />
         <span>{{ item.label }}</span>
@@ -52,24 +53,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useRoute, useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
-const isOpen = ref(true);
 
-// Get user initials for avatar - now with proper client-side initialization
+// Initialize userInitials with empty string for consistent SSR
 const userInitials = ref('');
-onMounted(() => {
-  const name = authStore.user?.name || 'Usuario';
-  userInitials.value = name.split(' ')
-    .map(word => word.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join('');
-});
 
 // Format role name for display
 const roleName = computed(() => {
@@ -106,14 +99,26 @@ const isActiveRoute = (path) => {
   return route.path === path || route.path.startsWith(`${path}/`);
 };
 
-// Toggle sidebar on mobile
-const toggleSidebar = () => {
-  isOpen.value = !isOpen.value;
-};
-
 // Logout handler
 const logout = async () => {
   await authStore.logout();
   router.push('/auth/login');
 };
+
+// Update userInitials after component is mounted
+if (process.client) {
+  const name = authStore.user?.name || 'Usuario';
+  userInitials.value = name.split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
+}
+
+defineEmits(['toggle-sidebar']);
+defineProps({
+  isOpen: {
+    type: Boolean,
+    default: true
+  }
+});
 </script>
