@@ -2,7 +2,7 @@
   <div class="bg-white border-b border-gray-200 h-16 flex items-center px-4 justify-between">
     <!-- Mobile sidebar trigger -->
     <button 
-      @click="toggleSidebar" 
+      @click="$emit('toggle-sidebar')" 
       class="md:hidden text-gray-500 hover:text-primary"
     >
       <Icon name="heroicons:bars-3" class="w-6 h-6" />
@@ -34,7 +34,7 @@
       <!-- User menu dropdown -->
       <div class="relative">
         <button 
-          @click="isUserMenuOpen = !isUserMenuOpen"
+          @click="toggleUserMenu"
           class="flex items-center gap-2 focus:outline-none"
         >
           <div v-if="userInitials" class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
@@ -54,12 +54,14 @@
           <NuxtLink 
             to="/admin/perfil" 
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            @click="closeUserMenu"
           >
             Mi Perfil
           </NuxtLink>
           <NuxtLink 
             to="/admin/configuracion" 
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            @click="closeUserMenu"
           >
             Configuración
           </NuxtLink>
@@ -104,7 +106,7 @@ const pageTitle = computed(() => {
   return pathMap[route.path] || 'Administración';
 });
 
-// Get user initials for avatar - now with proper client-side initialization
+// Get user initials for avatar
 const userInitials = ref('');
 onMounted(() => {
   const name = authStore.user?.name || 'Usuario';
@@ -114,14 +116,19 @@ onMounted(() => {
     .join('');
 });
 
-// Toggle sidebar in parent component
-const toggleSidebar = () => {
-  emit('toggle-sidebar');
+// Toggle user menu
+const toggleUserMenu = () => {
+  isUserMenuOpen.value = !isUserMenuOpen.value;
+};
+
+const closeUserMenu = () => {
+  isUserMenuOpen.value = false;
 };
 
 // Close dropdown when clicking outside
 const handleClickOutside = (event) => {
-  if (isUserMenuOpen.value) {
+  const dropdown = document.querySelector('.relative');
+  if (dropdown && !dropdown.contains(event.target)) {
     isUserMenuOpen.value = false;
   }
 };
@@ -140,5 +147,5 @@ const logout = async () => {
   router.push('/auth/login');
 };
 
-const emit = defineEmits(['toggle-sidebar']);
+defineEmits(['toggle-sidebar']);
 </script>
