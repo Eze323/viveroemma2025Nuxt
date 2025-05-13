@@ -31,7 +31,8 @@ import { ref, onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 
 const authStore = useAuthStore();
-const isSidebarOpen = ref(window?.innerWidth >= 768);
+// Initialize with true to match server-side rendering
+const isSidebarOpen = ref(true);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -42,6 +43,9 @@ onMounted(() => {
   if (!authStore.isAuthenticated) {
     navigateTo('/auth/login');
   }
+  
+  // Update sidebar state based on window width after mounting
+  isSidebarOpen.value = window.innerWidth >= 768;
   
   // Handle window resize
   window.addEventListener('resize', () => {

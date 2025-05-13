@@ -53,24 +53,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useRoute, useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
-const isOpen = ref(true);
 
-// Get user initials for avatar
+// Initialize userInitials with empty string for consistent SSR
 const userInitials = ref('');
-onMounted(() => {
-  const name = authStore.user?.name || 'Usuario';
-  userInitials.value = name.split(' ')
-    .map(word => word.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join('');
-});
 
 // Format role name for display
 const roleName = computed(() => {
@@ -112,6 +104,15 @@ const logout = async () => {
   await authStore.logout();
   router.push('/auth/login');
 };
+
+// Update userInitials after component is mounted
+if (process.client) {
+  const name = authStore.user?.name || 'Usuario';
+  userInitials.value = name.split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
+}
 
 defineEmits(['toggle-sidebar']);
 defineProps({
