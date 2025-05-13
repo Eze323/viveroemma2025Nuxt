@@ -3,7 +3,6 @@
     <!-- Mobile sidebar trigger -->
     <button 
       @click="toggleSidebar" 
-      @touchstart="toggleSidebar" 
       class="md:hidden text-gray-500 hover:text-primary"
     >
       <Icon :name="isOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'" class="w-6 h-6" />
@@ -35,7 +34,7 @@
       <!-- User menu dropdown -->
       <div class="relative">
         <button 
-          @click="isUserMenuOpen = !isUserMenuOpen"
+          @click="toggleUserMenu"
           class="flex items-center gap-2 focus:outline-none"
         >
           <div v-if="userInitials" class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
@@ -55,12 +54,14 @@
           <NuxtLink 
             to="/admin/perfil" 
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            @click="closeUserMenu"
           >
             Mi Perfil
           </NuxtLink>
           <NuxtLink 
             to="/admin/configuracion" 
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            @click="closeUserMenu"
           >
             Configuración
           </NuxtLink>
@@ -104,7 +105,7 @@ const pageTitle = computed(() => {
   return pathMap[route.path] || 'Administración';
 });
 
-// Get user initials
+// Get user initials for avatar - now with proper client-side initialization
 const userInitials = ref('');
 onMounted(() => {
   const name = authStore.user?.name || 'Usuario';
@@ -114,14 +115,14 @@ onMounted(() => {
     .join('');
 });
 
-// Toggle sidebar - CORRECCIÓN PRINCIPAL
+// Toggle sidebar in parent component
 const toggleSidebar = () => {
-  emit('toggle-sidebar'); // Esto coincide con lo que espera tu layout Admin
+  emit('toggle-sidebar');
 };
 
 // Cerrar menú al hacer click fuera
 const handleClickOutside = (event) => {
-  if (isUserMenuOpen.value && !event.target.closest('.relative')) {
+  if (isUserMenuOpen.value) {
     isUserMenuOpen.value = false;
   }
 };
@@ -138,4 +139,6 @@ const logout = async () => {
   await authStore.logout();
   navigateTo('/auth/login');
 };
+
+const emit = defineEmits(['toggle-sidebar']);
 </script>

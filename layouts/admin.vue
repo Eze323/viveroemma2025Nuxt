@@ -15,11 +15,8 @@
     
     <!-- Main content -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Top navbar - Ahora con la prop isOpen -->
-      <AdminNavbar 
-        :isOpen="isSidebarOpen" 
-        @toggle-sidebar="toggleSidebar" 
-      />
+      <!-- Top navbar -->
+      <AdminNavbar />
       
       <!-- Main content area -->
       <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
@@ -34,7 +31,6 @@ import { ref, onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 
 const authStore = useAuthStore();
-const isSidebarOpen = ref(true);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
@@ -44,13 +40,5 @@ onMounted(() => {
   if (!authStore.isAuthenticated) {
     navigateTo('/auth/login');
   }
-  
-  isSidebarOpen.value = window.innerWidth >= 768;
-  
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
-      isSidebarOpen.value = true;
-    }
-  });
 });
 </script>
