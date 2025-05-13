@@ -3,6 +3,7 @@
     <!-- Mobile sidebar trigger -->
     <button 
       @click="toggleSidebar" 
+      @touchstart="toggleSidebar" 
       class="md:hidden text-gray-500 hover:text-primary"
     >
       <Icon :name="isOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'" class="w-6 h-6" />
@@ -34,7 +35,7 @@
       <!-- User menu dropdown -->
       <div class="relative">
         <button 
-          @click="toggleUserMenu"
+          @click="isUserMenuOpen = !isUserMenuOpen"
           class="flex items-center gap-2 focus:outline-none"
         >
           <div v-if="userInitials" class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
@@ -54,14 +55,12 @@
           <NuxtLink 
             to="/admin/perfil" 
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            @click="closeUserMenu"
           >
             Mi Perfil
           </NuxtLink>
           <NuxtLink 
             to="/admin/configuracion" 
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            @click="closeUserMenu"
           >
             Configuración
           </NuxtLink>
@@ -80,7 +79,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps({
   isOpen: {
@@ -93,6 +92,7 @@ const emit = defineEmits(['toggle-sidebar', 'update:isOpen']);
 
 const authStore = useAuthStore();
 const route = useRoute();
+
 const isUserMenuOpen = ref(false);
 
 // Get page title based on current route
@@ -100,12 +100,21 @@ const pageTitle = computed(() => {
   const pathMap = {
     '/admin': 'Dashboard',
     '/admin/vendedores': 'Vendedores',
-    // ... (mantén tus rutas existentes)
+    '/admin/compradores': 'Compradores',
+    '/admin/productos': 'Productos',
+    '/admin/ventas': 'Ventas',
+    '/admin/facturas': 'Facturas',
+    '/admin/compras': 'Compras',
+    '/admin/embazado': 'Embazado',
+    '/admin/premios': 'Premios',
+    '/admin/perfil': 'Mi Perfil',
+    '/admin/configuracion': 'Configuración',
   };
+  
   return pathMap[route.path] || 'Administración';
 });
 
-// Get user initials for avatar - now with proper client-side initialization
+// Get user initials for avatar
 const userInitials = ref('');
 onMounted(() => {
   const name = authStore.user?.name || 'Usuario';
@@ -115,14 +124,16 @@ onMounted(() => {
     .join('');
 });
 
-// Toggle sidebar in parent component
+// Toggle sidebar
 const toggleSidebar = () => {
-  emit('toggle-sidebar');
+  const newValue = !props.isOpen;
+  emit('update:isOpen', newValue);
+  emit('toggle-sidebar', newValue);
 };
 
-// Cerrar menú al hacer click fuera
+// Close dropdown when clicking outside
 const handleClickOutside = (event) => {
-  if (isUserMenuOpen.value) {
+  if (isUserMenuOpen.value && !event.target.closest('.relative')) {
     isUserMenuOpen.value = false;
   }
 };
@@ -135,10 +146,9 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
+// Logout handler
 const logout = async () => {
   await authStore.logout();
   navigateTo('/auth/login');
 };
-
-const emit = defineEmits(['toggle-sidebar']);
 </script>
