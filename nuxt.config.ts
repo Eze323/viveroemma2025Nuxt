@@ -64,6 +64,9 @@ export default defineNuxtConfig({
       apiBaseUrl: process.env.API_BASE_URL || 'https://viveroemma-production.up.railway.app/api'
     }
   },
+  components: [
+    { path: '~/components', pathPrefix: false }, // Scans ~/components and subdirectories
+  ],
   
   // Custom CSS
   css: ['~/assets/css/main.css']

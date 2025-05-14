@@ -68,12 +68,14 @@
             <div>
               <h3 class="text-lg font-medium text-gray-900">{{ product.name }}</h3>
               <p class="text-sm text-gray-500">{{ product.category }}</p>
+              <p class="text-sm text-gray-500">{{ product.pot_size }}</p>
             </div>
             <span class="px-2 py-1 text-xs font-medium rounded-full"
               :class="getStockStatusClass(product.stock)">
               {{ getStockStatusText(product.stock) }}
             </span>
           </div>
+          
           <div class="flex justify-between items-center mb-4">
             <div class="text-xl font-bold text-primary">${{ Number(product.price).toFixed(2) }}</div>
             <div class="text-sm text-gray-500">Stock: {{ product.stock }}</div>
@@ -129,6 +131,14 @@
             <input v-model.number="newProduct.stock" type="number" class="input w-full" required />
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Maceta</label>
+            <select v-model="editingProduct.pot_size" class="input w-full" required>
+              <option value="pequeña">Pequeña</option>
+              <option value="mediana">Mediana</option>
+              <option value="grande">Grande</option>
+            </select>
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Imagen (URL)</label>
             <input v-model="newProduct.image_url" type="url" class="input w-full" placeholder="https://example.com/image.jpg" />
           </div>
@@ -164,6 +174,14 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
             <input v-model.number="editingProduct.stock" type="number" class="input w-full" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Maceta</label>
+            <select v-model="editingProduct.pot_size" class="input w-full" required>
+              <option value="pequeña">Pequeña</option>
+              <option value="mediana">Mediana</option>
+              <option value="grande">Grande</option>
+            </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Imagen (URL)</label>
@@ -210,6 +228,7 @@ const newProduct = reactive({
   category: '',
   price: 0,
   stock: 0,
+  pot_size: '',
   image_url: '',
 });
 
@@ -221,6 +240,7 @@ const editingProduct = reactive({
   category: '',
   price: 0,
   stock: 0,
+  pot_size: '',
   image_url: '',
 });
 
@@ -250,7 +270,7 @@ const openCreateModal = () => {
 // Function to close the create product modal
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  Object.assign(newProduct, { name: '', category: '', price: 0, stock: 0, image_url: '' });
+  Object.assign(newProduct, { name: '', category: '', price: 0, stock: 0,pot_size:'', image_url: '' });
 };
 
 // Function to handle the creation of a new product
@@ -280,14 +300,22 @@ const closeEditModal = () => {
 
 // Function to handle the update of a product
 const updateProduct = async () => {
+  loading.value = true;
+  error.value = null;
   try {
-    await api.updateProduct(editingProduct.id, editingProduct);
+    const response = await api.updateProduct(editingProduct.id, editingProduct);
+    const updatedProduct = { ...response.data };
+    const index = allProducts.value.findIndex((p) => p.id === editingProduct.id);
+    if (index !== -1) {
+      allProducts.value[index] = updatedProduct; // Update with API response
+    }
     closeEditModal();
-    loadProducts(); // Reload to get the updated list
-    alert('Producto actualizado exitosamente!');
   } catch (err) {
-    console.error('Error al actualizar producto:', err);
-    alert('Error al actualizar el producto. Por favor, intenta de nuevo.');
+    error.value = err.response?.data?.message || 'Error al actualizar el producto.';
+    console.error('Error updating product:', err);
+    await loadProducts(); // Reload to sync with database
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -298,6 +326,7 @@ const loadProducts = async () => {
   try {
     const response = await api.getProducts(); // Fetch all products initially
     allProducts.value = response.data || response;
+    console.log('Productos cargados:', allProducts.value);
   } catch (err) {
     console.error('Error al cargar productos:', err);
     error.value = err.message || 'No se pudieron cargar los productos. Inténtalo de nuevo.';

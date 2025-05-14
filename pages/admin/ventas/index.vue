@@ -342,46 +342,23 @@
             </div>
 
             <div class="mb-6">
-                 <h4 class="text-lg font-semibold text-gray-800 mb-3">Items de la Venta</h4>
-                 <div class="space-y-4">
-                    <div v-for="(item, index) in saleForm.items" :key="index" class="grid grid-cols-4 gap-4 items-center border p-3 rounded-md bg-gray-50">
-                         <div class="col-span-4 md:col-span-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Producto</label>
-                             <select
-                                v-model="item.product_id"
-                                class="input w-full text-sm"
-                                required
-                                @change="updateItemPrice(item)"
-                             >
-                                <option value="" disabled>Seleccione un producto</option>
-                                <option
-                                    v-for="product in availableProducts"
-                                    :key="product.id"
-                                    :value="product.id"
-                                >
-                                    {{ product.name }} (${{ parseFloat(product.price).toLocaleString() }})
-                                </option>
-                             </select>
-                            </div>
-                         <div class="col-span-2 md:col-span-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                             <input type="number" v-model.number="item.quantity" class="input w-full text-sm" min="1" required />
-                         </div>
-                         <div class="col-span-2 md:col-span-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio U.</label>
-                             <input type="number" v-model.number="item.unitPrice" class="input w-full text-sm" min="0" step="0.01" required />
-                            </div>
-                         <div class="col-span-4 md:col-span-1 flex items-end justify-end">
-                             <button type="button" @click="removeItem(index)" class="text-error hover:text-error-dark" title="Eliminar item">
-                                <Icon name="heroicons:trash" class="w-5 h-5" />
-                            </button>
-                         </div>
-                    </div>
-                 </div>
-                 <button type="button" @click="addItem" class="btn btn-outline mt-4">
-                    <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
-                    Agregar Item
-                 </button>
+              <h4 class="text-lg font-semibold text-gray-800 mb-3">Items de la Venta</h4>
+              <div class="space-y-4">
+                <SaleItemForm
+
+                  v-for="(item, index) in saleForm.items"
+                  :key="index"
+                  :item="item"
+                  :available-products="availableProducts"
+                  @update:item="updateItem(index, $event)"
+                  @remove="removeItem(index)"
+                />
+              </div>
+              <button type="button" @click="addItem" class="btn btn-outline mt-4">
+                <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
+                Agregar Item
+              </button>
+              
             </div>
 
             <div class="text-right text-lg font-bold text-gray-900 mb-6">
@@ -405,9 +382,13 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useApiService } from '~/services/api';
+import SaleItemForm from '~/components/admin/Ventas/SaleItemForm.vue';
+
+
+
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 });
 
 const api = useApiService();
@@ -418,25 +399,25 @@ const filters = reactive({
   status: '',
   date: '',
   seller: '',
-  sort: 'date_desc', // Added sort filter
+  sort: 'date_desc',
 });
 
 // Sales state
-const allSales = ref([]); // Store all loaded sales
+const allSales = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
 // Form Modal state
 const isFormModalOpen = ref(false);
 const saleForm = reactive({
-    id: null,
-    customer: '',
-    email: '',
-    seller: '',
-    date: '',
-    time: '',
-    status: 'Pendiente',
-    items: [] // Items will now have product_id and unitPrice
+  id: null,
+  customer: '',
+  email: '',
+  seller: '',
+  date: '',
+  time: '',
+  status: 'Pendiente',
+  items: [],
 });
 const isEditing = ref(false);
 
@@ -445,13 +426,13 @@ const isViewModalOpen = ref(false);
 const selectedSaleForView = ref(null);
 
 // Product state for the form modal
-const availableProducts = ref([]); // List of products to show in the select dropdown
+const availableProducts = ref([]);
 
 // Mock data for sellers (Ideally fetch this from API)
 const sellers = ref([
   { id: 1, name: 'María López' },
   { id: 2, name: 'Juan Pérez' },
-  { id: 3, name: 'Ana García' }
+  { id: 3, name: 'Ana García' },
 ]);
 
 // --- Computed property for filtering and sorting ---
@@ -461,20 +442,25 @@ const filteredSales = computed(() => {
   // Apply search filter
   if (filters.search) {
     const searchTerm = filters.search.toLowerCase();
-    filtered = filtered.filter(sale => {
-      const customerName = sale.customer ? sale.customer.full_name?.toLowerCase() : (sale.customer_name_field?.toLowerCase() ?? '');
-      const customerEmail = sale.customer ? sale.customer.email?.toLowerCase() : (sale.email?.toLowerCase() ?? '');
+    filtered = filtered.filter((sale) => {
+      const customerName = sale.customer
+        ? sale.customer.full_name?.toLowerCase()
+        : sale.customer_name_field?.toLowerCase() ?? '';
+      const customerEmail = sale.customer
+        ? sale.customer.email?.toLowerCase()
+        : sale.email?.toLowerCase() ?? '';
       const sellerName = sale.seller?.toLowerCase() ?? '';
       const saleId = sale.id ? sale.id.toString().toLowerCase() : '';
 
       // Check if search term matches sale ID, customer name/email, seller name
-      const mainMatch = saleId.includes(searchTerm) ||
-                         customerName.includes(searchTerm) ||
-                         customerEmail.includes(searchTerm) ||
-                         sellerName.includes(searchTerm);
+      const mainMatch =
+        saleId.includes(searchTerm) ||
+        customerName.includes(searchTerm) ||
+        customerEmail.includes(searchTerm) ||
+        sellerName.includes(searchTerm);
 
       // Check if search term matches any product name in sale items
-      const itemMatch = sale.items?.some(item =>
+      const itemMatch = sale.items?.some((item) =>
         item.product?.name?.toLowerCase().includes(searchTerm)
       );
 
@@ -484,17 +470,17 @@ const filteredSales = computed(() => {
 
   // Apply status filter
   if (filters.status) {
-    filtered = filtered.filter(sale => sale.status === filters.status);
+    filtered = filtered.filter((sale) => sale.status === filters.status);
   }
 
   // Apply date filter
   if (filters.date) {
-    filtered = filtered.filter(sale => sale.date === filters.date);
+    filtered = filtered.filter((sale) => sale.date === filters.date);
   }
 
   // Apply seller filter
   if (filters.seller) {
-    filtered = filtered.filter(sale => sale.seller === filters.seller);
+    filtered = filtered.filter((sale) => sale.seller === filters.seller);
   }
 
   // Apply sorting
@@ -504,126 +490,105 @@ const filteredSales = computed(() => {
       const dateB = new Date(b.date + (b.time ? 'T' + b.time : ''));
       return dateB - dateA; // Descending date/time sort
     }
-    // Add other sorting options if needed
     return 0; // Default no sort
   });
 
   return filtered;
 });
 
-
 // --- API Interaction Functions ---
 
-// Function to fetch sales from the backend (fetches all)
 const fetchSales = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-        const response = await api.getSales();
-        allSales.value = response.data;
-
-    } catch (err) {
-        error.value = err.error || 'Error al cargar las ventas.';
-        console.error('Error fetching sales:', err);
-    } finally {
-        loading.value = false;
-    }
+  loading.value = true;
+  error.value = null;
+  try {
+    const response = await api.getSales();
+    allSales.value = response.data;
+  } catch (err) {
+    error.value = err.error || 'Error al cargar las ventas.';
+    console.error('Error fetching sales:', err);
+  } finally {
+    loading.value = false;
+  }
 };
 
-// Function to fetch available products for the form
 const fetchProducts = async () => {
-    try {
-        // Assuming you have an API endpoint for products like /api/products
-        // And that your ProductController index method returns ProductResource::collection($products)
-        const response = await api.getProducts(); // Fetch all products initially
-        availableProducts.value = response.data || response;
-        
-        //const response = await api.getProducts(); // Use api.get for a generic GET request
-        
-        console.log('Available products:', availableProducts.value);
-    } catch (err) {
-        console.error('Error fetching products:', err);
-        // Handle error, maybe show a message to the user
-    }
+  try {
+    const response = await api.getProducts();
+    availableProducts.value = response.data || response;
+    console.log('Available products:', availableProducts.value);
+  } catch (err) {
+    error.value = 'Error al cargar los productos.';
+    console.error('Error fetching products:', err);
+  }
 };
 
-
-// Function to handle saving (create or update) a sale via API
 const handleSaveSale = async () => {
-    if (!saleForm.customer || !saleForm.seller || !saleForm.date || !saleForm.items || saleForm.items.length === 0) {
-        alert('Por favor, complete los campos obligatorios (Cliente, Vendedor, Fecha) y agregue al menos un item.');
-        return;
+  if (!saleForm.customer || !saleForm.seller || !saleForm.date || !saleForm.items || saleForm.items.length === 0) {
+    alert('Por favor, complete los campos obligatorios (Cliente, Vendedor, Fecha) y agregue al menos un item.');
+    return;
+  }
+
+  loading.value = true;
+  error.value = null;
+
+  const saleData = {
+    customer: saleForm.customer,
+    email: saleForm.email,
+    seller: saleForm.seller,
+    date: saleForm.date,
+    time: saleForm.time,
+    status: saleForm.status,
+    items: saleForm.items.map((item) => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+    })),
+  };
+
+  try {
+    let response;
+    if (isEditing.value && saleForm.id) {
+      response = await api.updateSale(saleForm.id, saleData);
+    } else {
+      response = await api.createSale(saleData);
     }
-
-    loading.value = true;
-    error.value = null;
-
-    // Prepare data to send to the backend
-    // Now sending product_id and unitPrice from the form items
-    const saleData = {
-        customer: saleForm.customer,
-        email: saleForm.email,
-        seller: saleForm.seller,
-        date: saleForm.date,
-        time: saleForm.time,
-        status: saleForm.status,
-        items: saleForm.items.map(item => ({
-            // IMPORTANT: Backend expects product name currently.
-            // Find the product name from availableProducts based on item.product_id
-            product: availableProducts.value.find(p => p.id === item.product_id)?.name || 'Producto Desconocido',
-            quantity: item.quantity,
-            unitPrice: item.unitPrice, // Send the unit price from the form
-        })),
-    };
-
-    try {
-        let response;
-        if (isEditing.value && saleForm.id) {
-            response = await api.updateSale(saleForm.id, saleData);
-        } else {
-            response = await api.createSale(saleData);
-        }
-
-        await fetchSales(); // Re-fetch all sales to update the list and apply filters
-        closeFormModal();
-
-    } catch (err) {
-         error.value = err.error || `Error al ${isEditing.value ? 'actualizar' : 'crear'} la venta.`;
-         console.error(`Error saving sale:`, err);
-    } finally {
-        loading.value = false;
-    }
+    await fetchSales();
+    closeFormModal();
+  } catch (err) {
+    error.value = err.error || `Error al ${isEditing.value ? 'actualizar' : 'crear'} la venta.`;
+    console.error(`Error saving sale:`, err);
+  } finally {
+    loading.value = false;
+  }
 };
 
-// Function to delete a sale via API
 const deleteSale = async (saleId) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta venta?')) {
-        return;
-    }
+  if (!confirm('¿Estás seguro de que quieres eliminar esta venta?')) {
+    return;
+  }
 
-    loading.value = true;
-    error.value = null;
+  loading.value = true;
+  error.value = null;
 
-    try {
-        await api.deleteSale(saleId);
-        allSales.value = allSales.value.filter(sale => sale.id !== saleId);
-
-    } catch (err) {
-        error.value = err.error || 'Error al eliminar la venta.';
-        console.error(`Error deleting sale:`, err);
-    } finally {
-        loading.value = false;
-    }
+  try {
+    await api.deleteSale(saleId);
+    allSales.value = allSales.value.filter((sale) => sale.id !== saleId);
+  } catch (err) {
+    error.value = err.error || 'Error al eliminar la venta.';
+    console.error(`Error deleting sale:`, err);
+  } finally {
+    loading.value = false;
+  }
 };
-
 
 // --- Modal and Form Logic ---
 
 const getStatusClass = (status) => {
   const statusMap = {
-    'Completada': 'bg-success/10 text-success',
-    'Pendiente': 'bg-warning/10 text-warning',
-    'Cancelada': 'bg-error/10 text-error'
+    Completada: 'bg-success/10 text-success',
+    Pendiente: 'bg-warning/10 text-warning',
+    Cancelada: 'bg-error/10 text-error',
   };
   return statusMap[status] || 'bg-gray-100 text-gray-800';
 };
@@ -639,105 +604,88 @@ const closeViewModal = () => {
 };
 
 const openFormModalForNew = () => {
-    isEditing.value = false;
-    Object.assign(saleForm, {
-        id: null,
-        customer: '',
-        email: '',
-        seller: '',
-        date: '',
-        time: '',
-        status: 'Pendiente',
-        items: [] // Initialize with empty items
-    });
-    isFormModalOpen.value = true;
-    error.value = null;
-    fetchProducts(); // Fetch products when opening the form modal
+  isEditing.value = false;
+  Object.assign(saleForm, {
+    id: null,
+    customer: '',
+    email: '',
+    seller: '',
+    date: '',
+    time: '',
+    status: 'Pendiente',
+    items: [],
+  });
+  isFormModalOpen.value = true;
+  error.value = null;
+  fetchProducts();
 };
 
 const openFormModalForEdit = (sale) => {
-    isEditing.value = true;
-    Object.assign(saleForm, {
-        id: sale.id,
-        customer: sale.customer ? sale.customer.full_name : (sale.customer_name_field ?? ''),
-        email: sale.customer ? sale.customer.email : (sale.email ?? ''),
-        seller: sale.seller,
-        date: sale.date,
-        time: sale.time,
-        status: sale.status,
-        // Map backend item structure to frontend form structure
-        items: sale.items.map(item => ({
-            // When editing, populate with product_id and unit_price from the backend
-            product_id: item.product_id, // Use product_id from backend
-            quantity: item.quantity,
-            unitPrice: item.unit_price, // Use backend's unit_price
-        })) || []
-    });
-    isFormModalOpen.value = true;
-    error.value = null;
-    fetchProducts(); // Fetch products when opening the form modal for edit
+  isEditing.value = true;
+  Object.assign(saleForm, {
+    id: sale.id,
+    customer: sale.customer ? sale.customer.full_name : sale.customer_name_field ?? '',
+    email: sale.customer ? sale.customer.email : sale.email ?? '',
+    seller: sale.seller,
+    date: sale.date,
+    time: sale.time,
+    status: sale.status,
+    items: sale.items.map((item) => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+    })) || [],
+  });
+  isFormModalOpen.value = true;
+  error.value = null;
+  fetchProducts();
 };
 
 const closeFormModal = () => {
-    isFormModalOpen.value = false;
-    Object.assign(saleForm, {
-        id: null,
-        customer: '',
-        email: '',
-        seller: '',
-        date: '',
-        time: '',
-        status: 'Pendiente',
-        items: []
-    });
-    error.value = null;
-    availableProducts.value = []; // Clear products when closing the modal
+  isFormModalOpen.value = false;
+  Object.assign(saleForm, {
+    id: null,
+    customer: '',
+    email: '',
+    seller: '',
+    date: '',
+    time: '',
+    status: 'Pendiente',
+    items: [],
+  });
+  error.value = null;
+  availableProducts.value = [];
 };
 
-// Function to add an item to the form
 const addItem = () => {
-    // Add a new item with default values, including null product_id
-    saleForm.items.push({ product_id: '', quantity: 1, unitPrice: 0 });
+  saleForm.items.push({ product_id: null, quantity: 1, unitPrice: 0 });
 };
 
-// Function to remove an item from the form
 const removeItem = (index) => {
-    saleForm.items.splice(index, 1);
+  saleForm.items.splice(index, 1);
 };
 
-// Function to update item price when a product is selected
-const updateItemPrice = (item) => {
-    const selectedProduct = availableProducts.value.find(p => p.id === item.product_id);
-    if (selectedProduct) {
-        // Update the unitPrice based on the selected product's price
-        item.unitPrice = parseFloat(selectedProduct.price);
-    } else {
-        item.unitPrice = 0; // Reset if no product selected
-    }
+const updateItem = (index, updatedItem) => {
+  saleForm.items[index] = { ...updatedItem };
 };
 
-
-// Function to calculate total for the form
 const calculateTotalForm = (items) => {
-    if (!items) return 0;
-    // Calculate total based on quantity and unitPrice from the form items
-    return items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+  if (!items) return 0;
+  return items.reduce((sum, item) => sum + (item.quantity * (item.unitPrice || 0)), 0);
 };
 
-// Function to calculate total for the view modal
 const calculateTotalViewModal = (items) => {
-     if (!items) return 0;
-     // Use item.subtotal from the backend response if available, or recalculate from unit_price
-     return items.reduce((sum, item) => sum + (item.subtotal ? parseFloat(item.subtotal) : (item.quantity * parseFloat(item.unit_price))), 0);
+  if (!items) return 0;
+  return items.reduce(
+    (sum, item) => sum + (item.subtotal ? parseFloat(item.subtotal) : item.quantity * parseFloat(item.unit_price)),
+    0
+  );
 };
-
 
 // --- Lifecycle Hook ---
 onMounted(() => {
-  fetchSales(); // Load all sales when the component is mounted
-  // Products are now fetched when the form modal is opened
+  fetchSales();
 });
-
 </script>
 
 <style scoped>
