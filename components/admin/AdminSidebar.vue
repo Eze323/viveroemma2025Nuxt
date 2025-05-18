@@ -81,7 +81,10 @@ const menuItems = [
   { label: 'Compradores', to: '/admin/compradores', icon: 'heroicons:user-group', roles: ['admin'] },
   { label: 'Productos', to: '/admin/productos', icon: 'heroicons:shopping-bag', roles: ['admin', 'encargado'] },
   { label: 'Ventas', to: '/admin/ventas', icon: 'heroicons:shopping-cart', roles: ['admin', 'encargado'] },
-  { label: 'Facturas', to: '/admin/facturas', icon: 'heroicons:document-text', roles: ['admin'] },
+  { label: 'Facturas', to: '/admin/facturas', icon: 'heroicons:document-text', roles: ['admin','encargado']},
+  { label: 'Proveedores', to: '/admin/proveedores', icon: 'heroicons:user-group', roles: ['admin','encargado']},
+  // { label: 'Clientes', to: '/admin/clientes', icon: 'heroicons:user-circle', roles: ['admin', 'encargado'] },
+  
   { label: 'Compras', to: '/admin/compras', icon: 'heroicons:banknotes', roles: ['admin'] },
   { label: 'Embazado', to: '/admin/embazado', icon: 'heroicons:beaker', roles: ['admin', 'encargado', 'empleado'] },
   { label: 'Premios', to: '/admin/premios', icon: 'heroicons:trophy', roles: ['admin'] },

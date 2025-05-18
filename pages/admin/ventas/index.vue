@@ -11,6 +11,7 @@
       </button>
     </div>
 
+    <!-- Dashboard Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
@@ -27,7 +28,6 @@
           </div>
         </div>
       </div>
-
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
           <div class="p-3 rounded-full bg-secondary-100 text-secondary">
@@ -43,7 +43,6 @@
           </div>
         </div>
       </div>
-
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
           <div class="p-3 rounded-full bg-accent-100 text-accent">
@@ -59,7 +58,6 @@
           </div>
         </div>
       </div>
-
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center">
           <div class="p-3 rounded-full bg-success-100 text-success">
@@ -77,6 +75,7 @@
       </div>
     </div>
 
+    <!-- Filters -->
     <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
@@ -117,6 +116,7 @@
       </div>
     </div>
 
+    <!-- Sales Table -->
     <div class="bg-white rounded-lg shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -154,8 +154,8 @@
                 <div class="text-sm font-medium text-gray-900">#{{ sale.id }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                 <div class="text-sm font-medium text-gray-900">{{ sale.customer ? sale.customer.full_name : (sale.customer_name_field ?? 'N/A') }}</div>
-                 <div class="text-sm text-gray-500">{{ sale.customer ? sale.customer.email : (sale.email ?? '') }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ sale.customer_name_field ?? 'N/A' }}</div>
+                <div class="text-sm text-gray-500">{{ sale.email ?? '' }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ sale.seller }}</div>
@@ -164,7 +164,7 @@
                 <div class="text-sm text-gray-900">{{ sale.items ? sale.items.length : 0 }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">${{ sale.total_price ? parseFloat(sale.total_price).toLocaleString() : '0' }}</div>
+                <div class="text-sm font-medium text-gray-900">${{ sale.total_price ? sale.total_price.toLocaleString() : '0' }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 py-1 text-xs font-medium rounded-full"
@@ -177,7 +177,7 @@
                 <div class="text-sm text-gray-500">{{ sale.time }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                 <button
+                <button
                   @click="openFormModalForEdit(sale)"
                   class="text-accent hover:text-accent-dark mr-3"
                   title="Editar venta"
@@ -191,13 +191,13 @@
                 >
                   <Icon name="heroicons:eye" class="w-5 h-5" />
                 </button>
-                 <button class="text-primary hover:text-primary-dark mr-3" title="Generar Factura">
+                <button class="text-primary hover:text-primary-dark mr-3" title="Generar Factura">
                   <Icon name="heroicons:document-text" class="w-5 h-5" />
                 </button>
                 <button
-                    @click="deleteSale(sale.id)"
-                    class="text-error hover:text-error-dark"
-                    title="Eliminar Venta"
+                  @click="deleteSale(sale.id)"
+                  class="text-error hover:text-error-dark"
+                  title="Eliminar Venta"
                 >
                   <Icon name="heroicons:trash" class="w-5 h-5" />
                 </button>
@@ -216,7 +216,7 @@
           <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p class="text-sm text-gray-700">
-                Mostrando <span class="font-medium">1</span> a <span class="font-medium">{{ filteredSales.length < 10 ? filteredSales.length : 10 }}</span> de{' '}
+                Mostrando <span class="font-medium">1</span> a <span class="font-medium">{{ filteredSales.length < 10 ? filteredSales.length : 10 }}</span> de
                 <span class="font-medium">{{ filteredSales.length }}</span> ventas
               </p>
             </div>
@@ -233,6 +233,7 @@
       </div>
     </div>
 
+    <!-- View Modal -->
     <div v-if="isViewModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
@@ -243,19 +244,17 @@
         </div>
 
         <div v-if="selectedSaleForView" class="mb-6 text-sm text-gray-700">
-           <p><strong>Cliente:</strong> {{ selectedSaleForView.customer ? selectedSaleForView.customer.full_name : (selectedSaleForView.customer_name_field ?? 'N/A') }}</p>
-           <p><strong>Email:</strong> {{ selectedSaleForView.customer ? selectedSaleForView.customer.email : (selectedSaleForView.email ?? '') }}</p>
-
-            <p><strong>Vendedor:</strong> {{ selectedSaleForView.seller }}</p>
-            <p><strong>Fecha:</strong> {{ selectedSaleForView.date }} {{ selectedSaleForView.time }}</p>
-            <p><strong>Estado:</strong>
-                 <span class="px-2 py-1 text-xs font-medium rounded-full"
-                  :class="getStatusClass(selectedSaleForView.status)">
-                  {{ selectedSaleForView.status }}
-                </span>
-            </p>
+          <p><strong>Cliente:</strong> {{ selectedSaleForView.customer_name_field ?? 'N/A' }}</p>
+          <p><strong>Email:</strong> {{ selectedSaleForView.email ?? '' }}</p>
+          <p><strong>Vendedor:</strong> {{ selectedSaleForView.seller }}</p>
+          <p><strong>Fecha:</strong> {{ selectedSaleForView.date }} {{ selectedSaleForView.time }}</p>
+          <p><strong>Estado:</strong>
+            <span class="px-2 py-1 text-xs font-medium rounded-full"
+              :class="getStatusClass(selectedSaleForView.status)">
+              {{ selectedSaleForView.status }}
+            </span>
+          </p>
         </div>
-
 
         <div v-if="selectedSaleForView && selectedSaleForView.items && selectedSaleForView.items.length > 0" class="mb-6">
           <h4 class="text-lg font-semibold text-gray-800 mb-3">Items de la Venta</h4>
@@ -270,13 +269,13 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="(item, index) in selectedSaleForView.items" :key="index">
-                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ item.product ? item.product.name : 'N/A' }}</td>
+                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ item.product ? item.product.name : 'N/A' }}</td>
                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ item.quantity }}</td>
-                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${{ item.unit_price ? parseFloat(item.unit_price).toLocaleString() : '0' }}</td>
-                <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-right text-gray-900">${{ item.subtotal ? parseFloat(item.subtotal).toLocaleString() : '0' }}</td>
+                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${{ item.unit_price ? item.unit_price.toLocaleString() : '0' }}</td>
+                <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-right text-gray-900">${{ item.subtotal ? item.subtotal.toLocaleString() : '0' }}</td>
               </tr>
             </tbody>
-             <tfoot>
+            <tfoot>
               <tr class="bg-gray-50">
                 <td colspan="3" class="px-4 py-2 text-right text-sm font-bold text-gray-900">Total:</td>
                 <td class="px-4 py-2 text-right text-sm font-bold text-gray-900">${{ calculateTotalViewModal(selectedSaleForView.items).toLocaleString() }}</td>
@@ -284,9 +283,9 @@
             </tfoot>
           </table>
         </div>
-         <div v-else-if="selectedSaleForView" class="text-center text-gray-500 italic">
-            No hay items para esta venta.
-         </div>
+        <div v-else-if="selectedSaleForView" class="text-center text-gray-500 italic">
+          No hay items para esta venta.
+        </div>
 
         <div class="mt-6 flex justify-end">
           <button @click="closeViewModal" class="btn btn-outline">Cerrar</button>
@@ -294,8 +293,8 @@
       </div>
     </div>
 
-
-     <div v-if="isFormModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <!-- Form Modal -->
+    <div v-if="isFormModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[95vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Venta' : 'Nueva Venta' }}</h3>
@@ -305,77 +304,81 @@
         </div>
 
         <form @submit.prevent="handleSaveSale">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-                    <input type="text" v-model="saleForm.customer" class="input w-full" required />
-                    </div>
-                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Cliente</label>
-                     <input type="email" v-model="saleForm.email" class="input w-full" />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Vendedor</label>
-                    <select v-model="saleForm.seller" class="input w-full" required>
-                        <option value="">Seleccione un vendedor</option>
-                        <option v-for="seller in sellers" :key="seller.id" :value="seller.name">
-                            {{ seller.name }}
-                        </option>
-                    </select>
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                    <input type="date" v-model="saleForm.date" class="input w-full" required />
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
-                    <input type="time" v-model="saleForm.time" class="input w-full" />
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                    <select v-model="saleForm.status" class="input w-full" required>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Completada">Completada</option>
-                        <option value="Cancelada">Cancelada</option>
-                    </select>
-                </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+              <input type="text" v-model="saleForm.customer" class="input w-full" required />
             </div>
-
-            <div class="mb-6">
-              <h4 class="text-lg font-semibold text-gray-800 mb-3">Items de la Venta</h4>
-              <div class="space-y-4">
-                <SaleItemForm
-
-                  v-for="(item, index) in saleForm.items"
-                  :key="index"
-                  :item="item"
-                  :available-products="availableProducts"
-                  @update:item="updateItem(index, $event)"
-                  @remove="removeItem(index)"
-                />
-              </div>
-              <button type="button" @click="addItem" class="btn btn-outline mt-4">
-                <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
-                Agregar Item
-              </button>
-              
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email Cliente</label>
+              <input type="email" v-model="saleForm.email" class="input w-full" />
             </div>
-
-            <div class="text-right text-lg font-bold text-gray-900 mb-6">
-                Total: ${{ calculateTotalForm(saleForm.items).toLocaleString() }}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Vendedor</label>
+              <select v-model="saleForm.seller" class="input w-full" required>
+                <option value="">Seleccione un vendedor</option>
+                <option v-for="seller in sellers" :key="seller.id" :value="seller.name">
+                  {{ seller.name }}
+                </option>
+              </select>
             </div>
-
-
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" @click="closeFormModal" class="btn btn-outline">Cancelar</button>
-                <button type="submit" class="btn btn-primary" :disabled="loading">{{ isEditing ? 'Guardar Cambios' : 'Crear Venta' }}</button>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+              <input type="date" v-model="saleForm.date" class="input w-full" required />
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+              <input type="time" v-model="saleForm.time" class="input w-full" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <select v-model="saleForm.status" class="input w-full" required>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Completada">Completada</option>
+                <option value="Cancelada">Cancelada</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <h4 class="text-lg font-semibold text-gray-800 mb-3">Items de la Venta</h4>
+            <div class="space-y-4">
+              <SaleItemForm
+                v-for="(item, index) in saleForm.items"
+                :key="index"
+                :item="item"
+                :available-products="availableProducts"
+                @update:item="updateItem(index, $event)"
+                @remove="removeItem(index)"
+              />
+            </div>
+            <button type="button" @click="addItem" class="btn btn-outline mt-4">
+              <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
+              Agregar Item
+            </button>
+          </div>
+
+          <div class="text-right text-lg font-bold text-gray-900 mb-6">
+            Total: ${{ calculateTotalForm(saleForm.items).toLocaleString() }}
+          </div>
+
+          <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" @click="closeFormModal" class="btn btn-outline">Cancelar</button>
+            <button type="submit" class="btn btn-primary" :disabled="loading">{{ isEditing ? 'Guardar Cambios' : 'Crear Venta' }}</button>
+          </div>
         </form>
-         <div v-if="error" class="mt-4 text-error text-center">{{ error }}</div>
-         <div v-if="loading" class="mt-4 text-center text-gray-600">Guardando...</div>
+        <div v-if="error && !notification.isOpen" class="mt-4 text-error text-center">{{ error }}</div>
+        <div v-if="loading" class="mt-4 text-center text-gray-600">Guardando...</div>
       </div>
     </div>
 
+    <!-- Notification Modal -->
+    <NotificationModal
+      :is-open="notification.isOpen"
+      :message="notification.message"
+      :type="notification.type"
+      @close="closeNotification"
+    />
   </div>
 </template>
 
@@ -383,9 +386,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useApiService } from '~/services/api';
 import SaleItemForm from '~/components/admin/Ventas/SaleItemForm.vue';
-
-
-
+import NotificationModal from '~/components/NotificationModal.vue';
 
 definePageMeta({
   layout: 'admin',
@@ -406,6 +407,13 @@ const filters = reactive({
 const allSales = ref([]);
 const loading = ref(false);
 const error = ref(null);
+
+// Notification state
+const notification = reactive({
+  isOpen: false,
+  message: '',
+  type: 'success',
+});
 
 // Form Modal state
 const isFormModalOpen = ref(false);
@@ -435,31 +443,24 @@ const sellers = ref([
   { id: 3, name: 'Ana García' },
 ]);
 
-// --- Computed property for filtering and sorting ---
+// Computed property for filtering and sorting
 const filteredSales = computed(() => {
   let filtered = allSales.value;
 
-  // Apply search filter
   if (filters.search) {
     const searchTerm = filters.search.toLowerCase();
     filtered = filtered.filter((sale) => {
-      const customerName = sale.customer
-        ? sale.customer.full_name?.toLowerCase()
-        : sale.customer_name_field?.toLowerCase() ?? '';
-      const customerEmail = sale.customer
-        ? sale.customer.email?.toLowerCase()
-        : sale.email?.toLowerCase() ?? '';
+      const customerName = sale.customer_name_field?.toLowerCase() ?? '';
+      const customerEmail = sale.email?.toLowerCase() ?? '';
       const sellerName = sale.seller?.toLowerCase() ?? '';
       const saleId = sale.id ? sale.id.toString().toLowerCase() : '';
 
-      // Check if search term matches sale ID, customer name/email, seller name
       const mainMatch =
         saleId.includes(searchTerm) ||
         customerName.includes(searchTerm) ||
         customerEmail.includes(searchTerm) ||
         sellerName.includes(searchTerm);
 
-      // Check if search term matches any product name in sale items
       const itemMatch = sale.items?.some((item) =>
         item.product?.name?.toLowerCase().includes(searchTerm)
       );
@@ -468,45 +469,42 @@ const filteredSales = computed(() => {
     });
   }
 
-  // Apply status filter
   if (filters.status) {
     filtered = filtered.filter((sale) => sale.status === filters.status);
   }
 
-  // Apply date filter
   if (filters.date) {
     filtered = filtered.filter((sale) => sale.date === filters.date);
   }
 
-  // Apply seller filter
   if (filters.seller) {
     filtered = filtered.filter((sale) => sale.seller === filters.seller);
   }
 
-  // Apply sorting
   filtered.sort((a, b) => {
-    if (filters.sort === 'date_desc') {
-      const dateA = new Date(a.date + (a.time ? 'T' + a.time : ''));
-      const dateB = new Date(b.date + (b.time ? 'T' + b.time : ''));
-      return dateB - dateA; // Descending date/time sort
-    }
-    return 0; // Default no sort
-  });
+  if (filters.sort === 'date_desc') {
+    const dateA = a.date ? new Date(a.date + (a.time ? 'T' + a.time : '')) : new Date(0);
+    const dateB = b.date ? new Date(b.date + (b.time ? 'T' + b.time : '')) : new Date(0);
+    return dateB - dateA;
+  }
+  return 0;
+});
 
   return filtered;
 });
 
-// --- API Interaction Functions ---
-
+// API Interaction Functions
 const fetchSales = async () => {
   loading.value = true;
   error.value = null;
   try {
     const response = await api.getSales();
-    allSales.value = response.data;
+    allSales.value = response;
+    console.log('Sales loaded:', allSales.value);
   } catch (err) {
-    error.value = err.error || 'Error al cargar las ventas.';
+    error.value = err.message || 'Error al cargar las ventas.';
     console.error('Error fetching sales:', err);
+    showNotification(error.value, 'error');
   } finally {
     loading.value = false;
   }
@@ -515,17 +513,18 @@ const fetchSales = async () => {
 const fetchProducts = async () => {
   try {
     const response = await api.getProducts();
-    availableProducts.value = response.data || response;
+    availableProducts.value = response;
     console.log('Available products:', availableProducts.value);
   } catch (err) {
     error.value = 'Error al cargar los productos.';
     console.error('Error fetching products:', err);
+    showNotification(error.value, 'error');
   }
 };
 
 const handleSaveSale = async () => {
   if (!saleForm.customer || !saleForm.seller || !saleForm.date || !saleForm.items || saleForm.items.length === 0) {
-    alert('Por favor, complete los campos obligatorios (Cliente, Vendedor, Fecha) y agregue al menos un item.');
+    showNotification('Por favor, complete los campos obligatorios (Cliente, Vendedor, Fecha) y agregue al menos un item.', 'error');
     return;
   }
 
@@ -537,7 +536,7 @@ const handleSaveSale = async () => {
     email: saleForm.email,
     seller: saleForm.seller,
     date: saleForm.date,
-    time: saleForm.time,
+    time: saleForm.time || null,
     status: saleForm.status,
     items: saleForm.items.map((item) => ({
       product_id: item.product_id,
@@ -550,14 +549,23 @@ const handleSaveSale = async () => {
     let response;
     if (isEditing.value && saleForm.id) {
       response = await api.updateSale(saleForm.id, saleData);
+      const index = allSales.value.findIndex((sale) => sale.id === saleForm.id);
+      if (index !== -1) {
+        allSales.value[index] = response;
+      } else {
+        allSales.value.push(response);
+      }
+      showNotification('Venta actualizada exitosamente!', 'success');
     } else {
       response = await api.createSale(saleData);
+      allSales.value.push(response);
+      showNotification('Venta creada exitosamente!', 'success');
     }
-    await fetchSales();
     closeFormModal();
   } catch (err) {
-    error.value = err.error || `Error al ${isEditing.value ? 'actualizar' : 'crear'} la venta.`;
-    console.error(`Error saving sale:`, err);
+    error.value = err.message || `Error al ${isEditing.value ? 'actualizar' : 'crear'} la venta.`;
+    console.error('Error saving sale:', err);
+    showNotification(error.value, 'error');
   } finally {
     loading.value = false;
   }
@@ -574,16 +582,30 @@ const deleteSale = async (saleId) => {
   try {
     await api.deleteSale(saleId);
     allSales.value = allSales.value.filter((sale) => sale.id !== saleId);
+    showNotification('Venta eliminada exitosamente!', 'success');
   } catch (err) {
-    error.value = err.error || 'Error al eliminar la venta.';
-    console.error(`Error deleting sale:`, err);
+    error.value = err.message || 'Error al eliminar la venta.';
+    console.error('Error deleting sale:', err);
+    showNotification(error.value, 'error');
   } finally {
     loading.value = false;
   }
 };
 
-// --- Modal and Form Logic ---
+// Notification Functions
+const showNotification = (message, type = 'success') => {
+  notification.message = message;
+  notification.type = type;
+  notification.isOpen = true;
+};
 
+const closeNotification = () => {
+  notification.isOpen = false;
+  notification.message = '';
+  notification.type = 'success';
+};
+
+// Modal and Form Logic
 const getStatusClass = (status) => {
   const statusMap = {
     Completada: 'bg-success/10 text-success',
@@ -610,7 +632,7 @@ const openFormModalForNew = () => {
     customer: '',
     email: '',
     seller: '',
-    date: '',
+    date: new Date().toISOString().split('T')[0],
     time: '',
     status: 'Pendiente',
     items: [],
@@ -624,8 +646,8 @@ const openFormModalForEdit = (sale) => {
   isEditing.value = true;
   Object.assign(saleForm, {
     id: sale.id,
-    customer: sale.customer ? sale.customer.full_name : sale.customer_name_field ?? '',
-    email: sale.customer ? sale.customer.email : sale.email ?? '',
+    customer: sale.customer_name_field ?? '',
+    email: sale.email ?? '',
     seller: sale.seller,
     date: sale.date,
     time: sale.time,
@@ -677,67 +699,57 @@ const calculateTotalForm = (items) => {
 const calculateTotalViewModal = (items) => {
   if (!items) return 0;
   return items.reduce(
-    (sum, item) => sum + (item.subtotal ? parseFloat(item.subtotal) : item.quantity * parseFloat(item.unit_price)),
+    (sum, item) => sum + (item.subtotal ? item.subtotal : item.quantity * item.unit_price),
     0
   );
 };
 
-// --- Lifecycle Hook ---
+// Lifecycle Hook
 onMounted(() => {
   fetchSales();
 });
 </script>
 
 <style scoped>
-/* Puedes añadir estilos adicionales si es necesario, aunque Tailwind cubre la mayoría */
-/* Por ejemplo, para asegurar que el modal esté por encima de todo */
-.z-50 {
-  z-index: 50;
-}
-
-/* Basic styles for input/select - adjust based on your actual CSS framework */
 .input {
-    border: 1px solid #d1d5db; /* gray-300 */
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem; /* rounded-md */
-    font-size: 0.875rem; /* text-sm */
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
 }
-
 .btn {
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
 }
-
 .btn-primary {
-    background-color: #3b82f6; /* blue-500 */
-    color: white;
+  background-color: #3b82f6;
+  color: white;
 }
 .btn-primary:hover {
-    background-color: #2563eb; /* blue-600 */
+  background-color: #2563eb;
 }
-
 .btn-outline {
-    background-color: transparent;
-    border: 1px solid #d1d5db;
-    color: #374151; /* gray-700 */
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 .btn-outline:hover {
-    background-color: #f9fafb; /* gray-50 */
+  background-color: #f9fafb;
 }
-
-.text-success { color: #10b981; /* green-500 */ }
+.text-success { color: #10b981; }
 .bg-success\/10 { background-color: rgba(16, 185, 129, 0.1); }
-
-.text-warning { color: #f59e0b; /* yellow-500 */ }
+.text-warning { color: #f59e0b; }
 .bg-warning\/10 { background-color: rgba(245, 158, 11, 0.1); }
-
-.text-error { color: #ef4444; /* red-500 */ }
+.text-error { color: #ef4444; }
 .bg-error\/10 { background-color: rgba(239, 68, 68, 0.1); }
-
-.text-accent { color: #6366f1; /* indigo-500 */ } /* Using indigo as example accent */
-.hover\:text-accent-dark:hover { color: #4f46e5; /* indigo-600 */ }
-
+.text-accent { color: #6366f1; }
+.hover\:text-accent-dark:hover { color: #4f46e5; }
+.text-primary { color: #3b82f6; }
+.bg-primary-100 { background-color: rgba(59, 130, 246, 0.1); }
+.text-secondary { color: #6b7280; }
+.bg-secondary-100 { background-color: rgba(107, 114, 128, 0.1); }
+.bg-accent-100 { background-color: rgba(99, 102, 241, 0.1); }
 </style>
