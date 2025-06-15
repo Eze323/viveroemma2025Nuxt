@@ -9,6 +9,16 @@
         </p>
       </div>
     </section>
+    <UAlert 
+          title="Formulario en construcción" 
+          color="warning" 
+          icon="i-heroicons-exclamation-triangle"
+          description="El formulario estará disponible pronto. Mientras tanto, contáctanos por WhatsApp o teléfono."
+          :avatar="{
+            src: 'https://github.com/nuxt/nuxt.png'
+          }"
+          class="mb-6"
+        />
 
     <!-- Contact section -->
     <section class="py-12">

@@ -160,7 +160,10 @@ const handleSubmit = async () => {
   if (!validateForm()) return;
   
   try {
-    await authStore.login(email.value, password.value);
+   await useFetch('/api/login', {
+      method: 'POST',
+      body: { email: email.value, password: password.value }
+    });
     navigateTo('/admin');
   } catch (error) {
     console.error('Error de inicio de sesión:', error);
