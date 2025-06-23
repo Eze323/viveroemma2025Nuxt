@@ -146,7 +146,7 @@
   
   <script setup>
   import { ref, reactive, onMounted, computed } from 'vue';
-  import { useApiService } from '~/services/api';
+  import { useApiService } from '~/services/api/api'
   import Modal from '~/components/Modal.vue';
   import NotificationModal from '~/components/NotificationModal.vue';
   

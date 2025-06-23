@@ -77,5 +77,8 @@ export default defineNuxtConfig({
   ],
   
   // Custom CSS
-  css: ['~/assets/css/main.css']
+  css: ['~/assets/css/main.css'],
+  plugins:[
+    '~/plugins/auth.ts'
+  ]
 })

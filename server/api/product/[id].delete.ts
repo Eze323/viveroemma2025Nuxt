@@ -1,31 +1,30 @@
-// import { query } from '../../utils/db';
-// import { Product } from '../../../types/product';
+// server/api/products/[id].delete.ts
+import { useDrizzle } from '~/server/utils/drizzle';
+import { products } from '~/src/db/schema';
+import { eq } from 'drizzle-orm';
 
-// export default defineEventHandler({
-//  // middleware: ['auth'],
-//   handler: async (event) => {
-//     const id = getRouterParam(event, 'id');
+export default defineEventHandler(async (event) => {
+  try {
+   // await requireAuth(event);
+    const db = useDrizzle();
 
-//     try {
-//       const [product] = await query<Product>('SELECT * FROM products WHERE id = ?', [id]);
-//       if (!product) {
-//         throw createError({
-//           statusCode: 404,
-//           message: 'Producto no encontrado'
-//         });
-//       }
+    const idParam = event.context.params?.id;
+    if (!idParam) {
+      return { success: false, error: 'Missing product id parameter' };
+    }
+    const id = parseInt(idParam);
+    const [product] = await db.delete(products).where(eq(products.id, id));
 
-//       await query('DELETE FROM products WHERE id = ?', [id]);
-//       return {
-//         message: 'Producto eliminado',
-//         status: 'OK'
-//       };
-//     } catch (error: unknown) {
-//       throw createError({
-//         statusCode: 500,
-//         message: 'Error al eliminar producto',
-//         data: error instanceof Error ? error.message : 'Error desconocido'
-//       });
-//     }
-//   }
-// });
+    if (!product) {
+      return { success: false, error: 'Product not found' };
+    }
+
+    return { success: true, data: { message: 'Producto eliminado' } };
+  } catch (error) {
+    console.error('Error in /api/products/[id] DELETE:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    };
+  }
+});

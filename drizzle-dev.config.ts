@@ -5,6 +5,7 @@ const config = useRuntimeConfig();
 
 export default defineConfig({
   dialect: "mysql",
+  schema: "./server/db/schema.ts",
   dbCredentials:{
       host: config.public.dbHost,
      port: Number(config.public.dbPort),

@@ -1,3 +1,4 @@
+<!-- pages/products/index.vue -->
 <template>
   <div>
     <div class="mb-6 flex justify-between items-center">
@@ -16,9 +17,9 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
           <input
-            type="text"
             v-model="filters.search"
-            placeholder="Nombre, código..."
+            type="text"
+            placeholder="Nombre..."
             class="input w-full"
             @input="applyFilters"
           />
@@ -27,12 +28,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
           <select v-model="filters.category" class="input w-full" @change="applyFilters">
             <option value="">Todas</option>
-            <option value="planta">Planta</option>
-            <option value="arbusto">Arbusto</option>
-            <option value="plantin">Plantín</option>
-            <option value="otro">Otro</option>
-            <option value="semilla">Semilla</option>
-            <option value="herramienta">Herramienta</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
           </select>
         </div>
         <div>
@@ -55,22 +51,29 @@
       </div>
     </div>
 
-    <div v-if="!loading && filteredProducts.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-if="loading" class="text-center py-8">
+      <p class="text-gray-600">Cargando productos...</p>
+    </div>
+    <div v-else-if="!filteredProducts.length" class="text-center py-8">
+      <p class="text-gray-600">No se encontraron productos.</p>
+    </div>
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div v-for="product in filteredProducts" :key="product.id"
         class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div class="aspect-w-4 aspect-h-3">
           <img
-            :src="product.image_url"
+            :src="product.image_url || '/placeholder.jpg'"
             :alt="product.name"
             class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+            @error="product.image_url = '/placeholder.jpg'"
           />
         </div>
         <div class="p-4">
           <div class="flex justify-between items-start mb-2">
             <div>
               <h3 class="text-lg font-medium text-gray-900">{{ product.name }}</h3>
-              <p class="text-sm text-gray-500">{{ product.category }}</p>
-              <p class="text-sm text-gray-500">Tamaño de maceta: {{ product.pot_size || 'N/A' }}</p>
+              <p class="text-sm text-gray-500 capitalize">{{ product.category }}</p>
+              <p class="text-sm text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
             </div>
             <span class="px-2 py-1 text-xs font-medium rounded-full"
               :class="getStockStatusClass(product.stock)">
@@ -78,7 +81,7 @@
             </span>
           </div>
           <div class="flex justify-between items-center mb-4">
-            <div class="text-xl font-bold text-primary">${{ product.price.toFixed(2) }}</div>
+            <div class="text-xl font-bold text-primary">${{ formatPrice(product.price) }}</div>
             <div class="text-sm text-gray-500">Stock: {{ product.stock }}</div>
           </div>
           <div class="flex gap-2">
@@ -95,17 +98,6 @@
       </div>
     </div>
 
-    <div v-else-if="loading" class="text-center py-8">
-      <p class="text-gray-600">Cargando productos...</p>
-    </div>
-
-    <div v-else class="text-center py-8">
-      <p class="text-gray-600">No se encontraron productos.</p>
-    </div>
-    <div v-if="error && !notification.isOpen" class="text-center py-4 text-error">
-      <p>{{ error }}</p>
-    </div>
-
     <!-- Modal de Creación -->
     <Modal :open="isCreateModalOpen" @close="closeCreateModal">
       <h2 class="text-xl font-bold mb-4">Nuevo Producto</h2>
@@ -118,33 +110,27 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
             <select v-model="newProduct.category" class="input w-full" required>
-              <option value="planta">Planta</option>
-              <option value="arbusto">Arbusto</option>
-              <option value="plantin">Plantín</option>
-              <option value="otro">Otro</option>
-              <option value="semilla">Semilla</option>
-              <option value="herramienta">Herramienta</option>
+              <option value="" disabled>Seleccione una categoría</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Venta</label>
-            <input v-model.number="newProduct.price" type="number" step="0.01" class="input w-full" required min="0" />
+           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <input v-model="newProduct.description" type="text" class="input w-full" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Costo</label>
-            <input v-model.number="newProduct.cost_price" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+            <input v-model.number="newProduct.price" type="number" step="0.01" class="input w-full" required min="0" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
             <input v-model.number="newProduct.stock" type="number" class="input w-full" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Maceta</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
             <select v-model="newProduct.pot_size" class="input w-full">
               <option value="">Sin especificar</option>
-              <option value="pequeña">Pequeña</option>
-              <option value="mediana">Mediana</option>
-              <option value="grande">Grande</option>
+              <option v-for="size in potSizes" :key="size" :value="size">{{ capitalize(size) }}</option>
             </select>
           </div>
           <div>
@@ -171,33 +157,27 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
             <select v-model="editingProduct.category" class="input w-full" required>
-              <option value="planta">Planta</option>
-              <option value="arbusto">Arbusto</option>
-              <option value="plantin">Plantín</option>
-              <option value="otro">Otro</option>
-              <option value="semilla">Semilla</option>
-              <option value="herramienta">Herramienta</option>
+              <option value="" disabled>Seleccione una categoría</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Venta</label>
-            <input v-model.number="editingProduct.price" type="number" step="0.01" class="input w-full" required min="0" />
+           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <input v-model="editingProduct.description" type="text" class="input w-full" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Costo</label>
-            <input v-model.number="editingProduct.cost_price" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+            <input v-model.number="editingProduct.price" type="number" step="0.01" class="input w-full" required min="0" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
             <input v-model.number="editingProduct.stock" type="number" class="input w-full" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Maceta</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
             <select v-model="editingProduct.pot_size" class="input w-full">
               <option value="">Sin especificar</option>
-              <option value="pequeña">Pequeña</option>
-              <option value="mediana">Mediana</option>
-              <option value="grande">Grande</option>
+              <option v-for="size in potSizes" :key="size" :value="size">{{ capitalize(size) }}</option>
             </select>
           </div>
           <div>
@@ -223,64 +203,91 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted, computed, onErrorCaptured } from 'vue';
-import { useApiService } from '~/services/api';
+<script setup lang="ts">
+import { ref, reactive, onMounted, computed } from 'vue';
+import { useApiService } from '~/services/api/api';
+import { useAuthStore } from '~/stores/auth';
 import Modal from '~/components/Modal.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
 
 definePageMeta({
   layout: 'admin',
+  //middleware: ['auth'],
 });
 
+interface Product {
+  id: number;
+  name: string;
+  category: 'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta';
+  description?: string;
+  price: string;
+  stock: number;
+  image_url: string | null;
+  pot_size: string | null;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+const authStore = useAuthStore();
 const api = useApiService();
+
+const categories = ['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta'] as const;
+const potSizes = ['pequeña', 'mediana', 'grande'] as const;
 
 const filters = reactive({
   search: '',
-  category: '',
-  stock: '',
-  sort: 'name',
+  category: '' as string | '',
+  stock: '' as string | '',
+  sort: 'name' as 'name' | 'price' | 'stock',
 });
 
-const allProducts = ref([]);
+const allProducts = ref<Product[]>([]);
 const loading = ref(false);
-const error = ref(null);
+const error = ref<string | null>(null);
 
-// Estado del modal de notificación
 const notification = reactive({
   isOpen: false,
   message: '',
-  type: 'success', // 'success' o 'error'
+  type: 'success' as 'success' | 'error',
 });
 
 const isCreateModalOpen = ref(false);
 const newProduct = reactive({
   name: '',
-  category: '',
+  category: null as Product['category'] | null, // Inicializamos como null en lugar de ''
+  description: '',
   price: 0,
-  cost_price: 0,
   stock: 0,
-  pot_size: '',
+  pot_size: '' as string | '',
   image_url: '',
 });
 
 const isEditModalOpen = ref(false);
 const editingProduct = reactive({
-  id: null,
+  id: null as number | null,
   name: '',
-  category: '',
+  category: null as Product['category'] | null, // Inicializamos como null en lugar de ''
+  description: '',
   price: 0,
-  cost_price: 0,
   stock: 0,
-  pot_size: '',
+  pot_size: '' as string | '',
   image_url: '',
 });
 
 const filteredProducts = computed(() => {
+  if (!Array.isArray(allProducts.value)) {
+    console.warn('allProducts.value no es un array:', allProducts.value);
+    return [];
+  }
+
   return allProducts.value
-    .filter((product) => {
-      if (!product || !product.id || !product.name) {
-        console.warn('Invalid product in filteredProducts:', product);
+    .filter((product): product is Product => {
+      if (!product?.id || !product.name) {
+        console.warn('Invalid product:', product);
         return false;
       }
       const searchMatch = !filters.search || product.name.toLowerCase().includes(filters.search.toLowerCase());
@@ -293,13 +300,51 @@ const filteredProducts = computed(() => {
       return searchMatch && categoryMatch && stockMatch;
     })
     .sort((a, b) => {
-      if (!a || !b) return 0;
       if (filters.sort === 'name') return a.name.localeCompare(b.name);
-      if (filters.sort === 'price') return a.price - b.price;
+      if (filters.sort === 'price') return parseFloat(a.price) - parseFloat(b.price);
       if (filters.sort === 'stock') return a.stock - b.stock;
       return 0;
     });
 });
+
+const loadProducts = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const response = await api.getProducts();
+    //console.log('Respuesta de getProducts:', response);
+    if (response && response.success && Array.isArray(response.data)) {
+      allProducts.value = response.data;
+    } else {
+      //console.warn('Respuesta inválida de getProducts:', response);
+      allProducts.value = [];
+      error.value = response.error || 'No se pudieron cargar los productos.';
+      showNotification(error.value ?? '', 'error');
+    }
+    //console.log('Productos cargados:', allProducts.value);
+  } catch (err: any) {
+    error.value = err.message || 'No se pudieron cargar los productos.';
+    console.error('Error loading products:', err);
+    allProducts.value = [];
+    showNotification(error.value ?? '', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Resto del código igual (applyFilters, formatPrice, createProduct, etc.)
+
+const applyFilters = () => {
+  filters.search = filters.search.trim();
+};
+
+const formatPrice = (price: string) => {
+  return parseFloat(price).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 const openCreateModal = () => {
   isCreateModalOpen.value = true;
@@ -307,30 +352,29 @@ const openCreateModal = () => {
 
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  Object.assign(newProduct, { name: '', category: '', price: 0, cost_price: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(newProduct, { name: '', category: null,description:'', price: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
-const openEditModal = (product) => {
+const openEditModal = (product: Product) => {
   Object.assign(editingProduct, {
     id: product.id,
     name: product.name,
     category: product.category,
-    price: product.price,
-    cost_price: product.cost_price,
+    description: product.description || '',
+    price: parseFloat(product.price),
     stock: product.stock,
     pot_size: product.pot_size || '',
-    image_url: product.image_url,
+    image_url: product.image_url || '',
   });
   isEditModalOpen.value = true;
 };
 
 const closeEditModal = () => {
   isEditModalOpen.value = false;
-  Object.assign(editingProduct, { id: null, name: '', category: '', price: 0, cost_price: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(editingProduct, { id: null, name: '', category: null ,description:'', price: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
-// Funciones para el modal de notificación
-const showNotification = (message, type = 'success') => {
+const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
   notification.message = message;
   notification.type = type;
   notification.isOpen = true;
@@ -342,6 +386,50 @@ const closeNotification = () => {
   notification.type = 'success';
 };
 
+const validateProduct = (product: typeof newProduct | typeof editingProduct) => {
+  if (!product.name.trim()) {
+    error.value = 'El nombre del producto es obligatorio.';
+    showNotification(error.value ?? '', 'error');
+    return false;
+  }
+  if (!product.category || !categories.includes(product.category)) {
+    error.value = 'Seleccione una categoría válida.';
+    showNotification(error.value ?? '', 'error');
+    return false;
+  }
+  if (isNaN(product.price) || product.price < 0) {
+    error.value = 'El precio debe ser un número válido mayor o igual a 0.';
+    showNotification(error.value ?? '', 'error');
+    return false;
+  }
+  if (isNaN(product.stock) || product.stock < 0) {
+    error.value = 'El stock debe ser un número válido mayor o igual a 0.';
+    showNotification(error.value ?? '', 'error');
+    return false;
+  }
+  if (product.pot_size && !potSizes.includes(product.pot_size as any)) {
+    error.value = 'Seleccione un tamaño de maceta válido o déjelo en blanco.';
+    showNotification(error.value ?? '', 'error');
+    return false;
+  }
+  if (product.image_url && !isValidUrl(product.image_url)) {
+    error.value = 'La URL de la imagen no es válida.';
+    showNotification(error.value ?? '', 'error');
+    return false;
+  }
+  return true;
+};
+
+const isValidUrl = (url: string) => {
+  if (!url) return true;
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const createProduct = async () => {
   if (!validateProduct(newProduct)) return;
   loading.value = true;
@@ -350,20 +438,20 @@ const createProduct = async () => {
     const productData = {
       name: newProduct.name,
       category: newProduct.category,
+      description: newProduct.description || null,
       price: Number(newProduct.price),
-      cost_price: Number(newProduct.cost_price),
       stock: Number(newProduct.stock),
       pot_size: newProduct.pot_size || null,
       image_url: newProduct.image_url || null,
     };
     const response = await api.createProduct(productData);
-    allProducts.value.push(response);
+    allProducts.value.push(response.data.product);
     closeCreateModal();
     showNotification('Producto creado exitosamente!');
-  } catch (err) {
+  } catch (err: any) {
     error.value = err.message || 'Error al crear el producto.';
     console.error('Error creating product:', err);
-    showNotification(error.value, 'error');
+    showNotification(error.value ?? '', 'error');
   } finally {
     loading.value = false;
   }
@@ -377,40 +465,32 @@ const updateProduct = async () => {
     const productData = {
       name: editingProduct.name,
       category: editingProduct.category,
+      description: editingProduct.description || null,
       price: Number(editingProduct.price),
-      cost_price: Number(editingProduct.cost_price),
       stock: Number(editingProduct.stock),
       pot_size: editingProduct.pot_size || null,
       image_url: editingProduct.image_url || null,
     };
-    console.log('Sending update data:', productData);
-    const response = await api.updateProduct(editingProduct.id, productData);
-    console.log('Update response:', response);
-    const updatedProduct = { ...response };
+    const response = await api.updateProduct(editingProduct.id!, productData);
+    const updatedProduct = response.data.product;
     const index = allProducts.value.findIndex((p) => p.id === editingProduct.id);
     if (index !== -1) {
       allProducts.value[index] = updatedProduct;
     } else {
-      console.warn('Product not found in allProducts:', editingProduct.id);
       allProducts.value.push(updatedProduct);
     }
     closeEditModal();
     showNotification('Producto actualizado exitosamente!');
-  } catch (err) {
+  } catch (err: any) {
     error.value = err.message || 'Error al actualizar el producto.';
-    console.error('Error updating product:', {
-      message: err.message,
-      status: err.status,
-      response: err.response,
-    });
-    showNotification(error.value, 'error');
-    await loadProducts();
+    console.error('Error updating product:', err);
+    showNotification(error.value ?? '', 'error');
   } finally {
     loading.value = false;
   }
 };
 
-const deleteProduct = async (productId) => {
+const deleteProduct = async (productId: number) => {
   if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
   loading.value = true;
   error.value = null;
@@ -418,100 +498,26 @@ const deleteProduct = async (productId) => {
     await api.deleteProduct(productId);
     allProducts.value = allProducts.value.filter((p) => p.id !== productId);
     showNotification('Producto eliminado exitosamente!');
-  } catch (err) {
+  } catch (err: any) {
     error.value = err.message || 'Error al eliminar el producto.';
     console.error('Error deleting product:', err);
-    showNotification(error.value, 'error');
+    showNotification(error.value ?? '', 'error');
   } finally {
     loading.value = false;
   }
 };
 
-const loadProducts = async () => {
-  loading.value = true;
-  error.value = null;
-  try {
-    const response = await api.getProducts();
-    allProducts.value = response;
-    console.log('Productos cargados:', allProducts.value);
-  } catch (err) {
-    error.value = err.message || 'No se pudieron cargar los productos.';
-    console.error('Error loading products:', err);
-    showNotification(error.value, 'error');
-  } finally {
-    loading.value = false;
-  }
-};
-
-const validateProduct = (product) => {
-  if (!product.name.trim()) {
-    error.value = 'El nombre del producto es obligatorio.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  const validCategories = ['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta'];
-  if (!validCategories.includes(product.category)) {
-    error.value = 'Seleccione una categoría válida.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  if (isNaN(product.price) || product.price < 0) {
-    error.value = 'El precio de venta debe ser un número válido mayor o igual a 0.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  if (isNaN(product.cost_price) || product.cost_price < 0) {
-    error.value = 'El precio de costo debe ser un número válido mayor o igual a 0.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  if (isNaN(product.stock) || product.stock < 0) {
-    error.value = 'El stock debe ser un número válido mayor o igual a 0.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  if (product.pot_size && !['pequeña', 'mediana', 'grande'].includes(product.pot_size)) {
-    error.value = 'Seleccione un tamaño de maceta válido o déjelo en blanco.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  if (product.image_url && !isValidUrl(product.image_url)) {
-    error.value = 'La URL de la imagen no es válida.';
-    showNotification(error.value, 'error');
-    return false;
-  }
-  return true;
-};
-
-const isValidUrl = (url) => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const applyFilters = () => {};
-
-const getStockStatusClass = (stock) => {
+const getStockStatusClass = (stock: number) => {
   if (stock === 0) return 'bg-error/10 text-error';
   if (stock < 10) return 'bg-warning/10 text-warning';
   return 'bg-success/10 text-success';
 };
 
-const getStockStatusText = (stock) => {
+const getStockStatusText = (stock: number) => {
   if (stock === 0) return 'Sin stock';
   if (stock < 10) return 'Stock bajo';
   return 'En stock';
 };
-
-onErrorCaptured((err, instance, info) => {
-  console.error('Render error:', err, info);
-  error.value = `Error al renderizar los productos: ${err.message}`;
-  showNotification(error.value, 'error');
-  return false;
-});
 
 onMounted(loadProducts);
 </script>

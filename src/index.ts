@@ -1,6 +1,8 @@
-import {drizzle } from 'drizzle-orm/mysql2';
-import { eq } from 'drizzle-orm';
-import { users } from './db/schema';
+import {drizzle } from 'drizzle-orm/mysql2'; // Importa drizzle desde drizzle-orm/mysql2
+
+import { sql,eq, and, or } from 'drizzle-orm'; // Importa las funciones necesarias de drizzle-orm
+
+import { users } from './db/schema'; // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
 
 const db = drizzle(process.env.DATABASE_URL!);
 

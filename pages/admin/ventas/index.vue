@@ -369,7 +369,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { useApiService } from '~/services/api';
+import { useApiService } from '~/services/api/api';
 import SaleItemForm from '~/components/admin/Ventas/SaleItemForm.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
 import Modal from '~/components/Modal.vue';

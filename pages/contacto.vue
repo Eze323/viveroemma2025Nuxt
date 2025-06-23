@@ -124,10 +124,19 @@
       <div class="container-custom">
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
           <div class="aspect-w-16 aspect-h-9">
-            <!-- Replace with actual Google Maps embed -->
-            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-              <p class="text-gray-600">Mapa de ubicación</p>
-            </div>
+          <div class="bg-gray-200 rounded-lg overflow-hidden h-96 shadow-lg">
+            <!-- Google Maps embed would go here -->
+            <iframe 
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.041380756593!2d-58.8047355!3d-34.5380952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bc97de6e6869bb%3A0xba563040b080cdf9!2sVivero%20Emma!5e0!3m2!1ses!2sar!4v1716842345678!5m2!1ses!2sar" 
+    width="100%" 
+    height="100%" 
+    style="border:0;" 
+    allowfullscreen="" 
+    loading="lazy" 
+    referrerpolicy="no-referrer-when-downgrade"
+    title="Ubicación de Vivero Emma"
+  ></iframe>
+          </div>
           </div>
         </div>
       </div>
