@@ -12,9 +12,7 @@ export default defineEventHandler(async (event) => {
       name: z.string().max(255),
       category: z.enum(['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta']),
       description: z.string().max(500).optional(),
-      price: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
-        message: 'El precio debe ser un número válido mayor o igual a 0',
-      }),
+      price: z.number().min(0),
       stock: z.number().int().min(0),
       pot_size: z.enum(['pequeña', 'mediana', 'grande']).optional(),
       image_url: z.string().url().optional(),
@@ -29,7 +27,7 @@ export default defineEventHandler(async (event) => {
         name: validated.name,
         category: validated.category,
         description: validated.description || null, // Asegurarse de que sea null si no se proporciona
-        price: validated.price.toFixed(2), // Convertir a string con 2 decimales
+        price: Number(validated.price).toFixed(2), // Convertir a string con 2 decimales
         stock: validated.stock,
         pot_size: validated.pot_size,
         image_url: validated.image_url,

@@ -7,7 +7,7 @@ export const users = mysqlTable(
   'users',
   {
     id: serial('id').primaryKey(),
-    name: varchar('name', { length: 255 }).notNull(),
+    name: varchar('name', { length: 255 }).notNull().unique(),
     email: varchar('email', { length: 255 }).notNull().unique(),
     password: varchar('password', { length: 255 }).notNull(),
     role: mysqlEnum('role', ['admin','encargado','operario', 'user']).default('user'),

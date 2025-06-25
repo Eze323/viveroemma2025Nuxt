@@ -62,6 +62,7 @@
         class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div class="aspect-w-4 aspect-h-3">
           <img
+            loading="lazy"
             :src="product.image_url || '/placeholder.jpg'"
             :alt="product.name"
             class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
@@ -448,6 +449,7 @@ const createProduct = async () => {
     allProducts.value.push(response.data.product);
     closeCreateModal();
     showNotification('Producto creado exitosamente!');
+    loadProducts(); // Reload products to ensure the new one is included
   } catch (err: any) {
     error.value = err.message || 'Error al crear el producto.';
     console.error('Error creating product:', err);
