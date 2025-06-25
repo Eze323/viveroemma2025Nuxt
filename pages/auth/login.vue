@@ -111,18 +111,17 @@
 import { ref, reactive } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 
-
 definePageMeta({
   layout: 'default'
 });
 
 const authStore = useAuthStore();
 
-const isDev = process.dev;
+const isDev = import.meta.dev;
 
 // Form data
-const email = ref(isDev ? 'encargado@vivero.com' : '');
-const password = ref(isDev ? 'password' : '');
+const email = ref(isDev ? 'administrador@vivero.com' : '');
+const password = ref(isDev ? 'password123' : '');
 const rememberMe = ref(false);
 const showPassword = ref(false);
 const errors = reactive({
@@ -158,9 +157,17 @@ const validateForm = () => {
 // Handle form submission
 const handleSubmit = async () => {
   if (!validateForm()) return;
-  
+
+  //console.log('Iniciando login con:', { email: email.value, password: password.value });
+
   try {
-    await authStore.login(email.value, password.value);
+    const response = await authStore.login(email.value, password.value);
+    //console.log('Respuesta de login:', response);
+    /*console.log('Estado tras login:', {
+      isAuthenticated: authStore.isAuthenticated,
+      user: authStore.user,
+      token: authStore.token,
+    });*/
     navigateTo('/admin');
   } catch (error) {
     console.error('Error de inicio de sesión:', error);

@@ -60,9 +60,16 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { useAuthStore } from '~/stores/auth';
+
+definePageMeta({
+  middleware: ['auth'],
+});
+
+//const authStore = useAuthStore();
+
+//import { useAuthStore } from '~/stores/auth';
 import StatCard from '~/components/admin/Dashboard/StatCard.vue';
 import SalesChart from '~/components/admin/Dashboard/SalesChart.vue';
 import TopSellersTable from '~/components/admin/Dashboard/TopSellersTable.vue';

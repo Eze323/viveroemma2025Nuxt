@@ -1,16 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
-  devtools: { enabled: false },
+  devtools: { enabled: true },
   
   // Importing modules
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
-    '@nuxtjs/color-mode',
+     '@nuxtjs/color-mode',
     '@vueuse/nuxt',
     'nuxt-icon',
-    '@nuxtjs/google-fonts'
+    '@nuxtjs/google-fonts',
   ],
   
   // Google Fonts configuration
@@ -61,13 +61,24 @@ export default defineNuxtConfig({
   // Runtime config for API URLs
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.API_BASE_URL || 'https://viveroemma-production.up.railway.app/api'
+      // apiBaseUrl: process.env.API_BASE_URL || 'https://viveroemma-production.up.railway.app/api'
+    apiBaseUrl: process.env.API_BASE_URL,
+    dbHost: process.env.DB_HOST || 'localhost',
+    dbPort: process.env.DB_PORT || '3306',
+    dbDatabase: process.env.DB_DATABASE || 'Vivero_Emma',
+    dbUsername: process.env.DB_USERNAME || 'root',
+    dbPassword: process.env.DB_PASSWORD || 'Ejemplo123!',
+    dbBaseURL: process.env.DATABASE_URL
     }
   },
+ 
   components: [
     { path: '~/components', pathPrefix: false }, // Scans ~/components and subdirectories
   ],
   
   // Custom CSS
-  css: ['~/assets/css/main.css']
+  css: ['~/assets/css/main.css'],
+  plugins:[
+    '~/plugins/auth.ts'
+  ]
 })
