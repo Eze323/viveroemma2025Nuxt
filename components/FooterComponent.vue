@@ -7,13 +7,13 @@
           <h2 class="text-xl font-bold mb-4">Vivero Emma</h2>
           <p class="text-gray-300 mb-4">Tu vivero de confianza en Cuartel V, Moreno. Ofrecemos plantas de calidad, asesoramiento personalizado y productos para jardinería.</p>
           <div class="flex space-x-4 mt-4">
-            <a href="#" class="text-white hover:text-accent transition-colors">
+            <!-- <a href="#" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:facebook" class="w-5 h-5" />
             </a>
             <a href="#" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:instagram" class="w-5 h-5" />
-            </a>
-            <a href="#" class="text-white hover:text-accent transition-colors">
+            </a> -->
+            <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:whatsapp" class="w-5 h-5" />
             </a>
           </div>
@@ -41,12 +41,16 @@
             </p>
             <p class="flex items-center gap-2">
               <Icon name="heroicons:phone" class="w-5 h-5 text-accent flex-shrink-0" />
-              <span>(+54) 11-2345-6789</span>
+              <span>(+54) 11-5116-5807</span>
             </p>
             <p class="flex items-center gap-2">
+              <Icon name="heroicons:phone" class="w-5 h-5 text-accent flex-shrink-0" />
+              <span>(+54) 11-5181-6570</span>
+            </p>
+            <!-- <p class="flex items-center gap-2">
               <Icon name="heroicons:envelope" class="w-5 h-5 text-accent flex-shrink-0" />
               <span>info@viveroemma.com</span>
-            </p>
+            </p> -->
           </address>
         </div>
         
@@ -56,15 +60,15 @@
           <ul class="text-gray-300 space-y-2">
             <li class="flex justify-between">
               <span>Lunes - Viernes:</span>
-              <span>8:00 - 19:00</span>
+              <span>7:20 - 17:00</span>
             </li>
             <li class="flex justify-between">
               <span>Sábados:</span>
-              <span>9:00 - 18:00</span>
+              <span>7:20 - 17:00</span>
             </li>
             <li class="flex justify-between">
               <span>Domingos:</span>
-              <span>10:00 - 16:00</span>
+              <span>7:20 - 12:00</span>
             </li>
           </ul>
         </div>

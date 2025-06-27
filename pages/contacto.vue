@@ -93,7 +93,7 @@
                   <Icon name="heroicons:clock" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                   <div class="ml-4">
                     <h4 class="font-bold text-gray-900">Horarios</h4>
-                    <p class="text-gray-600">Lunes a Sábado: 7:20 - 18:00</p>
+                    <p class="text-gray-600">Lunes a Sábado: 7:20 - 17:00</p>
                     <p class="text-gray-600">Domingos: 8:00 - 12:00</p>
                   </div>
                 </div>
