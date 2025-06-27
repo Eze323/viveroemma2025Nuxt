@@ -1,5 +1,5 @@
 // script/create-user.ts
-import { db } from '~/server/utils/db';
+import { db } from '~/server/utils/drizzle';
 import { users } from '~/src/db/schema';
 import bcrypt from 'bcrypt';
 

@@ -104,7 +104,7 @@ const pageTitle = computed(() => {
     '/admin/productos': 'Productos',
     '/admin/ventas': 'Ventas',
     '/admin/facturas': 'Facturas',
-    // '/admin/compras': 'Compras',
+    '/admin/compras': 'Compras',
     '/admin/embazado': 'Embazado',
     '/admin/premios': 'Premios',
     '/admin/perfil': 'Mi Perfil',
