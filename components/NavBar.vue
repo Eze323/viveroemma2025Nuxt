@@ -1,5 +1,6 @@
 <template>
   <header class="sticky top-0 bg-white/95 backdrop-blur-md shadow-sm z-50">
+
     <div class="container-custom flex justify-between items-center py-3">
       <!-- Logo -->
       <NuxtLink to="/" class="flex items-center space-x-2">

@@ -2,17 +2,17 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-  
+
   // Importing modules
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
-     '@nuxtjs/color-mode',
+    '@nuxtjs/color-mode',
     '@vueuse/nuxt',
     'nuxt-icon',
     '@nuxtjs/google-fonts',
   ],
-  
+
   // Google Fonts configuration
   googleFonts: {
     families: {
@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     },
     display: 'swap'
   },
-  
+
   // App configuration with meta tags
   app: {
     head: {
@@ -33,11 +33,15 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Vivero Emma - El mejor vivero de Cuartel V, Moreno, Buenos Aires. Plantas, flores, árboles y todo para tu jardín.' }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }, // Favicon genérico
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }, // iOS
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' }, // 16x16
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }, // 32x32
+        { rel: 'manifest', href: '/site.webmanifest' } // Manifiesto web
       ]
     }
   },
-  
+
   // Tailwind CSS configuration
   tailwindcss: {
     config: {
@@ -50,35 +54,34 @@ export default defineNuxtConfig({
       ]
     }
   },
-  
+
   // Color mode configuration
   colorMode: {
     preference: 'light',
     fallback: 'light',
     classSuffix: ''
   },
-  
+
   // Runtime config for API URLs
   runtimeConfig: {
     public: {
-      // apiBaseUrl: process.env.API_BASE_URL || 'https://viveroemma-production.up.railway.app/api'
-    apiBaseUrl: process.env.API_BASE_URL,
-    dbHost: process.env.DB_HOST || 'localhost',
-    dbPort: process.env.DB_PORT || '3306',
-    dbDatabase: process.env.DB_DATABASE || 'Vivero_Emma',
-    dbUsername: process.env.DB_USERNAME || 'root',
-    dbPassword: process.env.DB_PASSWORD || 'Ejemplo123!',
-    dbBaseURL: process.env.DATABASE_URL
+      apiBaseUrl: process.env.API_BASE_URL,
+      dbHost: process.env.DB_HOST || 'localhost',
+      dbPort: process.env.DB_PORT || '3306',
+      dbDatabase: process.env.DB_DATABASE || 'Vivero_Emma',
+      dbUsername: process.env.DB_USERNAME || 'root',
+      dbPassword: process.env.DB_PASSWORD || 'Ejemplo123!',
+      dbBaseURL: process.env.DATABASE_URL
     }
   },
- 
+
   components: [
     { path: '~/components', pathPrefix: false }, // Scans ~/components and subdirectories
   ],
-  
+
   // Custom CSS
   css: ['~/assets/css/main.css'],
-  plugins:[
+  plugins: [
     '~/plugins/auth.ts'
   ]
 })
