@@ -16,6 +16,14 @@ async function createAdminUser() {
       role: 'admin',
       createdAt: new Date(),
     });
+    //crear 3 usuario admin, encargado y operario
+    await db.insert(users).values({
+      name: 'Encargado',
+      email: 'r',
+      password: hashedPassword,
+      role: 'encargado',
+      createdAt: new Date(),
+    });
 
     console.log('Usuario administrador creado exitosamente');
   } catch (error) {
