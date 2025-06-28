@@ -25,6 +25,7 @@
             src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
             alt="Vivero Emma - Plantas" 
             class="rounded-lg shadow-2xl relative z-10 max-w-full h-auto"
+            placeholder
           />
           <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-accent rounded-full z-0"></div>
           <div class="absolute -top-6 -left-6 w-16 h-16 bg-secondary rounded-full z-0"></div>
