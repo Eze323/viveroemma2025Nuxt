@@ -4,14 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   // Importing modules
-  modules: [
-    '@nuxtjs/tailwindcss',
-    '@pinia/nuxt',
-    '@nuxtjs/color-mode',
-    '@vueuse/nuxt',
-    'nuxt-icon',
-    '@nuxtjs/google-fonts',
-  ],
+  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode', '@vueuse/nuxt', 'nuxt-icon', '@nuxtjs/google-fonts', '@nuxt/image'],
 
   // Google Fonts configuration
   googleFonts: {

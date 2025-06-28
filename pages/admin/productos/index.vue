@@ -61,12 +61,12 @@
       <div v-for="product in filteredProducts" :key="product.id"
         class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div class="aspect-w-4 aspect-h-3">
-          <img
-            loading="lazy"
-            :src="product.image_url || '/images/placeholder.jpg'"
+          <NuxtImg
+            
+            :src="product.image_url || '~/images/placeholder.png'"
             :alt="product.name"
             class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-            @error="product.image_url = '/images/placeholder.jpg'"
+            @error="product.image_url = '~/images/placeholder.png'"
           />
         </div>
         <div class="p-4">
@@ -210,6 +210,7 @@ import { useApiService } from '~/services/api/api';
 import { useAuthStore } from '~/stores/auth';
 import Modal from '~/components/Modal.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
+import { NuxtImg } from '#components';
 
 definePageMeta({
   layout: 'admin',
