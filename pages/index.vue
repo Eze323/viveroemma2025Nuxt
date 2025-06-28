@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="lg:w-1/2 relative animate-fade-in" style="animation-delay: 0.3s;">
-          <img 
+          <NuxtImg
             src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
             alt="Vivero Emma - Plantas" 
             class="rounded-lg shadow-2xl relative z-10 max-w-full h-auto"
@@ -74,7 +74,7 @@
           <div v-for="(product, index) in products" :key="index" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
             <div class="h-64 relative overflow-hidden">
-              <img :src="product.image" :alt="product.name" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+              <NuxtImg :src="product.image" :alt="product.name" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
             </div>
             <div class="p-6">
               <h3 class="text-lg font-bold text-gray-900">{{ product.name }}</h3>
