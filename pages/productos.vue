@@ -55,7 +55,7 @@
           <div v-for="product in products" :key="product.id" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
             <div class="aspect-w-1 aspect-h-1 relative overflow-hidden">
-              <nuxtimg 
+              <img 
                 :src="product.image" 
                 :alt="product.name"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
@@ -103,7 +103,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div v-for="category in featuredCategories" :key="category.name" 
             class="relative rounded-lg overflow-hidden group cursor-pointer">
-            <nuxtimg 
+            <img 
               :src="category.image" 
               :alt="category.name"
               class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"

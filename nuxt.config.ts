@@ -8,7 +8,9 @@ export default defineNuxtConfig({
 
   //image
   image: {
+    formats: ['webp', 'jpg'],
     dir: 'assets/images',
+     domains: ['example.com']
   },
   // Google Fonts configuration
   googleFonts: {

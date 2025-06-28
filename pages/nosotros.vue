@@ -34,7 +34,7 @@
             </div>
           </div>
           <div class="relative">
-            <nuxtimg 
+            <img 
               src="https://images.pexels.com/photos/31779753/pexels-photo-31779753/free-photo-of-flores-creciendo-en-el-invernadero-del-vivero.jpeg" 
               
               alt="Vivero Emma" 
@@ -120,7 +120,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div v-for="cert in certifications" :key="cert.name" 
             class="bg-white rounded-lg p-6 text-center">
-            <nuxtimg 
+            <img 
               :src="cert.logo" 
               :alt="cert.name"
               class="h-16 mx-auto mb-4"

@@ -17,7 +17,7 @@
           <div v-for="service in services" :key="service.id" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
             <div class="aspect-w-16 aspect-h-9">
-              <nuxtimg 
+              <img 
                 :src="service.image" 
                 :alt="service.name"
                 class="w-full h-full object-cover"
