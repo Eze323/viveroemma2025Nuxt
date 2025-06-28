@@ -74,7 +74,7 @@
           <div v-for="(product, index) in products" :key="index" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
             <div class="h-64 relative overflow-hidden">
-              <NuxtImg :src="product.image" :alt="product.name" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+              <NuxtImg src="product.image" alt="product.name" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
             </div>
             <div class="p-6">
               <h3 class="text-lg font-bold text-gray-900">{{ product.name }}</h3>

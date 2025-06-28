@@ -63,8 +63,8 @@
         <div class="aspect-w-4 aspect-h-3">
           <NuxtImg
             
-            :src="product.image_url || '~/images/placeholder.png'"
-            :alt="product.name"
+            src="product.image_url || '~/images/placeholder.png'"
+            alt="product.name"
             class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
             @error="product.image_url = '~/images/placeholder.png'"
           />
