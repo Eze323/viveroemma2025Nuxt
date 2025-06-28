@@ -6,6 +6,10 @@ export default defineNuxtConfig({
   // Importing modules
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode', '@vueuse/nuxt', 'nuxt-icon', '@nuxtjs/google-fonts', '@nuxt/image'],
 
+  //image
+  image: {
+    dir: 'assets/images',
+  },
   // Google Fonts configuration
   googleFonts: {
     families: {
