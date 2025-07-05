@@ -59,6 +59,7 @@
                 :src="product.image" 
                 :alt="product.name"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                loading="lazy"
               />
               <div v-if="product.discount" 
                 class="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-sm font-medium">

@@ -39,6 +39,7 @@
               
               alt="Vivero Emma" 
               class="rounded-lg shadow-lg"
+              loading="lazy"
             />
             <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-accent rounded-full z-0"></div>
             <div class="absolute -top-6 -left-6 w-16 h-16 bg-primary rounded-full z-0"></div>
@@ -124,6 +125,7 @@
               :src="cert.logo" 
               :alt="cert.name"
               class="h-16 mx-auto mb-4"
+              loading="lazy"
             />
             <h3 class="font-bold text-gray-900">{{ cert.name }}</h3>
             <p class="text-sm text-gray-600">{{ cert.year }}</p>

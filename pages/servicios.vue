@@ -21,6 +21,7 @@
                 :src="service.image" 
                 :alt="service.name"
                 class="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
             <div class="p-6">
