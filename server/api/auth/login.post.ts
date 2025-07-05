@@ -6,16 +6,25 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { H3Event } from 'h3';
 
-// Clave secreta para JWT (guárdala en .env en producción)
+// Interfaz para el cuerpo de la solicitud
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
+// Validar JWT_SECRET
 if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET no está definido');
+  throw new Error('JWT_SECRET no está definido en las variables de entorno');
 }
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
-    const body = await readBody(event);
+    // Leer y tipar el cuerpo de la solicitud
+    const body = await readBody<LoginBody>(event);
+    const { email, password } = body;
 
+    // Validar entrada
     if (!email || !password) {
       throw createError({
         statusCode: 400,
@@ -23,6 +32,7 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
+    // Buscar usuario en la base de datos
     const [user] = await db
       .select({
         id: users.id,
@@ -42,6 +52,7 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
+    // Verificar contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw createError({
@@ -50,12 +61,12 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
+    // Generar token JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
-    
 
     return {
       user: {
@@ -67,6 +78,7 @@ export default defineEventHandler(async (event: H3Event) => {
       token,
     };
   } catch (error) {
+    console.error('Error en /api/auth/login:', error);
     const err = error as { statusCode?: number; statusMessage?: string };
     throw createError({
       statusCode: err.statusCode || 500,
