@@ -151,6 +151,11 @@
 
 <script setup>
 // Values data
+import iso9001Logo from '@/assets/images/Ramos-iso-9001.jpg';
+import ecoFriendlyLogo from '@/assets/images/ecofriendly.webp';
+import greenBussinessLogo from '@/assets/images/green-business.jpg';
+import bestServiceLogo from '@/assets/images/bestservice.jpeg';
+
 const values = [
   {
     title: 'Calidad',
@@ -198,22 +203,22 @@ const certifications = [
   {
     name: 'ISO 9001',
     year: '2023',
-    logo: 'https://via.placeholder.com/150x80'
+    logo: iso9001Logo
   },
   {
     name: 'Green Business',
     year: '2022',
-    logo: 'https://via.placeholder.com/150x80'
+    logo: greenBussinessLogo
   },
   {
     name: 'Eco Friendly',
     year: '2023',
-    logo: 'https://via.placeholder.com/150x80'
+    logo: ecoFriendlyLogo
   },
   {
     name: 'Best Service',
     year: '2024',
-    logo: 'https://via.placeholder.com/150x80'
+    logo: bestServiceLogo
   }
 ];
 </script>

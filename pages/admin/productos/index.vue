@@ -63,10 +63,10 @@
         <div class="aspect-w-4 aspect-h-3">
           <img
             loading="lazy"
-            :src="product.image_url || '~/images/placeholder.png'"
+            :src="product.image_url || '/placeholder.jpg'"
             :alt="product.name"
             class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-            @error="product.image_url = '~/images/placeholder.png'"
+            @error="product.image_url = '/placeholder.jpg'"
           />
         </div>
         <div class="p-4">

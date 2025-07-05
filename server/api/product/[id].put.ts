@@ -21,7 +21,6 @@ export default defineEventHandler(async (event) => {
 
     const idParam = event.context.params?.id;
     if (!idParam) {
-      return { success: false, error: 'Missing product id in request parameters' };
     }
     const id = parseInt(idParam);
     const body = await readBody(event);
@@ -42,7 +41,6 @@ export default defineEventHandler(async (event) => {
       ;
 
     if (!product) {
-      return { success: false, error: 'Product not found' };
     }
 
     return { 

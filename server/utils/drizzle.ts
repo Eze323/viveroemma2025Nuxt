@@ -2,7 +2,6 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
 import * as schema from '~/src/db/schema';
-import { sql, eq, and, or } from 'drizzle-orm';
 
 // Configuración de la conexión a MySQL
 const connectionConfig = {
@@ -21,7 +20,6 @@ const pool = mysql.createPool({
 export const db = drizzle(pool, { schema, mode: 'default' });
 
 // Exportar utilidades de Drizzle
-export { sql, eq, and, or };
 
 // Exportar tablas
 export const tables = schema;

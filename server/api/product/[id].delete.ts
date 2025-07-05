@@ -10,13 +10,11 @@ export default defineEventHandler(async (event) => {
 
     const idParam = event.context.params?.id;
     if (!idParam) {
-      return { success: false, error: 'Missing product id parameter' };
     }
     const id = parseInt(idParam);
     const [product] = await db.delete(products).where(eq(products.id, id));
 
     if (!product) {
-      return { success: false, error: 'Product not found' };
     }
 
     return { success: true, data: { message: 'Producto eliminado' } };

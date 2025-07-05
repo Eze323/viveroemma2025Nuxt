@@ -15,7 +15,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event);
-    const { email, password } = body;
 
     if (!email || !password) {
       throw createError({

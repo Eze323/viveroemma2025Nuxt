@@ -2,7 +2,6 @@
 import { db } from '~/server/utils/drizzle';
 import { plantPotPrices } from '~/src/db/schema';
 import { eq } from 'drizzle-orm';
-import { Product, FormattedProduct } from '../../types/product';
 
 export async function formatProduct(product: Product): Promise<FormattedProduct> {
   try {
