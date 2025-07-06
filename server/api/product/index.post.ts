@@ -12,10 +12,10 @@ export default defineEventHandler(async (event) => {
       name: z.string().max(255),
       category: z.enum(['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta']),
       description: z.string().max(500).optional(),
-      price: z.number().min(0),
-      stock: z.number().int().min(0),
-      pot_size: z.enum(['pequeña', 'mediana', 'grande']).optional(),
-      image_url: z.string().url().optional(),
+      price: z.number().min(1),
+      stock: z.number().int().min(1),
+      pot_size: z.enum(['Sin especificar','pequeña', 'mediana', 'grande','3 Lts','4 Lts','7 Lts','10 Lts']).optional(),
+      image_url: z.string().nullable().optional(),
     });
 
     const body = await readBody(event);

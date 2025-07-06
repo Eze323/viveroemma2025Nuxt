@@ -2,9 +2,35 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
+    // Importing modules
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt',
+    '@nuxtjs/color-mode',
+    '@vueuse/nuxt',
+    'nuxt-icon',
+    '@nuxtjs/google-fonts',
+    '@nuxt/image',
+    '@nuxt/content',
+    'nuxt-openapi-docs-module'
+  ],
+  content:{
+    
+      database: {
+          type: 'sqlite',
+          filename: 'vivero_emma.sqlite',
+              },
+              watch:{
+                port: 4000,
+                showURL: true,
+              }
+  },
+openApiDocs: {
+  folder: './docs',
+  name: 'Vivero Emma API Documentation',
+  files:function(){return{'ApiVivero': 'Api Vivero'}}
+},
 
-  // Importing modules
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode', '@vueuse/nuxt', 'nuxt-icon', '@nuxtjs/google-fonts', '@nuxt/image'],
 
   //image
   image: {
@@ -73,6 +99,7 @@ export default defineNuxtConfig({
       dbBaseURL: process.env.DATABASE_URL
     }
   },
+
 
   components: [
     { path: '~/components', pathPrefix: false }, // Scans ~/components and subdirectories

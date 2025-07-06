@@ -63,10 +63,10 @@
         <div class="aspect-w-4 aspect-h-3">
           <img
             loading="lazy"
-            :src="product.image_url || '/placeholder.jpg'"
+            :src="product.image_url || '/placeholder.png'"
             :alt="product.name"
             class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-            @error="product.image_url = '/placeholder.jpg'"
+            @error="product.image_url = placeHolderImg"
           />
         </div>
         <div class="p-4">
@@ -211,6 +211,8 @@ import { useAuthStore } from '~/stores/auth';
 import Modal from '~/components/Modal.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
 
+import placeHolderImg from '@/assets/images/placeholder.png';
+
 definePageMeta({
   layout: 'admin',
   //middleware: ['auth'],
@@ -237,7 +239,7 @@ const authStore = useAuthStore();
 const api = useApiService();
 
 const categories = ['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta'] as const;
-const potSizes = ['pequeña', 'mediana', 'grande'] as const;
+const potSizes = ['pequeña', 'mediana', 'grande','3 Lts','4 Lts','7 Lts','10 Lts'] as const;
 
 const filters = reactive({
   search: '',
@@ -263,8 +265,8 @@ const newProduct = reactive({
   description: '',
   price: 0,
   stock: 0,
-  pot_size: '' as string | '',
-  image_url: '',
+  pot_size: '' as string | 'Sin especificar',
+  image_url: '/placeholder.png',
 });
 
 const isEditModalOpen = ref(false);
@@ -275,8 +277,8 @@ const editingProduct = reactive({
   description: '',
   price: 0,
   stock: 0,
-  pot_size: '' as string | '',
-  image_url: '',
+  pot_size: '' as string | 'Sin especificar',
+  image_url: '/placeholder.png',
 });
 
 const filteredProducts = computed(() => {
@@ -398,13 +400,13 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
     showNotification(error.value ?? '', 'error');
     return false;
   }
-  if (isNaN(product.price) || product.price < 0) {
-    error.value = 'El precio debe ser un número válido mayor o igual a 0.';
+  if (isNaN(product.price) || product.price <= 0) {
+    error.value = 'El precio debe ser un número válido mayor a 0.';
     showNotification(error.value ?? '', 'error');
     return false;
   }
-  if (isNaN(product.stock) || product.stock < 0) {
-    error.value = 'El stock debe ser un número válido mayor o igual a 0.';
+  if (isNaN(product.stock) || product.stock <= 0) {
+    error.value = 'El stock debe ser un número válido mayor a 0.';
     showNotification(error.value ?? '', 'error');
     return false;
   }
@@ -421,7 +423,9 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
   return true;
 };
 
+
 const isValidUrl = (url: string) => {
+  console.log('Validating URL:', url);
   if (!url) return true;
   try {
     new URL(url);
@@ -442,8 +446,8 @@ const createProduct = async () => {
       description: newProduct.description || null,
       price: Number(newProduct.price),
       stock: Number(newProduct.stock),
-      pot_size: newProduct.pot_size || null,
-      image_url: newProduct.image_url || null,
+      pot_size: newProduct.pot_size || 'Sin especificar',
+      image_url: newProduct.image_url || '/placeholder.png',
     };
     const response = await api.createProduct(productData);
     allProducts.value.push(response.data.product);
@@ -470,8 +474,8 @@ const updateProduct = async () => {
       description: editingProduct.description || null,
       price: Number(editingProduct.price),
       stock: Number(editingProduct.stock),
-      pot_size: editingProduct.pot_size || null,
-      image_url: editingProduct.image_url || null,
+      pot_size: editingProduct.pot_size || 'Sin especificar',
+      image_url: editingProduct.image_url || '/placeholder.png',
     };
     const response = await api.updateProduct(editingProduct.id!, productData);
     const updatedProduct = response.data.product;

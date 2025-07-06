@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: Vivero Emma API
+  description: API para interactuar con el contenido del Vivero Emma.
+  version: 1.0.0
+
+tags:
+  - name: content
+    description: Operaciones relacionadas con el contenido del vivero.
+  - name: plants
+    description: Operaciones relacionadas con las plantas del vivero.
+  - name: users
+    description: Operaciones relacionadas con los usuarios del vivero.
+
+paths:
+  /products:
+      post:
+        tags:
+          - content
+        summary: Crear un nuevo producto
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Nombre del producto
+                  description:
+                    type: string
+                    description: Descripción del producto
+                  price:
+                    type: number
+                    format: float
+                    description: Precio del producto
+        responses:
+          '201':
+            description: Producto creado exitosamente
+          '400':
+            description: Solicitud inválida
+  

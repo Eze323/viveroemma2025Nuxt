@@ -80,6 +80,7 @@
               :alt="product.name" 
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
               loading="lazy"
+
               />
             </div>
             <div class="p-6">
@@ -225,9 +226,19 @@
       </div>
     </section>
   </div>
+  <ContentRenderer v-if="home" :value="home"/>
+  <div v-else>home not found</div>
 </template>
 
 <script setup>
+const {data: home } = await useAsyncData('home', () => 
+  queryCollection('content').path('/').first()
+);
+useSeoMeta({
+  title: home?.title || 'Vivero Emma',
+  description: home?.description || 'Tu vivero de confianza en Cuartel V, Moreno. Ofrecemos plantas de calidad, asesoramiento personalizado y todo para tu jardín.',
+  ogImage: home?.image || 'https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+});
 // Features data
 const features = [
   {
