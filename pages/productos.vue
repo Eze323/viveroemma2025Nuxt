@@ -55,11 +55,14 @@
           <div v-for="product in products" :key="product.id" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
             <div class="aspect-w-1 aspect-h-1 relative overflow-hidden">
-              <img 
+              <NuxtImg
                 :src="product.image" 
                 :alt="product.name"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 loading="lazy"
+                  
+              sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
+              :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
               />
               <div v-if="product.discount" 
                 class="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-sm font-medium">
@@ -104,10 +107,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div v-for="category in featuredCategories" :key="category.name" 
             class="relative rounded-lg overflow-hidden group cursor-pointer">
-            <img 
+            <NuxtImg
               :src="category.image" 
               :alt="category.name"
               class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+                  
+              sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
+              :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
               <div class="text-white">
@@ -149,7 +156,8 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-
+const img = useImage()
+import placeHolderImg from '@/assets/images/placeholder.png'
 // Filters state
 const filters = reactive({
   search: '',

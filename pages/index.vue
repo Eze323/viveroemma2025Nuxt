@@ -21,11 +21,12 @@
           </div>
         </div>
         <div class="lg:w-1/2 relative animate-fade-in" style="animation-delay: 0.3s;">
-          <img 
+          <NuxtImg 
             src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
             alt="Vivero Emma - Plantas" 
             class="rounded-lg shadow-2xl relative z-10 max-w-full h-auto"
             loading="lazy"
+            :placeholder="img(`placeholder.png`, { w: 900, f: 'png', blur: 2, q: 50 })"
           />
           <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-accent rounded-full z-0"></div>
           <div class="absolute -top-6 -left-6 w-16 h-16 bg-secondary rounded-full z-0"></div>
@@ -75,11 +76,13 @@
           <div v-for="(product, index) in products" :key="index" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
             <div class="h-64 relative overflow-hidden">
-              <img 
+              <NuxtImg
               :src="product.image" 
               :alt="product.name" 
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
               loading="lazy"
+              
+            :placeholder="img(`placeholder.png`, { w: 200, f: 'png', blur: 2, q: 50 })"
 
               />
             </div>
@@ -231,6 +234,7 @@
 </template>
 
 <script setup>
+const img = useImage()
 const {data: home } = await useAsyncData('home', () => 
   queryCollection('content').path('/').first()
 );

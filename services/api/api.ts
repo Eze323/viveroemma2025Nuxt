@@ -3,14 +3,17 @@ import { useRuntimeConfig } from '#app';
 import { useAuthStore } from '~/stores/auth';
 
 interface Product {
-  id: number;
-  name: string;
-  category: 'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta';
-  description: string;
-  price: string;
-  stock: number;
-  image_url: string | null;
-  pot_size: string | null;
+    id: number;
+    name: string;
+    category: string;
+    description: string | null;
+    precio_compra: number;
+    precio_venta: number;
+    stock: number;
+    pot_size: string | null;
+    image_url: string | null;
+    publicado: boolean;
+    sku: string | null;
 }
 
 interface ApiResponse<T> {
@@ -51,7 +54,10 @@ export const useApiService = () => {
       name: String(product.name),
       category: validCategories.includes(product.category) ? product.category : 'otro',
       description: String(product.description || ''),
-      price: String(product.price || '0'),
+      precio_compra: Number(product.precio_compra) || 0,
+      precio_venta: Number(product.precio_venta) || 0,
+      publicado: product.publicado !== undefined ? Boolean(product.publicado) : true,
+      sku: product.sku ? String(product.sku) : null,
       stock: Number(product.stock) || 0,
       image_url: product.image_url || 'https://via.placeholder.com/300x200',
       pot_size: ['pequeña', 'mediana', 'grande'].includes(product.pot_size) ? product.pot_size : null,

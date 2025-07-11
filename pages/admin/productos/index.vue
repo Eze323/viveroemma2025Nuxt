@@ -44,7 +44,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
           <select v-model="filters.sort" class="input w-full" @change="applyFilters">
             <option value="name">Nombre</option>
-            <option value="price">Precio</option>
+            <option value="precio_venta">Precio</option>
             <option value="stock">Stock</option>
           </select>
         </div>
@@ -57,7 +57,7 @@
     <div v-else-if="!filteredProducts.length" class="text-center py-8">
       <p class="text-gray-600">No se encontraron productos.</p>
     </div>
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div v-for="product in filteredProducts" :key="product.id"
         class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div class="aspect-w-4 aspect-h-3">
@@ -81,8 +81,10 @@
               {{ getStockStatusText(product.stock) }}
             </span>
           </div>
+          
           <div class="flex justify-between items-center mb-4">
-            <div class="text-xl font-bold text-primary">${{ formatPrice(product.price) }}</div>
+            <div class="text-xl font-bold text-primary">${{ product.precio_compra }}</div>
+            <div class="text-xl font-bold text-primary">${{ product.precio_venta }}</div>
             <div class="text-sm text-gray-500">Stock: {{ product.stock }}</div>
           </div>
           <div class="flex gap-2">
@@ -120,8 +122,12 @@
             <input v-model="newProduct.description" type="text" class="input w-full" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-            <input v-model.number="newProduct.price" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra($)</label>
+            <input v-model.number="newProduct.precio_compra" type="number" step="0.01" class="input w-full" required min="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta($)</label>
+            <input v-model.number="newProduct.precio_venta" type="number" step="0.01" class="input w-full" required min="0" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
@@ -167,8 +173,12 @@
             <input v-model="editingProduct.description" type="text" class="input w-full" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-            <input v-model.number="editingProduct.price" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra($)</label>
+            <input v-model.number="editingProduct.precio_compra" type="number" step="0.01" class="input w-full" required min="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta($)</label>
+            <input v-model.number="editingProduct.precio_venta" type="number" step="0.01" class="input w-full" required min="0" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
@@ -219,14 +229,19 @@ definePageMeta({
 });
 
 interface Product {
-  id: number;
+   id: number;
   name: string;
   category: 'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta';
-  description?: string;
-  price: string;
+  description: string | null;
+  precio_compra: number;
+  precio_venta: number;
   stock: number;
   image_url: string | null;
   pot_size: string | null;
+  publicado: boolean;
+  sku: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ApiResponse<T> {
@@ -245,7 +260,7 @@ const filters = reactive({
   search: '',
   category: '' as string | '',
   stock: '' as string | '',
-  sort: 'name' as 'name' | 'price' | 'stock',
+  sort: 'name' as 'name' | 'precio_venta' | 'stock',
 });
 
 const allProducts = ref<Product[]>([]);
@@ -263,7 +278,10 @@ const newProduct = reactive({
   name: '',
   category: null as Product['category'] | null, // Inicializamos como null en lugar de ''
   description: '',
-  price: 0,
+  precio_venta: 0,
+  precio_compra: 0,
+  publicado: false,
+  sku: null as string | null,
   stock: 0,
   pot_size: '' as string | 'Sin especificar',
   image_url: '/placeholder.png',
@@ -275,7 +293,10 @@ const editingProduct = reactive({
   name: '',
   category: null as Product['category'] | null, // Inicializamos como null en lugar de ''
   description: '',
-  price: 0,
+  precio_venta: 0,
+  precio_compra: 0,
+  publicado: false,
+  sku: null as string | null,
   stock: 0,
   pot_size: '' as string | 'Sin especificar',
   image_url: '/placeholder.png',
@@ -304,7 +325,7 @@ const filteredProducts = computed(() => {
     })
     .sort((a, b) => {
       if (filters.sort === 'name') return a.name.localeCompare(b.name);
-      if (filters.sort === 'price') return parseFloat(a.price) - parseFloat(b.price);
+      if (filters.sort === 'precio_venta') return a.precio_venta - b.precio_venta;
       if (filters.sort === 'stock') return a.stock - b.stock;
       return 0;
     });
@@ -335,14 +356,14 @@ const loadProducts = async () => {
   }
 };
 
-// Resto del código igual (applyFilters, formatPrice, createProduct, etc.)
+// Resto del código igual (applyFilters, formatPrecio_venta, createProduct, etc.)
 
 const applyFilters = () => {
   filters.search = filters.search.trim();
 };
 
-const formatPrice = (price: string) => {
-  return parseFloat(price).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatPrice = (precio_venta: string) => {
+  return parseFloat(precio_venta).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const capitalize = (str: string) => {
@@ -355,7 +376,7 @@ const openCreateModal = () => {
 
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  Object.assign(newProduct, { name: '', category: null,description:'', price: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(newProduct, { name: '', category: null,description:'', precio_venta: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
 const openEditModal = (product: Product) => {
@@ -364,7 +385,10 @@ const openEditModal = (product: Product) => {
     name: product.name,
     category: product.category,
     description: product.description || '',
-    price: parseFloat(product.price),
+    precio_venta: product.precio_venta,
+    precio_compra: product.precio_compra || '0',
+    publicado: product.publicado || false,
+    sku: product.sku || null,
     stock: product.stock,
     pot_size: product.pot_size || '',
     image_url: product.image_url || '',
@@ -374,7 +398,7 @@ const openEditModal = (product: Product) => {
 
 const closeEditModal = () => {
   isEditModalOpen.value = false;
-  Object.assign(editingProduct, { id: null, name: '', category: null ,description:'', price: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(editingProduct, { id: null, name: '', category: null ,description:'',precio_venta:0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
 const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -400,7 +424,7 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
     showNotification(error.value ?? '', 'error');
     return false;
   }
-  if (isNaN(product.price) || product.price <= 0) {
+  if (isNaN(product.precio_venta) || product.precio_venta <= 0) {
     error.value = 'El precio debe ser un número válido mayor a 0.';
     showNotification(error.value ?? '', 'error');
     return false;
@@ -444,7 +468,10 @@ const createProduct = async () => {
       name: newProduct.name,
       category: newProduct.category,
       description: newProduct.description || null,
-      price: Number(newProduct.price),
+      precio_venta: Number(newProduct.precio_venta),
+      precio_compra: Number(newProduct.precio_compra || '0'),
+      publicado: newProduct.publicado || false,
+      sku: newProduct.sku || null,
       stock: Number(newProduct.stock),
       pot_size: newProduct.pot_size || 'Sin especificar',
       image_url: newProduct.image_url || '/placeholder.png',
@@ -472,7 +499,10 @@ const updateProduct = async () => {
       name: editingProduct.name,
       category: editingProduct.category,
       description: editingProduct.description || null,
-      price: Number(editingProduct.price),
+      precio_compra: Number(editingProduct.precio_compra || '0'),
+      precio_venta: Number(editingProduct.precio_venta),
+      publicado: editingProduct.publicado || false,
+      sku: editingProduct.sku || null,
       stock: Number(editingProduct.stock),
       pot_size: editingProduct.pot_size || 'Sin especificar',
       image_url: editingProduct.image_url || '/placeholder.png',

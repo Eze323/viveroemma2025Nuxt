@@ -1,5 +1,5 @@
 // schema/index.ts
-import { mysqlTable, serial, varchar, int, decimal, datetime, index, unique, mysqlEnum } from 'drizzle-orm/mysql-core';
+import { mysqlTable, int, varchar, decimal, boolean, timestamp,serial,mysqlEnum,datetime  } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 // Tabla: users
@@ -19,16 +19,19 @@ export const users = mysqlTable(
 export const products = mysqlTable(
   'products',
   {
-    id: serial('id').primaryKey(),
-    name: varchar('name', { length: 255 }).notNull(),
-    category: varchar('category',{length:50}).notNull(),
-    description: varchar('description', { length: 500 }),
-    price: decimal('price', { precision: 10, scale: 2 }).notNull(),
-    pot_size: mysqlEnum('pot_size', ['pequeña', 'mediana', 'grande']).default('mediana'),
-    stock: int('stock').notNull().default(0),
-    image_url: varchar('image_url', { length: 500 }),
-    created_at: datetime('created_at').notNull().default(new Date()),
-     updated_at: datetime('updated_at').notNull().default(new Date()),
+    id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }).notNull(),
+  category: varchar('category', { length: 50 }).notNull(),
+  description: varchar('description', { length: 500 }),
+  precio_compra: decimal('precio_compra', { precision: 10, scale: 2 }).notNull().default('0.00'),
+  precio_venta: decimal('precio_venta', { precision: 10, scale: 2 }).notNull(),
+  stock: int('stock').notNull(),
+  pot_size: varchar('pot_size', { length: 50 }),
+  image_url: varchar('image_url', { length: 255 }),
+  publicado: boolean('publicado').notNull().default(true),
+  sku: varchar('sku', { length: 50 }).unique(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
   }
 );
 

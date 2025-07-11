@@ -12,7 +12,10 @@ export default defineEventHandler(async (event) => {
       name: z.string().max(255),
       category: z.enum(['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta']),
       description: z.string().max(500).optional(),
-      price: z.number().min(1),
+      precio_venta: z.number().min(1),
+      precio_compra: z.number().min(1).optional(), // Si necesitas precio_compra, descomentar esta línea
+      publicado: z.boolean().optional(), // Si necesitas el campo publicado, descomentar esta línea
+      sku: z.string().max(50).nullable().optional(), // SKU opc
       stock: z.number().int().min(1),
       pot_size: z.enum(['Sin especificar','pequeña', 'mediana', 'grande','3 Lts','4 Lts','7 Lts','10 Lts']).optional(),
       image_url: z.string().nullable().optional(),
@@ -27,7 +30,10 @@ export default defineEventHandler(async (event) => {
         name: validated.name,
         category: validated.category,
         description: validated.description || null, // Asegurarse de que sea null si no se proporciona
-        price: Number(validated.price).toFixed(2), // Convertir a string con 2 decimales
+        precio_venta: Number(validated.precio_venta).toFixed(2), // Convertir a string con 2 decimales
+        precio_compra: validated.precio_compra ? Number(validated.precio_compra).toFixed(2) : '0.00', // Convertir a string con 2 decimales
+        publicado: validated.publicado !== undefined ? validated.publicado : true, // Por defecto true
+        sku: validated.sku || null, // Asegurarse de que sea null si
         stock: validated.stock,
         pot_size: validated.pot_size,
         image_url: validated.image_url,
