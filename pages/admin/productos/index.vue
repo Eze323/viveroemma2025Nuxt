@@ -1,39 +1,38 @@
-<!-- pages/products/index.vue -->
 <template>
   <div>
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-4 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Productos</h1>
-        <p class="text-gray-600">Gestiona el inventario de productos</p>
+        <h1 class="text-xl font-bold text-gray-900">Productos</h1>
+        <p class="text-sm text-gray-600">Gestiona el inventario de productos</p>
       </div>
-      <button @click="openCreateModal" class="btn btn-primary">
-        <Icon name="heroicons:plus" class="w-5 h-5 mr-2" />
-        Nuevo Producto
+      <button @click="openCreateModal" class="btn btn-primary text-xs px-2 py-1">
+        <Icon name="heroicons:plus" class="w-4 h-4 mr-1" />
+        Nuevo
       </button>
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg shadow-sm p-3 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Buscar</label>
           <input
             v-model="filters.search"
             type="text"
             placeholder="Nombre..."
-            class="input w-full"
+            class="input w-full text-xs py-1 px-2"
             @input="applyFilters"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-          <select v-model="filters.category" class="input w-full" @change="applyFilters">
+          <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+          <select v-model="filters.category" class="input w-full text-xs py-1 px-2" @change="applyFilters">
             <option value="">Todas</option>
             <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-          <select v-model="filters.stock" class="input w-full" @change="applyFilters">
+          <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
+          <select v-model="filters.stock" class="input w-full text-xs py-1 px-2" @change="applyFilters">
             <option value="">Todos</option>
             <option value="in">En stock</option>
             <option value="low">Stock bajo</option>
@@ -41,8 +40,8 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-          <select v-model="filters.sort" class="input w-full" @change="applyFilters">
+          <label class="block text-xs font-medium text-gray-700 mb-1">Ordenar por</label>
+          <select v-model="filters.sort" class="input w-full text-xs py-1 px-2" @change="applyFilters">
             <option value="name">Nombre</option>
             <option value="precio_venta">Precio</option>
             <option value="stock">Stock</option>
@@ -51,13 +50,13 @@
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-8">
-      <p class="text-gray-600">Cargando productos...</p>
+    <div v-if="loading" class="text-center py-4">
+      <p class="text-sm text-gray-600">Cargando productos...</p>
     </div>
-    <div v-else-if="!filteredProducts.length" class="text-center py-8">
-      <p class="text-gray-600">No se encontraron productos.</p>
+    <div v-else-if="!filteredProducts.length" class="text-center py-4">
+      <p class="text-sm text-gray-600">No se encontraron productos.</p>
     </div>
-    <div v-else class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <div v-for="product in filteredProducts" :key="product.id"
         class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
         <div class="aspect-w-4 aspect-h-3">
@@ -65,40 +64,34 @@
             loading="lazy"
             :src="product.image_url || '/placeholder.png'"
             :alt="product.name"
-            class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+            class="w-full h-32 object-cover transition-transform duration-300 hover:scale-105"
             @error="product.image_url = placeHolderImg"
           />
         </div>
-        <div class="p-4">
+        <div class="p-3">
           <div class="flex justify-between items-start mb-2">
             <div class="flex flex-col">
-              <h3 class="text-lg font-medium text-gray-900">{{ product.name }}</h3>
-              <p class="text-sm text-gray-500 capitalize">{{ product.category }}</p>
-              
-              <p class="text-sm text-gray-900">{{ product.publicado ? 'Publicado' : 'No publicado' }}</p>
-
-              
-              <p class="text-sm text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
+              <h3 class="text-sm font-medium text-gray-900">{{ product.name }}</h3>
+              <p class="text-xs text-gray-500 capitalize">{{ product.category }}</p>
+              <p class="text-xs text-gray-900">{{ product.publicado ? 'Publicado' : 'No publicado' }}</p>
+              <p class="text-xs text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
             </div>
             <span class="px-2 py-1 text-xs font-medium rounded-full"
               :class="getStockStatusClass(product.stock)">
               {{ getStockStatusText(product.stock) }}
             </span>
           </div>
-          
-          <div class="flex justify-between items-center mb-4 flex-col xl:flex-row">
-            <div class="text-xl font-bold text-primary">${{ product.precio_compra }}</div>
-            <div class="text-xl font-bold text-primary">${{ product.precio_venta }}</div>
-            <div class="text-sm text-gray-500">Stock: {{ product.stock }}</div>
+          <div class="flex flex-col mb-3 gap-1">
+            <div class="text-base font-bold text-primary">${{ product.precio_compra }}</div>
+            <div class="text-base font-bold text-primary">${{ product.precio_venta }}</div>
+            <div class="text-xs text-gray-500">Stock: {{ product.stock }}</div>
           </div>
-          <div class="flex flex-col md:flex-row gap-2">
-            <button @click="openEditModal(product)" class="btn btn-outline flex-1">
-              <Icon name="heroicons:pencil-square" class="w-4 h-4 mr-1" />
-              Editar
+          <div class="flex flex-col gap-2">
+            <button @click="openEditModal(product)" class="btn btn-outline text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Editar producto">
+              <Icon name="heroicons:pencil-square" class="w-4 h-4" />
             </button>
-            <button @click="deleteProduct(product.id)" class="btn btn-outline text-error hover:bg-error/10 flex-1">
-              <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
-              Eliminar
+            <button @click="deleteProduct(product.id)" class="btn btn-outline text-error hover:bg-error/10 text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Eliminar producto">
+              <Icon name="heroicons:trash" class="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -106,106 +99,106 @@
     </div>
 
     <!-- Modal de Creación -->
-    <Modal :open="isCreateModalOpen" @close="closeCreateModal">
-      <h2 class="text-xl font-bold mb-4">Nuevo Producto</h2>
+    <Modal :open="isCreateModalOpen" @close="closeCreateModal" class="sm:max-w-full sm:h-full">
+      <h2 class="text-lg font-bold mb-3">Nuevo Producto</h2>
       <form @submit.prevent="createProduct">
-        <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input v-model="newProduct.name" type="text" class="input w-full" required />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre</label>
+            <input v-model="newProduct.name" type="text" class="input w-full text-sm py-1 px-2" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select v-model="newProduct.category" class="input w-full" required>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+            <select v-model="newProduct.category" class="input w-full text-sm py-1 px-2" required>
               <option value="" disabled>Seleccione una categoría</option>
               <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
             </select>
           </div>
-           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <input v-model="newProduct.description" type="text" class="input w-full" required />
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+            <input v-model="newProduct.description" type="text" class="input w-full text-sm py-1 px-2" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra($)</label>
-            <input v-model.number="newProduct.precio_compra" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Compra($)</label>
+            <input v-model.number="newProduct.precio_compra" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta($)</label>
-            <input v-model.number="newProduct.precio_venta" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Venta($)</label>
+            <input v-model.number="newProduct.precio_venta" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-            <input v-model.number="newProduct.stock" type="number" class="input w-full" required min="0" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
+            <input v-model.number="newProduct.stock" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
-            <select v-model="newProduct.pot_size" class="input w-full">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
+            <select v-model="newProduct.pot_size" class="input w-full text-sm py-1 px-2">
               <option value="">Sin especificar</option>
               <option v-for="size in potSizes" :key="size" :value="size">{{ capitalize(size) }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen (URL)</label>
-            <input v-model="newProduct.image_url" type="url" class="input w-full" placeholder="https://example.com/image.jpg" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL)</label>
+            <input v-model="newProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
           </div>
         </div>
-        <div class="mt-6 flex gap-4">
-          <button type="submit" class="btn btn-primary flex-1" :disabled="loading">Guardar Producto</button>
-          <button type="button" @click="closeCreateModal" class="btn btn-outline flex-1" :disabled="loading">Cancelar</button>
+        <div class="mt-4 flex flex-col gap-2">
+          <button type="submit" class="btn btn-primary text-xs px-2 py-1" :disabled="loading">Guardar Producto</button>
+          <button type="button" @click="closeCreateModal" class="btn btn-outline text-xs px-2 py-1" :disabled="loading">Cancelar</button>
         </div>
       </form>
     </Modal>
 
     <!-- Modal de Edición -->
-    <Modal :open="isEditModalOpen" @close="closeEditModal">
-      <h2 class="text-xl font-bold mb-4">Editar Producto</h2>
+    <Modal :open="isEditModalOpen" @close="closeEditModal" class="sm:max-w-full sm:h-full">
+      <h2 class="text-lg font-bold mb-3">Editar Producto</h2>
       <form @submit.prevent="updateProduct">
-        <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input v-model="editingProduct.name" type="text" class="input w-full" required />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre</label>
+            <input v-model="editingProduct.name" type="text" class="input w-full text-sm py-1 px-2" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select v-model="editingProduct.category" class="input w-full" required>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+            <select v-model="editingProduct.category" class="input w-full text-sm py-1 px-2" required>
               <option value="" disabled>Seleccione una categoría</option>
               <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
             </select>
           </div>
-           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <input v-model="editingProduct.description" type="text" class="input w-full" required />
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+            <input v-model="editingProduct.description" type="text" class="input w-full text-sm py-1 px-2" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Compra($)</label>
-            <input v-model.number="editingProduct.precio_compra" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Compra($)</label>
+            <input v-model.number="editingProduct.precio_compra" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio Venta($)</label>
-            <input v-model.number="editingProduct.precio_venta" type="number" step="0.01" class="input w-full" required min="0" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Venta($)</label>
+            <input v-model.number="editingProduct.precio_venta" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-            <input v-model.number="editingProduct.stock" type="number" class="input w-full" required min="0" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
+            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
-            <select v-model="editingProduct.pot_size" class="input w-full">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
+            <select v-model="editingProduct.pot_size" class="input w-full text-sm py-1 px-2">
               <option value="">Sin especificar</option>
               <option v-for="size in potSizes" :key="size" :value="size">{{ capitalize(size) }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen (URL)</label>
-            <input v-model="editingProduct.image_url" type="url" class="input w-full" placeholder="https://example.com/image.jpg" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL)</label>
+            <input v-model="editingProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
           </div>
         </div>
-        <div class="mt-6 flex gap-4">
-          <button type="submit" class="btn btn-primary flex-1" :disabled="loading">Guardar Cambios</button>
-          <button type="button" @click="closeEditModal" class="btn btn-outline flex-1" :disabled="loading">Cancelar</button>
+        <div class="mt-4 flex flex-col gap-2">
+          <button type="submit" class="btn btn-primary text-xs px-2 py-1" :disabled="loading">Guardar Cambios</button>
+          <button type="button" @click="closeEditModal" class="btn btn-outline text-xs px-2 py-1" :disabled="loading">Cancelar</button>
         </div>
       </form>
-      <div v-if="error && !notification.isOpen" class="mt-4 text-error text-center">{{ error }}</div>
+      <div v-if="error && !notification.isOpen" class="mt-3 text-error text-xs text-center">{{ error }}</div>
     </Modal>
 
     <!-- Modal de Notificación -->
@@ -565,12 +558,10 @@ onMounted(loadProducts);
 <style scoped>
 .input {
   border: 1px solid #d1d5db;
-  padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* text-sm for inputs */
 }
 .btn {
-  padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   font-weight: 500;
   cursor: pointer;
@@ -598,4 +589,31 @@ onMounted(loadProducts);
 .text-error { color: #ef4444; }
 .bg-error\/10 { background-color: rgba(239, 68, 68, 0.1); }
 .text-primary { color: #3b82f6; }
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  .input {
+    font-size: 0.75rem; /* text-xs for inputs on mobile */
+    padding: 0.4rem 0.6rem;
+  }
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem; /* text-xs for buttons */
+  }
+  .grid-cols-2 {
+    gap: 1rem; /* Reduced gap for mobile */
+  }
+  .aspect-w-4.aspect-h-3 img {
+    height: 8rem; /* h-32 for images */
+  }
+  .p-3 {
+    padding: 0.5rem; /* Reduced padding for cards */
+  }
+  h1.text-xl {
+    font-size: 1rem; /* text-base for headers */
+  }
+  .text-base {
+    font-size: 0.875rem; /* text-sm for prices */
+  }
+}
 </style>
