@@ -71,9 +71,13 @@
         </div>
         <div class="p-4">
           <div class="flex justify-between items-start mb-2">
-            <div>
+            <div class="flex flex-col">
               <h3 class="text-lg font-medium text-gray-900">{{ product.name }}</h3>
               <p class="text-sm text-gray-500 capitalize">{{ product.category }}</p>
+              
+              <p class="text-sm text-gray-900">{{ product.publicado ? 'Publicado' : 'No publicado' }}</p>
+
+              
               <p class="text-sm text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
             </div>
             <span class="px-2 py-1 text-xs font-medium rounded-full"
@@ -82,12 +86,12 @@
             </span>
           </div>
           
-          <div class="flex justify-between items-center mb-4">
+          <div class="flex justify-between items-center mb-4 flex-col xl:flex-row">
             <div class="text-xl font-bold text-primary">${{ product.precio_compra }}</div>
             <div class="text-xl font-bold text-primary">${{ product.precio_venta }}</div>
             <div class="text-sm text-gray-500">Stock: {{ product.stock }}</div>
           </div>
-          <div class="flex gap-2">
+          <div class="flex flex-col md:flex-row gap-2">
             <button @click="openEditModal(product)" class="btn btn-outline flex-1">
               <Icon name="heroicons:pencil-square" class="w-4 h-4 mr-1" />
               Editar
