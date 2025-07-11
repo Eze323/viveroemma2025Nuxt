@@ -58,7 +58,25 @@
     </div>
     <div v-else class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <div v-for="product in filteredProducts" :key="product.id"
-        class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+        class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="p-3">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-sm font-medium text-gray-900">{{ product.name }}</h3>
+            <span class="px-2 py-1 text-xs font-medium rounded-full"
+              :class="getStockStatusClass(product.stock)">
+              {{ getStockStatusText(product.stock) }}
+            </span>
+          </div>
+          <button
+            @click="toggleDetails(product.id)"
+            class="w-full text-left text-xs text-primary flex items-center justify-between mb-2"
+            :aria-expanded="isDetailsOpen(product.id)"
+            :aria-controls="'details-' + product.id"
+          >
+            <span>Detalles</span>
+            <Icon :name="isDetailsOpen(product.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-4 h-4" />
+          </button>
+        </div>
         <div class="aspect-w-4 aspect-h-3">
           <img
             loading="lazy"
@@ -68,32 +86,22 @@
             @error="product.image_url = placeHolderImg"
           />
         </div>
-        <div class="p-3">
-          <div class="flex justify-between items-start mb-2">
-            <div class="flex flex-col">
-              <h3 class="text-sm font-medium text-gray-900">{{ product.name }}</h3>
-              <p class="text-xs text-gray-500 capitalize">{{ product.category }}</p>
-              <p class="text-xs text-gray-900">{{ product.publicado ? 'Publicado' : 'No publicado' }}</p>
-              <p class="text-xs text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
-            </div>
-            <span class="px-2 py-1 text-xs font-medium rounded-full"
-              :class="getStockStatusClass(product.stock)">
-              {{ getStockStatusText(product.stock) }}
-            </span>
+        <div v-show="isDetailsOpen(product.id)" class="p-3 bg-gray-50 transition-all duration-300 ease-in-out" :id="'details-' + product.id">
+          <p class="text-xs text-gray-500 capitalize">{{ product.category }}</p>
+          <p class="text-xs text-gray-900">{{ product.publicado ? 'Publicado' : 'No publicado' }}</p>
+          <p class="text-xs text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
+          <div class="flex flex-col gap-1 mt-2">
+            <div class="text-sm font-bold text-primary">${{ product.precio_compra }}</div>
+            <div class="text-sm font-bold text-primary">${{ product.precio_venta }}</div>
           </div>
-          <div class="flex flex-col mb-3 gap-1">
-            <div class="text-base font-bold text-primary">${{ product.precio_compra }}</div>
-            <div class="text-base font-bold text-primary">${{ product.precio_venta }}</div>
-            <div class="text-xs text-gray-500">Stock: {{ product.stock }}</div>
-          </div>
-          <div class="flex flex-col gap-2">
-            <button @click="openEditModal(product)" class="btn btn-outline text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Editar producto">
-              <Icon name="heroicons:pencil-square" class="w-4 h-4" />
-            </button>
-            <button @click="deleteProduct(product.id)" class="btn btn-outline text-error hover:bg-error/10 text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Eliminar producto">
-              <Icon name="heroicons:trash" class="w-4 h-4" />
-            </button>
-          </div>
+        </div>
+        <div class="p-3 flex flex-col gap-2">
+          <button @click="openEditModal(product)" class="btn btn-outline text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Editar producto">
+            <Icon name="heroicons:pencil-square" class="w-4 h-4" />
+          </button>
+          <button @click="deleteProduct(product.id)" class="btn btn-outline text-error hover:bg-error/10 text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Eliminar producto">
+            <Icon name="heroicons:trash" class="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
@@ -217,16 +225,15 @@ import { useApiService } from '~/services/api/api';
 import { useAuthStore } from '~/stores/auth';
 import Modal from '~/components/Modal.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
-
 import placeHolderImg from '@/assets/images/placeholder.png';
 
 definePageMeta({
   layout: 'admin',
-  //middleware: ['auth'],
+  // middleware: ['auth'],
 });
 
 interface Product {
-   id: number;
+  id: number;
   name: string;
   category: 'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta';
   description: string | null;
@@ -251,7 +258,7 @@ const authStore = useAuthStore();
 const api = useApiService();
 
 const categories = ['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta'] as const;
-const potSizes = ['pequeña', 'mediana', 'grande','3 Lts','4 Lts','7 Lts','10 Lts'] as const;
+const potSizes = ['pequeña', 'mediana', 'grande', '3 Lts', '4 Lts', '7 Lts', '10 Lts'] as const;
 
 const filters = reactive({
   search: '',
@@ -273,7 +280,7 @@ const notification = reactive({
 const isCreateModalOpen = ref(false);
 const newProduct = reactive({
   name: '',
-  category: null as Product['category'] | null, // Inicializamos como null en lugar de ''
+  category: null as Product['category'] | null,
   description: '',
   precio_venta: 0,
   precio_compra: 0,
@@ -288,7 +295,7 @@ const isEditModalOpen = ref(false);
 const editingProduct = reactive({
   id: null as number | null,
   name: '',
-  category: null as Product['category'] | null, // Inicializamos como null en lugar de ''
+  category: null as Product['category'] | null,
   description: '',
   precio_venta: 0,
   precio_compra: 0,
@@ -298,6 +305,21 @@ const editingProduct = reactive({
   pot_size: '' as string | 'Sin especificar',
   image_url: '/placeholder.png',
 });
+
+// Dropdown state management
+const openDetails = ref<number[]>([]);
+
+const toggleDetails = (productId: number) => {
+  if (openDetails.value.includes(productId)) {
+    openDetails.value = openDetails.value.filter((id) => id !== productId);
+  } else {
+    openDetails.value.push(productId);
+  }
+};
+
+const isDetailsOpen = (productId: number) => {
+  return openDetails.value.includes(productId);
+};
 
 const filteredProducts = computed(() => {
   if (!Array.isArray(allProducts.value)) {
@@ -333,16 +355,13 @@ const loadProducts = async () => {
   error.value = null;
   try {
     const response = await api.getProducts();
-    //console.log('Respuesta de getProducts:', response);
     if (response && response.success && Array.isArray(response.data)) {
       allProducts.value = response.data;
     } else {
-      //console.warn('Respuesta inválida de getProducts:', response);
       allProducts.value = [];
       error.value = response.error || 'No se pudieron cargar los productos.';
       showNotification(error.value ?? '', 'error');
     }
-    //console.log('Productos cargados:', allProducts.value);
   } catch (err: any) {
     error.value = err.message || 'No se pudieron cargar los productos.';
     console.error('Error loading products:', err);
@@ -352,8 +371,6 @@ const loadProducts = async () => {
     loading.value = false;
   }
 };
-
-// Resto del código igual (applyFilters, formatPrecio_venta, createProduct, etc.)
 
 const applyFilters = () => {
   filters.search = filters.search.trim();
@@ -373,7 +390,7 @@ const openCreateModal = () => {
 
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  Object.assign(newProduct, { name: '', category: null,description:'', precio_venta: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(newProduct, { name: '', category: null, description: '', precio_venta: 0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
 const openEditModal = (product: Product) => {
@@ -395,7 +412,7 @@ const openEditModal = (product: Product) => {
 
 const closeEditModal = () => {
   isEditModalOpen.value = false;
-  Object.assign(editingProduct, { id: null, name: '', category: null ,description:'',precio_venta:0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(editingProduct, { id: null, name: '', category: null, description: '', precio_venta: 0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
 const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -444,7 +461,6 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
   return true;
 };
 
-
 const isValidUrl = (url: string) => {
   console.log('Validating URL:', url);
   if (!url) return true;
@@ -477,7 +493,7 @@ const createProduct = async () => {
     allProducts.value.push(response.data.product);
     closeCreateModal();
     showNotification('Producto creado exitosamente!');
-    loadProducts(); // Reload products to ensure the new one is included
+    loadProducts();
   } catch (err: any) {
     error.value = err.message || 'Error al crear el producto.';
     console.error('Error creating product:', err);
@@ -530,6 +546,7 @@ const deleteProduct = async (productId: number) => {
   try {
     await api.deleteProduct(productId);
     allProducts.value = allProducts.value.filter((p) => p.id !== productId);
+    openDetails.value = openDetails.value.filter((id) => id !== productId);
     showNotification('Producto eliminado exitosamente!');
   } catch (err: any) {
     error.value = err.message || 'Error al eliminar el producto.';
@@ -565,7 +582,7 @@ onMounted(loadProducts);
   border-radius: 0.375rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 .btn-primary {
   background-color: #3b82f6;
@@ -573,6 +590,7 @@ onMounted(loadProducts);
 }
 .btn-primary:hover {
   background-color: #2563eb;
+  transform: translateY(-1px);
 }
 .btn-outline {
   background-color: transparent;
@@ -581,6 +599,7 @@ onMounted(loadProducts);
 }
 .btn-outline:hover {
   background-color: #f9fafb;
+  transform: translateY(-1px);
 }
 .text-success { color: #10b981; }
 .bg-success\/10 { background-color: rgba(16, 185, 129, 0.1); }
@@ -612,8 +631,21 @@ onMounted(loadProducts);
   h1.text-xl {
     font-size: 1rem; /* text-base for headers */
   }
-  .text-base {
-    font-size: 0.875rem; /* text-sm for prices */
+  .text-sm {
+    font-size: 0.75rem; /* text-xs for smaller text on mobile */
+  }
+  /* Dropdown animation */
+  .transition-all {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  [v-show="false"] {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+  [v-show="true"] {
+    max-height: 200px; /* Adjust based on content height */
+    opacity: 1;
   }
 }
 </style>
