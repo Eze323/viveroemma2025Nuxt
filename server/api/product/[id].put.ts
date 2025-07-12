@@ -13,7 +13,10 @@ export default defineEventHandler(async (event) => {
       name: z.string().max(255),
       category: z.enum(['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta']),
       description: z.string().max(255),
-      price: z.number().min(0),
+      precio_venta: z.number().min(1),
+      precio_compra: z.number().min(1).optional(), // Si necesitas precio_compra, descomentar esta línea
+      publicado: z.boolean().optional(), // Si necesitas el campo publicado, descomentar esta línea
+      sku: z.string().max(50).nullable().optional(), // SKU opcional
       stock: z.number().int().min(0),
       pot_size: z.enum(['pequeña', 'mediana', 'grande']).optional(),
       image_url: z.string().url().optional(),
@@ -32,7 +35,10 @@ export default defineEventHandler(async (event) => {
         name: validated.name,
         category: validated.category,
         description: validated.description,
-        price: validated.price.toFixed(2),
+        precio_compra: validated.precio_compra.toFixed(2),
+        precio_venta: validated.precio_venta.toFixed(2),
+        publicado: validated.publicado !== undefined ? validated.publicado : true,
+        sku: validated.sku || null,
         stock: validated.stock,
         pot_size: validated.pot_size,
         image_url: validated.image_url,

@@ -62,7 +62,7 @@
         <div class="p-3">
           <div class="flex justify-between items-start mb-2">
             <h3 class="text-sm font-medium text-gray-900">{{ product.name }}</h3>
-            <span class="px-2 py-1 text-xs font-medium rounded-full"
+            <span class="px-2 py-1 text-xs font-medium rounded-full mx-auto"
               :class="getStockStatusClass(product.stock)">
               {{ getStockStatusText(product.stock) }}
             </span>
@@ -88,7 +88,9 @@
         </div>
         <div v-show="isDetailsOpen(product.id)" class="p-3 bg-gray-50 transition-all duration-300 ease-in-out" :id="'details-' + product.id">
           <p class="text-xs text-gray-500 capitalize">{{ product.category }}</p>
-          <p class="text-xs text-gray-900">{{ product.publicado ? 'Publicado' : 'No publicado' }}</p>
+          <p class="text-xs" :class="product.publicado ? 'text-success' : 'text-gray-500'">
+            {{ product.publicado ? 'Publicado' : 'No publicado' }}
+          </p>
           <p class="text-xs text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
           <div class="flex flex-col gap-1 mt-2">
             <div class="text-sm font-bold text-primary">${{ product.precio_compra }}</div>
@@ -158,6 +160,7 @@
     </Modal>
 
     <!-- Modal de Edición -->
+     <!-- Modal de Edición -->
     <Modal :open="isEditModalOpen" @close="closeEditModal" class="sm:max-w-full sm:h-full">
       <h2 class="text-lg font-bold mb-3">Editar Producto</h2>
       <form @submit.prevent="updateProduct">
@@ -187,7 +190,8 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
-            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
+            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2Has context menu
+            " required min="0" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
@@ -199,6 +203,23 @@
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL)</label>
             <input v-model="editingProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Publicado</label>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="editingProduct.publicado"
+                class="sr-only peer"
+                aria-label="Toggle producto publicado"
+              />
+              <div
+                class="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:bg-success"
+              ></div>
+              <span
+                class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-200 ease-in-out peer-checked:translate-x-5"
+              ></span>
+            </label>
           </div>
         </div>
         <div class="mt-4 flex flex-col gap-2">
@@ -530,6 +551,7 @@ const updateProduct = async () => {
     }
     closeEditModal();
     showNotification('Producto actualizado exitosamente!');
+    loadProducts();
   } catch (err: any) {
     error.value = err.message || 'Error al actualizar el producto.';
     console.error('Error updating product:', err);
@@ -548,6 +570,7 @@ const deleteProduct = async (productId: number) => {
     allProducts.value = allProducts.value.filter((p) => p.id !== productId);
     openDetails.value = openDetails.value.filter((id) => id !== productId);
     showNotification('Producto eliminado exitosamente!');
+    loadProducts();
   } catch (err: any) {
     error.value = err.message || 'Error al eliminar el producto.';
     console.error('Error deleting product:', err);
@@ -600,6 +623,9 @@ onMounted(loadProducts);
 .btn-outline:hover {
   background-color: #f9fafb;
   transform: translateY(-1px);
+}
+.btn:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .text-success { color: #10b981; }
 .bg-success\/10 { background-color: rgba(16, 185, 129, 0.1); }

@@ -23,8 +23,10 @@ export async function formatProduct(product: Product): Promise<FormattedProduct>
       name: product.name,
       category: product.category,
       description: product.description || '', // Asegurarse de que la descripción no sea undefined
-      price: finalPrice, // Precio de venta
-      cost_price: parseFloat(product.price), // Precio de costo
+      precio_venta: parseFloat(product.precio_venta), // Precio de venta
+      precio_compra: parseFloat(product.precio_compra), // Precio de costo
+      publicado: product.publicado || true, // Asegurarse de que el campo publicado tenga un valor
+      sku: product.sku || null, // Asegurarse de que el SKU no
       stock: product.stock,
       image_url: product.image_url,
       pot_size: product.pot_size,
@@ -36,8 +38,11 @@ export async function formatProduct(product: Product): Promise<FormattedProduct>
       name: product.name,
       category: product.category,
       description: product.description || '', // Asegurarse de que la descripción no sea undefined
-      price: parseFloat(product.price) || 0,
-      cost_price: parseFloat(product.price) || 0,
+      precio_venta: parseFloat(product.precio_venta) || 0, // Precio de venta
+      precio_compra: parseFloat(product.precio_compra) || 0, // Precio de costo
+      publicado: product.publicado || true, // Asegurarse de que el campo publicado tenga un valor
+      sku: product.sku || null, // Asegurarse de que
+      
       stock: product.stock || 0,
       image_url: product.image_url,
       pot_size: product.pot_size,
