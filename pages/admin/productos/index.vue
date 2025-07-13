@@ -5,10 +5,17 @@
         <h1 class="text-xl font-bold text-gray-900">Productos</h1>
         <p class="text-sm text-gray-600">Gestiona el inventario de productos</p>
       </div>
-      <button @click="openCreateModal" class="btn btn-primary text-xs px-2 py-1">
-        <Icon name="heroicons:plus" class="w-4 h-4 mr-1" />
-        Nuevo
-      </button>
+      
+      <button 
+  @click="openCreateModal" 
+  class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0 relative group"
+  title="Crear nuevo producto"
+>
+  <Icon name="heroicons:plus" class="w-5 h-5" />
+  <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2">
+    Crear nuevo producto
+  </span>
+</button>
     </div>
 
     <div class="bg-white rounded-lg shadow-sm p-3 mb-4">
@@ -596,37 +603,51 @@ onMounted(loadProducts);
 </script>
 
 <style scoped>
+/* Estilos existentes */
 .input {
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
-  font-size: 0.875rem; /* text-sm for inputs */
+  font-size: 0.875rem;
 }
+
+/* Ajustar .btn para no interferir con botones circulares */
 .btn {
-  border-radius: 0.375rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
+
+/* Definir padding y border-radius solo si no se sobrescribe */
+.btn:not(.rounded-full) {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
 .btn-primary {
   background-color: #3b82f6;
   color: white;
 }
+
 .btn-primary:hover {
   background-color: #2563eb;
   transform: translateY(-1px);
 }
+
 .btn-outline {
   background-color: transparent;
   border: 1px solid #d1d5db;
   color: #374151;
 }
+
 .btn-outline:hover {
   background-color: #f9fafb;
   transform: translateY(-1px);
 }
+
 .btn:hover {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
 .text-success { color: #10b981; }
 .bg-success\/10 { background-color: rgba(16, 185, 129, 0.1); }
 .text-warning { color: #f59e0b; }
@@ -635,32 +656,31 @@ onMounted(loadProducts);
 .bg-error\/10 { background-color: rgba(239, 68, 68, 0.1); }
 .text-primary { color: #3b82f6; }
 
-/* Mobile-specific styles */
+/* Estilos móviles */
 @media (max-width: 640px) {
   .input {
-    font-size: 0.75rem; /* text-xs for inputs on mobile */
+    font-size: 0.75rem;
     padding: 0.4rem 0.6rem;
   }
-  .btn {
+  .btn:not(.rounded-full) {
     padding: 0.4rem 0.8rem;
-    font-size: 0.75rem; /* text-xs for buttons */
+    font-size: 0.75rem;
   }
   .grid-cols-2 {
-    gap: 1rem; /* Reduced gap for mobile */
+    gap: 1rem;
   }
   .aspect-w-4.aspect-h-3 img {
-    height: 8rem; /* h-32 for images */
+    height: 8rem;
   }
   .p-3 {
-    padding: 0.5rem; /* Reduced padding for cards */
+    padding: 0.5rem;
   }
   h1.text-xl {
-    font-size: 1rem; /* text-base for headers */
+    font-size: 1rem;
   }
   .text-sm {
-    font-size: 0.75rem; /* text-xs for smaller text on mobile */
+    font-size: 0.75rem;
   }
-  /* Dropdown animation */
   .transition-all {
     transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
   }
@@ -670,7 +690,7 @@ onMounted(loadProducts);
     overflow: hidden;
   }
   [v-show="true"] {
-    max-height: 200px; /* Adjust based on content height */
+    max-height: 200px;
     opacity: 1;
   }
 }

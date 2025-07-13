@@ -34,9 +34,10 @@ openApiDocs: {
 
   //image
   image: {
+    provider:'netlify',
     formats: ['webp', 'jpg'],
     dir: 'assets/images',
-     domains: ['example.com']
+     domains: ['images.pexels.com'],
   },
   // Google Fonts configuration
   googleFonts: {
