@@ -36,3 +36,16 @@ export interface User{
   role: string;
   
 }
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+export interface Sales {
+  id: number;
+  product_id: number;
+  quantity: number;
+  total_price: number;
+  sale_date: Date;
+}
