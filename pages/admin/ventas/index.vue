@@ -129,16 +129,16 @@
             <div class="flex justify-between items-start">
               <div>
                 <h3 class="text-sm font-medium text-gray-900">Venta #{{ sale.id }}</h3>
-                <p class="text-xs text-gray-500">{{ sale.customer_name_field ?? 'N/A' }}</p>
+                <p class="text-xs text-gray-500">{{ sale.customer ?? 'N/A' }}</p>
               </div>
               <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getStatusClass(sale.status)">
                 {{ sale.status }}
               </span>
             </div>
             <p class="text-xs text-gray-500">Vendedor: {{ sale.seller }}</p>
-            <p class="text-xs text-gray-500">Items: {{ sale.items ? sale.items.length : 0 }}</p>
+            <p class="text-xs text-gray-500">Items: {{ sale.sale_items ? sale.sale_items.length : 0 }}</p>
             <p class="text-sm font-medium text-gray-900">${{ sale.total_price ? sale.total_price.toLocaleString() : '0' }}</p>
-            <p class="text-xs text-gray-500">{{ sale.date }} {{ sale.time }}</p>
+            <p class="text-xs text-gray-500">{{ formatDate(sale.date) }} {{ formatTime(sale.time) }}</p>
             <div class="flex gap-2 mt-2">
               <button @click="openViewModal(sale)" class="btn btn-outline flex-1 py-2 text-xs">
                 <Icon name="heroicons:eye" class="w-4 h-4 mr-1" />
@@ -177,11 +177,11 @@
               <tr v-for="sale in filteredSales" :key="sale.id" class="hover:bg-gray-50">
                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#{{ sale.id }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ sale.customer_name_field ?? 'N/A' }}</div>
+                  <div class="text-sm font-medium text-gray-900">{{ sale.customer ?? 'N/A' }}</div>
                   <div class="text-xs text-gray-500">{{ sale.email ?? '' }}</div>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ sale.seller }}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ sale.items ? sale.items.length : 0 }}</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ sale.sale_items ? sale.sale_items.length : 0 }}</td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${{ sale.total_price ? sale.total_price.toLocaleString() : '0' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getStatusClass(sale.status)">
@@ -189,8 +189,8 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ sale.date }}</div>
-                  <div class="text-xs text-gray-500">{{ sale.time }}</div>
+                  <div class="text-sm text-gray-900">{{ formatDate(sale.date) }}</div>
+                  <div class="text-xs text-gray-500">{{ formatTime(sale.time) }}</div>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                   <button @click="openViewModal(sale)" class="text-primary hover:text-primary-dark mr-2" title="Ver detalles">
@@ -244,17 +244,17 @@
     <Modal :open="isViewModalOpen" @close="closeViewModal">
       <h3 class="text-xl font-bold text-gray-900 mb-4">Detalles de la Venta #{{ selectedSaleForView?.id }}</h3>
       <div v-if="selectedSaleForView" class="mb-6 text-sm text-gray-700 space-y-2">
-        <p><strong>Cliente:</strong> {{ selectedSaleForView.customer_name_field ?? 'N/A' }}</p>
+        <p><strong>Cliente:</strong> {{ selectedSaleForView.customer ?? 'N/A' }}</p>
         <p><strong>Email:</strong> {{ selectedSaleForView.email ?? '' }}</p>
         <p><strong>Vendedor:</strong> {{ selectedSaleForView.seller }}</p>
-        <p><strong>Fecha:</strong> {{ selectedSaleForView.date }} {{ selectedSaleForView.time }}</p>
+        <p><strong>Fecha:</strong> {{ formatDate(selectedSaleForView.date) }} {{ formatTime(selectedSaleForView.time) }}</p>
         <p><strong>Estado:</strong>
           <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getStatusClass(selectedSaleForView.status)">
             {{ selectedSaleForView.status }}
           </span>
         </p>
       </div>
-      <div v-if="selectedSaleForView && selectedSaleForView.items && selectedSaleForView.items.length > 0" class="mb-6">
+      <div v-if="selectedSaleForView && selectedSaleForView.sale_items && selectedSaleForView.sale_items.length > 0" class="mb-6">
         <h4 class="text-lg font-semibold text-gray-800 mb-3">Items de la Venta</h4>
         <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-md">
           <thead class="bg-gray-50">
@@ -266,8 +266,8 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="(item, index) in selectedSaleForView.items" :key="index">
-              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ item.product ? item.product.name : 'N/A' }}</td>
+            <tr v-for="(item, index) in selectedSaleForView.sale_items" :key="index">
+              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ item.product_name ?? 'N/A' }}</td>
               <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{{ item.quantity }}</td>
               <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${{ item.unit_price ? item.unit_price.toLocaleString() : '0' }}</td>
               <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-right text-gray-900">${{ item.subtotal ? item.subtotal.toLocaleString() : '0' }}</td>
@@ -276,7 +276,7 @@
           <tfoot>
             <tr class="bg-gray-50">
               <td colspan="3" class="px-3 py-2 text-right text-sm font-bold text-gray-900">Total:</td>
-              <td class="px-3 py-2 text-right text-sm font-bold text-gray-900">${{ calculateTotalViewModal(selectedSaleForView.items).toLocaleString() }}</td>
+              <td class="px-3 py-2 text-right text-sm font-bold text-gray-900">${{ calculateTotalViewModal(selectedSaleForView.sale_items).toLocaleString() }}</td>
             </tr>
           </tfoot>
         </table>
@@ -454,6 +454,19 @@ const sellers = ref([
   { id: 3, name: 'Ana García' },
 ]);
 
+// Format date and time
+const formatDate = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+};
+
+const formatTime = (time) => {
+  if (!time) return '';
+  // Asegura que el formato sea HH:mm
+  return time.substring(0, 5); // Ejemplo: "14:30:00" -> "14:30"
+};
+
 // Computed property for filtering and sorting
 const filteredSales = computed(() => {
   let filtered = Array.isArray(allSales.value) ? [...allSales.value] : [];
@@ -462,7 +475,7 @@ const filteredSales = computed(() => {
     const searchTerm = filters.search.toLowerCase();
     filtered = filtered.filter((sale) => {
       if (!sale) return false;
-      const customerName = sale.customer_name_field?.toLowerCase() ?? '';
+      const customerName = sale.customer?.toLowerCase() ?? '';
       const customerEmail = sale.email?.toLowerCase() ?? '';
       const sellerName = sale.seller?.toLowerCase() ?? '';
       const saleId = sale.id ? sale.id.toString().toLowerCase() : '';
@@ -473,8 +486,8 @@ const filteredSales = computed(() => {
         customerEmail.includes(searchTerm) ||
         sellerName.includes(searchTerm);
 
-      const itemMatch = sale.items?.some((item) =>
-        item.product?.name?.toLowerCase().includes(searchTerm)
+      const itemMatch = sale.sale_items?.some((item) =>
+        item.product_name?.toLowerCase().includes(searchTerm)
       );
 
       return mainMatch || itemMatch;
@@ -510,7 +523,7 @@ const fetchSales = async () => {
   error.value = null;
   try {
     const response = await api.getSales();
-    allSales.value = Array.isArray(response) ? response : [];
+    allSales.value = response.data || []; // Ajustado para manejar la estructura del endpoint
     console.log('Sales loaded:', allSales.value);
   } catch (err) {
     error.value = err.message || 'Error al cargar las ventas.';
@@ -553,15 +566,15 @@ const handleSaveSale = async () => {
 
   const saleData = {
     customer: saleForm.customer,
-    email: saleForm.email,
+    email: saleForm.email || null,
     seller: saleForm.seller,
     date: saleForm.date,
     time: saleForm.time || null,
     status: saleForm.status,
     items: saleForm.items.map((item) => ({
-      product_id: item.product_id,
+      productId: item.product_id, // Ajustado al nombre esperado por el backend
       quantity: item.quantity,
-      unit_price: item.unit_price,
+      unitPrice: item.unit_price, // Ajustado al nombre esperado por el backend
     })),
   };
 
@@ -571,16 +584,17 @@ const handleSaveSale = async () => {
       response = await api.updateSale(saleForm.id, saleData);
       const index = allSales.value.findIndex((sale) => sale.id === saleForm.id);
       if (index !== -1) {
-        allSales.value[index] = response;
+        allSales.value[index] = response.sale; // Ajustado para la estructura del endpoint
       } else {
-        allSales.value.push(response);
+        allSales.value.push(response.sale);
       }
       showNotification('Venta actualizada exitosamente!', 'success');
     } else {
       response = await api.createSale(saleData);
-      allSales.value.push(response);
+      allSales.value.push(response.sale); // Ajustado para la estructura del endpoint
       showNotification('Venta creada exitosamente!', 'success');
     }
+    await fetchDashboardData(); // Actualizar datos del dashboard
     closeFormModal();
   } catch (err) {
     error.value = err.message || `Error al ${isEditing.value ? 'actualizar' : 'crear'} la venta.`;
@@ -598,6 +612,7 @@ const deleteSale = async (saleId) => {
   try {
     await api.deleteSale(saleId);
     allSales.value = allSales.value.filter((sale) => sale.id !== saleId);
+    await fetchDashboardData(); // Actualizar datos del dashboard
     showNotification('Venta eliminada exitosamente!', 'success');
   } catch (err) {
     error.value = err.message || 'Error al eliminar la venta.';
@@ -662,13 +677,13 @@ const openFormModalForEdit = (sale) => {
   isEditing.value = true;
   Object.assign(saleForm, {
     id: sale.id,
-    customer: sale.customer_name_field ?? '',
+    customer: sale.customer ?? '',
     email: sale.email ?? '',
     seller: sale.seller,
-    date: sale.date,
-    time: sale.time,
+    date: formatDate(sale.date),
+    time: formatTime(sale.time),
     status: sale.status,
-    items: sale.items?.map((item) => ({
+    items: sale.sale_items?.map((item) => ({
       product_id: item.product_id,
       quantity: item.quantity,
       unit_price: item.unit_price,
