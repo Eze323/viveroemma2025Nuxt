@@ -25,9 +25,9 @@ export default defineEventHandler(async (event: H3Event) => {
 
     // Obtener productos publicados
     const productRecords = await prisma.products.findMany({
-      where: {
-        publicado: true,
-      },
+      // where: {
+      //   publicado: true,
+      // },
       select: {
         id: true,
         name: true,
