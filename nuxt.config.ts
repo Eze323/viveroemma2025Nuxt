@@ -92,11 +92,11 @@ openApiDocs: {
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.API_BASE_URL,
-      dbHost: process.env.DB_HOST || 'localhost',
-      dbPort: process.env.DB_PORT || '3306',
-      dbDatabase: process.env.DB_DATABASE || 'Vivero_Emma',
-      dbUsername: process.env.DB_USERNAME || 'root',
-      dbPassword: process.env.DB_PASSWORD || 'Ejemplo123!',
+      dbHost: process.env.DB_HOST, 
+      dbPort: process.env.DB_PORT, 
+      dbDatabase: process.env.DB_DATABASE, 
+      dbUsername: process.env.DB_USERNAME, 
+      dbPassword: process.env.DB_PASSWORD, 
       dbBaseURL: process.env.DATABASE_URL
     }
   },

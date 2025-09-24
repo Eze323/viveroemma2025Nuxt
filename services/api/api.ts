@@ -1,5 +1,6 @@
 // services/api.ts
 import { useRuntimeConfig } from '#app';
+import type { get } from '@vueuse/core';
 import { useAuthStore } from '~/stores/auth';
 
 interface Product {
@@ -131,6 +132,14 @@ export const useApiService = () => {
   };
 
   return {
+    //sales
+    getSales: () => request<ApiResponse<any[]>>('/sales'),
+    getSale: (id: number) => request<ApiResponse<any>>(`/sales/${id}`),
+    createSale: (data: any) => request<ApiResponse<{ message: string; sale: any }>>('/sales', { method: 'POST', body: data }),
+    updateSale: (id: number, data: any) => request<ApiResponse<{ message: string; sale: any }>>(`/sales/${id}`, { method: 'PUT', body: data }),
+    deleteSale: (id: number) => request<ApiResponse<{ message: string }>>(`/sales/${id}`, { method: 'DELETE' }),
+    
+    //products
     getProducts: () => request<ApiResponse<Product[]>>('/product'), // Corregido de /product a /products
     getProduct: (id: number) => request<ApiResponse<Product>>(`/product/${id}`),
     createProduct: (data: Partial<Product>) => request<ApiResponse<{ message: string; product: Product }>>('/product', { method: 'POST', body: data }),
