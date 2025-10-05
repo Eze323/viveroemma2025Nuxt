@@ -99,16 +99,16 @@ const isUserMenuOpen = ref(false);
 const pageTitle = computed(() => {
   const pathMap = {
     '/admin': 'Dashboard',
-    '/admin/vendedores': 'Vendedores',
-    '/admin/compradores': 'Compradores',
+  //  '/admin/vendedores': 'Vendedores',
+   // '/admin/compradores': 'Compradores',
     '/admin/productos': 'Productos',
     '/admin/ventas': 'Ventas',
-    '/admin/facturas': 'Facturas',
-    '/admin/compras': 'Compras',
-    '/admin/embazado': 'Embazado',
-    '/admin/premios': 'Premios',
-    '/admin/perfil': 'Mi Perfil',
-    '/admin/configuracion': 'Configuración',
+   // '/admin/facturas': 'Facturas',
+    // '/admin/compras': 'Compras',
+  //  '/admin/embazado': 'Embazado',
+   // '/admin/premios': 'Premios',
+   // '/admin/perfil': 'Mi Perfil',
+   // '/admin/configuracion': 'Configuración',
   };
   
   return pathMap[route.path] || 'Administración';

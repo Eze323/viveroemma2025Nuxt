@@ -7,10 +7,12 @@ module.exports = {
     "./plugins/**/*.{js,ts}",
     "./app.vue",
   ],
+  darkMode: 'class', // Added from components for consistency
   theme: {
     extend: {
       colors: {
-        primary: {
+        // Your original color palette
+       primary: {
           DEFAULT: '#2D6A4F',
           light: '#40916C',
           dark: '#1B4332',
@@ -69,35 +71,62 @@ module.exports = {
           DEFAULT: '#D64143',
           light: '#E06566',
           dark: '#B13436'
-        }
+        },
+        // Colors from admin-products component
+        'admin-primary': '#17cf17', // Renamed to avoid conflict with your primary
+        'background-light': '#f6f8f6',
+        'background-dark': '#112111',
+        'content-light': '#112111',
+        'content-dark': '#f6f8f6',
+        'subtle-light': '#e3e8e3',
+        'subtle-dark': '#2a3c2a',
+        // Colors from ventas component
+        'ventas-primary': '#17cf17', // Renamed to avoid conflict
+        'foreground-light': '#1f2937',
+        'foreground-dark': '#e5e7eb',
+        'card-light': '#ffffff',
+        'card-dark': '#1a2e1a',
+        'border-light': '#e5e7eb',
+        'border-dark': '#374151',
       },
       fontFamily: {
+        // Your original fonts
         sans: ['Poppins', 'sans-serif'],
         heading: ['Montserrat', 'sans-serif'],
-        serif: ['Playfair Display', 'serif']
+        serif: ['Playfair Display', 'serif'],
+        // Fonts from components
+        display: ['Epilogue', 'Manrope', 'sans-serif'], // Combined Epilogue (admin-products) and Manrope (ventas)
       },
       spacing: {
+        // Your original spacing
         '72': '18rem',
         '84': '21rem',
         '96': '24rem',
       },
       borderRadius: {
+        // Your original borderRadius
         'xl': '1rem',
         '2xl': '1.5rem',
         '3xl': '2rem',
+        // Component borderRadius (merged, using smallest values to avoid conflicts)
+        'DEFAULT': '0.25rem',
+        'lg': '0.5rem',
       },
       boxShadow: {
+        // Your original boxShadow
         'soft': '0 2px 15px rgba(0, 0, 0, 0.05)',
         'medium': '0 4px 20px rgba(0, 0, 0, 0.08)',
         'hard': '0 8px 30px rgba(0, 0, 0, 0.12)',
       },
       animation: {
+        // Your original animations
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-in-out',
         'gentle-sway': 'gentleSway 6s ease-in-out infinite',
         'grow': 'grow 0.3s ease-in-out',
       },
       keyframes: {
+        // Your original keyframes
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
@@ -117,5 +146,8 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/container-queries'),
+  ],
 }

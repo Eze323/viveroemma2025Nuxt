@@ -1,5 +1,6 @@
 <template>
-  <header class="sticky top-0 bg-white/95 backdrop-blur-md shadow-sm z-50">
+  <div class="flex flex-col bg-background-light dark:bg-background-dark font-display text-content-light dark:text-content-dark">
+  <header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
 
     <div class="container-custom flex justify-between items-center py-3">
       <!-- Logo -->
@@ -46,6 +47,7 @@
       </div>
     </div>
   </header>
+  </div>
 </template>
 
 <script setup>
