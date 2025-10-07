@@ -151,12 +151,16 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
+    // const token = jwt.sign(
+    //   { userId: user.id, email: user.email, role: user.role },
+    //   JWT_SECRET,
+    //   { expiresIn: '1h' }
+    // );
+    const token = jwt.sign({userId:user.id},process.env.JWT_SECRET as string,{
+      algorithm: 'HS256',
+      expiresIn: '1h',
+    })
+console.log('Generated JWT Token:', token);
     return {
       user: {
         id: user.id,
