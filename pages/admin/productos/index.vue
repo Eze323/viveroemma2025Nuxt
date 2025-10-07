@@ -63,57 +63,78 @@
     <div v-else-if="!filteredProducts.length" class="text-center py-4">
       <p class="text-sm text-gray-600">No se encontraron productos.</p>
     </div>
-    <div v-else class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <div v-for="product in filteredProducts" :key="product.id"
-        class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
-        <div class="p-3">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-sm font-medium text-gray-900">{{ product.name }}</h3>
-            <span class="px-2 py-1 text-xs font-medium rounded-full mx-auto"
-              :class="getStockStatusClass(product.stock)">
-              {{ getStockStatusText(product.stock) }}
-            </span>
-          </div>
-          <button
-            @click="toggleDetails(product.id)"
-            class="w-full text-left text-xs text-primary flex items-center justify-between mb-2"
-            :aria-expanded="isDetailsOpen(product.id)"
-            :aria-controls="'details-' + product.id"
-          >
-            <span>Detalles</span>
-            <Icon :name="isDetailsOpen(product.id) ? 'heroicons:chevron-up' : 'heroicons:chevron-down'" class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="aspect-w-4 aspect-h-3">
-          <img
-            loading="lazy"
-            :src="product.image_url || '/placeholder.png'"
-            :alt="product.name"
-            class="w-full h-32 object-cover transition-transform duration-300 hover:scale-105"
-            @error="product.image_url = placeHolderImg"
-          />
-        </div>
-        <div v-show="isDetailsOpen(product.id)" class="p-3 bg-gray-50 transition-all duration-300 ease-in-out" :id="'details-' + product.id">
-          <p class="text-xs text-gray-500 capitalize">{{ product.category }}</p>
-          <p class="text-xs" :class="product.publicado ? 'text-success' : 'text-gray-500'">
-            {{ product.publicado ? 'Publicado' : 'No publicado' }}
-          </p>
-          <p class="text-xs text-gray-500">Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}</p>
-          <div class="flex flex-col gap-1 mt-2">
-            <div class="text-sm font-bold text-primary">${{ product.precio_compra }}</div>
-            <div class="text-sm font-bold text-primary">${{ product.precio_venta }}</div>
-          </div>
-        </div>
-        <div class="p-3 flex flex-col gap-2">
-          <button @click="openEditModal(product)" class="btn btn-outline text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Editar producto">
-            <Icon name="heroicons:pencil-square" class="w-4 h-4" />
-          </button>
-          <button @click="deleteProduct(product.id)" class="btn btn-outline text-error hover:bg-error/10 text-xs px-2 py-1 min-w-[44px] min-h-[44px]" aria-label="Eliminar producto">
-            <Icon name="heroicons:trash" class="w-4 h-4" />
-          </button>
-        </div>
+    <div v-else class="space-y-4">
+  <div
+    v-for="product in filteredProducts"
+    :key="product.id"
+    class="flex items-center gap-4 rounded-lg bg-white dark:bg-black/20 p-3 shadow-sm transition-all hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer"
+    @click="toggleDetails(product.id)"
+  >
+    <!-- Image with Status Indicator -->
+    <div class="relative h-16 w-16 shrink-0">
+  <img
+    loading="lazy"
+    :src="product.image_url || '/placeholder.png'"
+    :alt="product.name"
+    class="h-full w-full rounded-lg object-cover"
+    @error="product.image_url = placeHolderImg"
+  />
+<div
+  class="absolute -right-2 -top-2 h-4 w-4 rounded-full border-2 border-white dark:border-background-dark"
+  :style="{ backgroundColor: product.stock === 0 ? '#ef4444' : product.stock < 10 ? '#f59e0b' : '#10b981' }"
+  :title="getStockStatusText(product.stock)"
+></div>
+</div>
+
+    <!-- Product Details -->
+    <div class="flex-1">
+      <p class="font-semibold text-text-primary-light dark:text-text-primary-dark">{{ product.name }}</p>
+      <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">${{ product.precio_venta }}</p>
+    </div>
+
+    <!-- Chevron Icon -->
+    <span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">chevron_right</span>
+
+    <!-- Details Section (Collapsible) -->
+    <div
+      v-show="isDetailsOpen(product.id)"
+      class="p-3 bg-gray-50 dark:bg-gray-900 transition-all duration-300 ease-in-out w-full"
+      :id="'details-' + product.id"
+    >
+      <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark capitalize">{{ product.category }}</p>
+      <p
+        class="text-xs"
+        :class="product.publicado ? 'text-success' : 'text-text-secondary-light dark:text-text-secondary-dark'"
+      >
+        {{ product.publicado ? 'Publicado' : 'No publicado' }}
+      </p>
+      <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+        Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}
+      </p>
+      <div class="flex flex-col gap-1 mt-2">
+        <div class="text-sm font-bold text-primary">${{ product.precio_compra }}</div>
       </div>
     </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-2">
+      <button
+        @click.stop="openEditModal(product)"
+        class="btn btn-outline text-xs px-2 py-1 min-w-[44px] min-h-[44px]"
+        aria-label="Editar producto"
+      >
+        <span class="material-symbols-outlined">edit</span>
+      </button>
+      <button
+        @click.stop="deleteProduct(product.id)"
+        class="btn btn-outline text-error hover:bg-error/10 text-xs px-2 py-1 min-w-[44px] min-h-[44px]"
+        aria-label="Eliminar producto"
+      >
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- Modal de Creación -->
     <Modal :open="isCreateModalOpen" @close="closeCreateModal" class="sm:max-w-full sm:h-full">
@@ -260,21 +281,8 @@ definePageMeta({
   // middleware: ['auth'],
 });
 
-interface Product {
-  id: number;
-  name: string;
-  category: 'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta';
-  description: string | null;
-  precio_compra: number;
-  precio_venta: number;
-  stock: number;
-  image_url: string | null;
-  pot_size: string | null;
-  publicado: boolean;
-  sku: string | null;
-  created_at: string;
-  updated_at: string;
-}
+// Use the Product type from the shared types file for consistency
+import type { Product } from '~/types/product';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -372,7 +380,7 @@ const filteredProducts = computed(() => {
     })
     .sort((a, b) => {
       if (filters.sort === 'name') return a.name.localeCompare(b.name);
-      if (filters.sort === 'precio_venta') return a.precio_venta - b.precio_venta;
+      if (filters.sort === 'precio_venta') return Number(a.precio_venta) - Number(b.precio_venta);
       if (filters.sort === 'stock') return a.stock - b.stock;
       return 0;
     });
@@ -461,7 +469,10 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
     showNotification(error.value ?? '', 'error');
     return false;
   }
-  if (!product.category || !categories.includes(product.category)) {
+  if (
+    !product.category ||
+    !categories.includes(product.category as typeof categories[number])
+  ) {
     error.value = 'Seleccione una categoría válida.';
     showNotification(error.value ?? '', 'error');
     return false;
@@ -518,7 +529,7 @@ const createProduct = async () => {
       image_url: newProduct.image_url || '/placeholder.png',
     };
     const response = await api.createProduct(productData);
-    allProducts.value.push(response.data.product);
+    allProducts.value.push(response.data);
     closeCreateModal();
     showNotification('Producto creado exitosamente!');
     loadProducts();
@@ -549,7 +560,7 @@ const updateProduct = async () => {
       image_url: editingProduct.image_url || '/placeholder.png',
     };
     const response = await api.updateProduct(editingProduct.id!, productData);
-    const updatedProduct = response.data.product;
+    const updatedProduct = response.data;
     const index = allProducts.value.findIndex((p) => p.id === editingProduct.id);
     if (index !== -1) {
       allProducts.value[index] = updatedProduct;
@@ -600,6 +611,8 @@ const getStockStatusText = (stock: number) => {
 };
 
 onMounted(loadProducts);
+
+
 </script>
 
 <style scoped>

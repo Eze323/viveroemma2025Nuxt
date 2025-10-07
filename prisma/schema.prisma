@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = "./src/generated/prisma"
 }
 
 datasource db {
@@ -29,11 +30,12 @@ model customers {
   is_regular Boolean   @default(false)
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
+  sales      sales[]
 }
 
 model embazado_records {
   id         Int       @id @default(autoincrement())
-  user_id    BigInt    @db.UnsignedBigInt
+  user_id    Int
   product_id Int
   quantity   Int
   created_at DateTime? @db.Timestamp(0)
@@ -80,7 +82,7 @@ model job_batches {
 }
 
 model jobs {
-  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  id           Int    @id @default(autoincrement())
   queue        String @db.VarChar(255)
   payload      String @db.LongText
   attempts     Int    @db.UnsignedTinyInt
@@ -104,9 +106,9 @@ model password_reset_tokens {
 }
 
 model personal_access_tokens {
-  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  id             Int       @id @default(autoincrement())
   tokenable_type String    @db.VarChar(255)
-  tokenable_id   BigInt    @db.UnsignedBigInt
+  tokenable_id   Int
   name           String    @db.VarChar(255)
   token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
   abilities      String?   @db.Text
@@ -130,19 +132,19 @@ model plant_pot_prices {
 }
 
 model products {
-  id            Int         @id @default(autoincrement())
-  name          String      @db.VarChar(255)
-  category      String      @db.VarChar(255)
-  description   String?     @db.Text
-  image_url     String?     @db.VarChar(255)
-  precio_venta  Decimal     @db.Decimal(10, 2)
-  stock         Int         @default(0)
-  pot_size      String?     @db.VarChar(255)
-  created_at    DateTime?   @db.Timestamp(0)
-  updated_at    DateTime?   @db.Timestamp(0)
-  precio_compra Decimal     @default(0.00) @db.Decimal(10, 2)
-  publicado     Boolean     @default(true)
-  sku           String?     @unique(map: "products_sku_unique") @db.VarChar(50)
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  category      String       @db.VarChar(255)
+  description   String?      @db.Text
+  image_url     String?      @db.VarChar(255)
+  precio_venta  Decimal      @db.Decimal(10, 2)
+  stock         Int          @default(0)
+  pot_size      String?      @db.VarChar(255)
+  created_at    DateTime?    @db.Timestamp(0)
+  updated_at    DateTime?    @db.Timestamp(0)
+  precio_compra Decimal      @default(0.00) @db.Decimal(10, 2)
+  publicado     Boolean      @default(true)
+  sku           String?      @unique(map: "products_sku_unique") @db.VarChar(50)
   sale_items    sale_items[]
 }
 
@@ -172,22 +174,6 @@ model rewards {
   @@index([customer_id], map: "rewards_customer_id_foreign")
 }
 
-model sale_items {
-  id         Int       @id @default(autoincrement())
-  sale_id    Int
-  product_id Int
-  quantity   Int
-  unit_price Decimal   @db.Decimal(10, 2)
-  subtotal   Decimal   @db.Decimal(10, 2)
-  created_at DateTime? @db.Timestamp(0)
-  updated_at DateTime? @db.Timestamp(0)
-  sale       sales     @relation(fields: [sale_id], references: [id], onDelete: Cascade)
-  product    products  @relation(fields: [product_id], references: [id], onDelete: Restrict)
-
-  @@index([sale_id], map: "sale_items_sale_id_foreign")
-  @@index([product_id], map: "sale_items_product_id_foreign")
-}
-
 model sales {
   id          Int         @id @default(autoincrement())
   user_id     Int
@@ -201,12 +187,27 @@ model sales {
   total_price Decimal     @default(0.00) @db.Decimal(10, 2)
   created_at  DateTime?   @db.Timestamp(0)
   updated_at  DateTime?   @db.Timestamp(0)
-  sale_items  sale_items[]
-
+  sale_items  sale_items[] // Relación uno-a-muchos con sale_items
+  user        users       @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  customer_ref customers?  @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   @@index([customer_id], map: "sales_customer_id_foreign")
   @@index([user_id], map: "sales_user_id_foreign")
 }
 
+model sale_items {
+  id         Int       @id @default(autoincrement())
+  sale_id    Int
+  product_id Int
+  quantity   Int
+  unit_price Decimal   @db.Decimal(10, 2)
+  subtotal   Decimal   @db.Decimal(10, 2)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  sale       sales     @relation(fields: [sale_id], references: [id], onDelete: Cascade)
+  product    products  @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  @@index([sale_id], map: "sale_items_sale_id_foreign")
+  @@index([product_id], map: "sale_items_product_id_foreign")
+}
 model sessions {
   id            String  @id @db.VarChar(255)
   user_id       Int?
@@ -254,4 +255,5 @@ model users {
   remember_token    String?   @db.VarChar(100)
   created_at        DateTime? @db.Timestamp(0)
   updated_at        DateTime? @db.Timestamp(0)
+  sales             sales[]
 }
