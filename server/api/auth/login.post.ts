@@ -114,6 +114,8 @@ export default defineEventHandler(async (event: H3Event) => {
     const body = await readBody<LoginBody>(event);
     const { email, password } = body;
 
+    console.log('Login attempt with email:', email);
+
     // Validate input
     if (!email || !password) {
       throw createError({
@@ -133,6 +135,7 @@ export default defineEventHandler(async (event: H3Event) => {
         role: true,
       },
     });
+console.log('User found:', user);
 
     if (!user) {
       throw createError({
@@ -140,6 +143,7 @@ export default defineEventHandler(async (event: H3Event) => {
         statusMessage: 'Credenciales inválidas',
       });
     }
+console.log('Verifying password for user:', user);
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -149,7 +153,7 @@ export default defineEventHandler(async (event: H3Event) => {
         statusMessage: 'Credenciales inválidas',
       });
     }
-
+console.log('Password is valid for user:', user);
     // Generate JWT token
     // const token = jwt.sign(
     //   { userId: user.id, email: user.email, role: user.role },
@@ -160,6 +164,7 @@ export default defineEventHandler(async (event: H3Event) => {
       algorithm: 'HS256',
       expiresIn: '1h',
     })
+    
 console.log('Generated JWT Token:', token);
     return {
       user: {
