@@ -1,27 +1,27 @@
 // server/api/products/index.get.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../prisma/src/generated/prisma'; 
 import { createError, defineEventHandler, H3Event } from 'h3';
 import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
-// if (!process.env.JWT_SECRET) {
-//   throw new Error('JWT_SECRET no está definido en las variables de entorno');
-// }
-// const JWT_SECRET = process.env.JWT_SECRET;
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET no está definido en las variables de entorno');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
     // Validar token JWT
-    // const authHeader = event.node.req.headers.authorization;
-    // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    //   throw createError({
-    //     statusCode: 401,
-    //     statusMessage: 'Token de autenticación faltante o inválido',
-    //   });
-    // }
-    // const token = authHeader.split(' ')[1];
-    // jwt.verify(token, JWT_SECRET);
+    const authHeader = event.node.req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Token de autenticación faltante o inválido',
+      });
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, JWT_SECRET);
 
     // Obtener productos publicados
     const productRecords = await prisma.products.findMany({
