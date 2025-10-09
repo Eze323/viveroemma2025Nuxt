@@ -1,14 +1,9 @@
 // server/api/auth/user.get.ts
-
-
+import { db } from '~/server/utils/drizzle';
+import { users } from '~/src/db/schema';
 import { eq } from 'drizzle-orm';
-
-
-import { PrismaClient } from '@prisma/client';
-import { createError, defineEventHandler, H3Event } from 'h3';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import { H3Event } from 'h3';
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET no está definido');
@@ -28,15 +23,16 @@ export default defineEventHandler(async (event: H3Event) => {
     const token = authHeader.replace('Bearer ', '');
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
 
-    const user = await prisma.users.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
-    });
+    const [user] = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.id, decoded.userId))
+      .limit(1);
 
     if (!user) {
       throw createError({
