@@ -1,6 +1,5 @@
 // server/api/products/index.get.ts
-import { PrismaClient } from './prisma/src/generated/prisma'; 
-console.log(PrismaClient);
+import { PrismaClient } from '@prisma/client';
 import { createError, defineEventHandler, H3Event } from 'h3';
 import jwt from 'jsonwebtoken';
 
