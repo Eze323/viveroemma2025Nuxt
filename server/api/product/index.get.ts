@@ -1,24 +1,9 @@
-// server/api/products/index.get.ts
-import { PrismaClient } from '@prisma/client';
-import { createError, defineEventHandler } from 'h3';
-
-const prisma = new PrismaClient();
+import { defineEventHandler } from 'h3';
 
 export default defineEventHandler(async () => {
-  try {
-    const productRecords = await prisma.products.findMany();
-    return {
-      success: true,
-      data: productRecords,
-    };
-  } catch (error) {
-    console.error('Error en GET /api/products:', error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Error en el servidor',
-      data: { error: error instanceof Error ? error.message : String(error) },
-    });
-  } finally {
-    await prisma.$disconnect();
-  }
+  console.log('Returning static response');
+  return {
+    success: true,
+    data: [{ id: 1, name: 'Test Product', precio_venta: 10.99, stock: 100 }],
+  };
 });
