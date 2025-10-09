@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async () => {
   try {
     console.log('Attempting to connect to database...');
+    //comprobar que conecto a la base de datos
+    await prisma.$connect();
+    console.log('Connected to database.'+prisma.products);
     const productRecords = await prisma.products.findMany({
       where: {
         publicado: true,
