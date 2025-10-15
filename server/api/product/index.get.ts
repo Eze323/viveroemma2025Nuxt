@@ -1,9 +1,11 @@
 // server/api/products/index.get.ts
-import { PrismaClient } from '@prisma/client';
-import { createError, defineEventHandler, H3Event } from 'h3';
+import { defineEventHandler, createError, H3Event } from 'h3';
+import { db } from '~/server/utils/drizzle';
+import { products } from '~/src/db/schema';
+import { eq } from 'drizzle-orm';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET no está definido en las variables de entorno');
@@ -24,29 +26,27 @@ export default defineEventHandler(async (event: H3Event) => {
     jwt.verify(token, JWT_SECRET);
 
     // Obtener productos publicados
-    const productRecords = await prisma.products.findMany({
-      // where: {
-      //   publicado: true,
-      // },
-      select: {
-        id: true,
-        name: true,
-        precio_venta: true,
-        stock: true,
-      },
-    });
+    const productRecords = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        precio_venta: products.precio_venta,
+        stock: products.stock,
+      })
+      .from(products);
+      // .where(eq(products.publicado, true)); // Descomenta si tienes el campo publicado
 
     // Mapear los datos al formato esperado por el frontend
-    const products = productRecords.map(product => ({
+    const mappedProducts = productRecords.map(product => ({
       id: product.id,
       name: product.name,
-      unit_price: Number(product.precio_venta), // Convertir Decimal a número
+      unit_price: Number(product.precio_venta),
       stock: product.stock,
     }));
 
     return {
       success: true,
-      data: products,
+      data: mappedProducts,
     };
   } catch (error) {
     console.error('Error en GET /api/products:', error);
@@ -55,7 +55,5 @@ export default defineEventHandler(async (event: H3Event) => {
       statusCode: err.statusCode || 500,
       statusMessage: err.statusMessage || 'Error en el servidor',
     });
-  } finally {
-    await prisma.$disconnect();
   }
 });
