@@ -65,7 +65,9 @@ openApiDocs: {
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }, // 32x32
         { rel: 'manifest', href: '/site.webmanifest' } // Manifiesto web
       ]
-    }
+    },
+    // pageTransition: { name: 'layout', mode: 'out-in' },
+    // layoutTransition: { name: 'layout', mode: 'out-in' }
   },
 
   // Tailwind CSS configuration
@@ -98,7 +100,20 @@ openApiDocs: {
       dbUsername: process.env.DB_USERNAME, 
       dbPassword: process.env.DB_PASSWORD, 
       dbBaseURL: process.env.DATABASE_URL
-    }
+    },
+    private:{
+      content: {
+        database: {
+          type: 'sqlite',
+          filename: process.env.DATABASE_FILENAME || 'vivero_emma.sqlite',
+        },
+        watch: {
+          port: Number(process.env.WATCH_PORT) || 4000,
+          showURL: process.env.WATCH_SHOW_URL === 'true',
+        },
+      },
+    },
+    
   },
 
 
