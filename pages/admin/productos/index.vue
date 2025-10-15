@@ -80,10 +80,10 @@
     @error="product.image_url = placeHolderImg"
   />
 <div
-  class="absolute -right-2 -top-2 h-4 w-4 rounded-full border-2 border-white dark:border-background-dark"
+  class="absolute -right-2 -top-2 h-7 w-7 text-center rounded-full border-2 border-white dark:border-background-dark"
   :style="{ backgroundColor: product.stock === 0 ? '#ef4444' : product.stock < 10 ? '#f59e0b' : '#10b981' }"
   :title="getStockStatusText(product.stock)"
-></div>
+>{{ product.stock }}</div>
 </div>
 
     <!-- Product Details -->
@@ -107,6 +107,9 @@
         :class="product.publicado ? 'text-success' : 'text-text-secondary-light dark:text-text-secondary-dark'"
       >
         {{ product.publicado ? 'Publicado' : 'No publicado' }}
+      </p>
+      <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+        Stock: {{ product.stock ? product.stock : 'N/A' }}
       </p>
       <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
         Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}
@@ -392,7 +395,10 @@ const loadProducts = async () => {
   try {
     const response = await api.getProducts();
     if (response && response.success && Array.isArray(response.data)) {
-      allProducts.value = response.data;
+      allProducts.value = response.data.map((p: any) => ({
+        ...p,
+        description: p.description === null ? undefined : p.description,
+      }));
     } else {
       allProducts.value = [];
       error.value = response.error || 'No se pudieron cargar los productos.';
@@ -518,7 +524,7 @@ const createProduct = async () => {
   try {
     const productData = {
       name: newProduct.name,
-      category: newProduct.category,
+      category: newProduct.category ?? undefined,
       description: newProduct.description || null,
       precio_venta: Number(newProduct.precio_venta),
       precio_compra: Number(newProduct.precio_compra || '0'),

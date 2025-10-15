@@ -4,10 +4,10 @@ import type { Decimal } from "@prisma/client/runtime/library";
 export interface Product {
   id: number;
   name: string;
-  category: string | null; //'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta' | null; 
-  description?: string | null; // Descripción opcional
-  precio_venta: number | Decimal; // Precio de costo (string por Drizzle)
-  precio_compra: number | Decimal; // Precio de venta (número por Drizzle)
+  category: string | null; 
+  description?: string; // Descripción opcional
+  precio_venta: number; // Precio de costo (string por Drizzle)
+  precio_compra: number; // Precio de venta (número por Drizzle)
   publicado: boolean; // Indica si el producto está publicado
   sku: string | null; // SKU del producto
   stock: number;
@@ -18,10 +18,10 @@ export interface Product {
 export interface FormattedProduct {
   id: number;
   name: string;
-  category: string | null; //'planta' | 'arbusto' | 'plantin' | 'otro' | 'semilla' | 'herramienta' | null; 
-  description?: string | null; // Descripción del producto
-  precio_compra: string | Decimal; // Precio de costo
-  precio_venta: string | Decimal; // Precio de venta
+  category: string | null; 
+  description: string; // Descripción del producto
+  precio_compra: string; // Precio de costo
+  precio_venta: string; // Precio de venta
   publicado: boolean; // Indica si el producto está publicado
   sku: string | null; // SKU del producto
   cost_price: number; // Precio de costo

@@ -2,20 +2,29 @@
   <div class="relative flex h-auto min-h-screen w-full flex-col justify-between overflow-x-hidden bg-background-light dark:bg-background-dark font-display">
     <div class="flex-grow pb-28">
       <!-- Header -->
-      <!-- <header class="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-background-light/80 p-4 pb-3 backdrop-blur-sm dark:border-border-dark dark:bg-background-dark/80">
-        <NuxtLink to="/admin" class="flex h-10 w-10 items-center justify-center rounded-full text-foreground-light dark:text-foreground-dark">
-          <span class="material-symbols-outlined">arrow_back</span>
-        </NuxtLink>
-        <h1 class="text-lg font-bold text-foreground-light dark:text-foreground-dark">Ventas del día</h1>
-        <div class="w-10"></div>
-      </header> -->
+       <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Ventas</h1>
+        <p class="text-gray-600">Administra las ventas del vivero</p>
+      </div>
+       <button 
+  @click="openSaleModal('create')"  title="Crear nueva venta"
+  class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0 relative group"
+  
+>
+  <Icon name="heroicons:plus" class="w-5 h-5" />
+  <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2">
+    Crear nueva venta
+  </span>
+</button>
+    </div>
  <!-- Button to open modal -->
-    <button
+    <!-- <button
       @click="openSaleModal('create')"
       class="px-4 py-2 rounded-lg bg-primary text-white"
     >
       Crear Nueva Venta
-    </button>
+    </button> -->
 
      <!-- Modal -->
     <SaleModal
@@ -50,7 +59,7 @@
         <section>
           <h2 class="mb-4 text-xl font-bold text-foreground-light dark:text-foreground-dark">Historial de Ventas</h2>
           <div class="space-y-2">
-            <div v-for="sale in sales" :key="sale.client" class="flex items-center justify-between rounded-lg bg-card-light p-4 dark:bg-card-dark rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+            <div v-for="sale in sales" :key="sale.client" class="flex items-center bg-white justify-between rounded-lg bg-card-light p-4 dark:bg-card-dark rounded-xl shadow-sm transition-all hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer">
               <div>
                 <p class="font-semibold text-foreground-light dark:text-foreground-dark">Cliente: {{ sale.client }}</p>
                 <p class="text-sm text-foreground-light/70 dark:text-foreground-dark/70">{{ sale.time }}</p>
@@ -69,7 +78,7 @@
           v-for="navItem in navItems"
           :key="navItem.title"
           :to="navItem.href"
-          class="flex flex-1 flex-col items-center justify-center gap-1 py-1"
+          class="flex flex-1 flex-col items-center  justify-center gap-1 py-1"
           :class="navItem.active ? 'rounded-full bg-primary/10 text-primary dark:bg-primary/20' : 'text-foreground-light/70 dark:text-foreground-dark/70'"
         >
           <span
@@ -152,6 +161,52 @@ const formatCurrency = (amount) => {
 </script>
 
 <style scoped>
+/* Ajustar .btn para no interferir con botones circulares */
+.btn {
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Definir padding y border-radius solo si no se sobrescribe */
+.btn:not(.rounded-full) {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btn-outline:hover {
+  background-color: #f9fafb;
+  transform: translateY(-1px);
+}
+
+.btn:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.text-success { color: #10b981; }
+.bg-success\/10 { background-color: rgba(16, 185, 129, 0.1); }
+.text-warning { color: #f59e0b; }
+.bg-warning\/10 { background-color: rgba(245, 158, 11, 0.1); }
+.text-error { color: #ef4444; }
+.bg-error\/10 { background-color: rgba(239, 68, 68, 0.1); }
+.text-primary { color: #3b82f6; }
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
@@ -159,6 +214,7 @@ const formatCurrency = (amount) => {
 body {
   min-height: max(884px, 100dvh);
 }
+
 </style>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
