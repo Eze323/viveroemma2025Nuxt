@@ -16,6 +16,7 @@ interface AuthState {
 }
 
 export const useAuthStore = defineStore('auth', {
+  
   state: (): AuthState => ({
     user: null,
     token: null,

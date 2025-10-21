@@ -62,18 +62,19 @@ export const useApiService = () => {
   }
 
   return {
-    // Sales endpoints
-    getSales: () => request<any[]>('/sales'),
-    getSale: (id: number) => request<any>(`/sales/${id}`),
-    createSale: (data: any) => request<any>('/sales', { method: 'POST', body: data }),
-    updateSale: (id: number, data: any) => request<any>(`/sales/${id}`, { method: 'PUT', body: data }),
-    deleteSale: (id: number) => request<any>(`/sales/${id}`, { method: 'DELETE' }),
-
-    // Products endpoints (sin normalización extra)
-    getProducts: () => request<Product[]>('/product'),
-    getProduct: (id: number) => request<Product>(`/product/${id}`),
-    createProduct: (data: Partial<Product>) => request<Product>('/product', { method: 'POST', body: data }),
-    updateProduct: (id: number, data: Partial<Product>) => request<Product>(`/product/${id}`, { method: 'PUT', body: data }),
-    deleteProduct: (id: number) => request<any>(`/product/${id}`, { method: 'DELETE' }),
-  }
-}
+    //sales
+    getSales: () => request<ApiResponse<any[]>>('/sales'),
+    getSale: (id: number) => request<ApiResponse<any>>(`/sales/${id}`),
+    createSale: (data: any) => request<ApiResponse<{ message: string; sale: any }>>('/sales', { method: 'POST', body: data }),
+    updateSale: (id: number, data: any) => request<ApiResponse<{ message: string; sale: any }>>(`/sales/${id}`, { method: 'PUT', body: data }),
+    deleteSale: (id: number) => request<ApiResponse<{ message: string }>>(`/sales/${id}`, { method: 'DELETE' }),
+    
+    //products
+    getProducts: () => request<ApiResponse<Product[]>>('/products'), // Corregido de /product a /products
+    getProduct: (id: number) => request<ApiResponse<Product>>(`/product/${id}`),
+    createProduct: (data: Partial<Product>) => request<ApiResponse<{ message: string; product: Product }>>('/product', { method: 'POST', body: data }),
+    updateProduct: (id: number, data: Partial<Product>) =>
+      request<ApiResponse<{ message: string; product: Product }>>(`/product/${id}`, { method: 'PUT', body: data }),
+    deleteProduct: (id: number) => request<ApiResponse<{ message: string }>>(`/product/${id}`, { method: 'DELETE' }),
+  };
+};

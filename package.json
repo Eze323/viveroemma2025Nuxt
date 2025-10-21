@@ -23,6 +23,7 @@
     "@vueuse/nuxt": "^10.9.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
+    "caniuse-lite": "^1.0.30001751",
     "chart.js": "^4.4.2",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",
