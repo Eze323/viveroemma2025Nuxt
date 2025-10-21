@@ -140,7 +140,7 @@ export const useApiService = () => {
     deleteSale: (id: number) => request<ApiResponse<{ message: string }>>(`/sales/${id}`, { method: 'DELETE' }),
     
     //products
-    getProducts: () => request<ApiResponse<Product[]>>('/product'), // Corregido de /product a /products
+    getProducts: () => request<ApiResponse<Product[]>>('/products'), // Corregido de /product a /products
     getProduct: (id: number) => request<ApiResponse<Product>>(`/product/${id}`),
     createProduct: (data: Partial<Product>) => request<ApiResponse<{ message: string; product: Product }>>('/product', { method: 'POST', body: data }),
     updateProduct: (id: number, data: Partial<Product>) =>
