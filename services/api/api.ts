@@ -71,10 +71,10 @@ export const useApiService = () => {
     
     //products
     getProducts: () => request<ApiResponse<Product[]>>('/products'), // Corregido de /product a /products
-    getProduct: (id: number) => request<ApiResponse<Product>>(`/product/${id}`),
-    createProduct: (data: Partial<Product>) => request<ApiResponse<{ message: string; product: Product }>>('/product', { method: 'POST', body: data }),
+    getProduct: (id: number) => request<ApiResponse<Product>>(`/products/${id}`),
+    createProduct: (data: Partial<Product>) => request<ApiResponse<{ message: string; product: Product }>>('/products', { method: 'POST', body: data }),
     updateProduct: (id: number, data: Partial<Product>) =>
-      request<ApiResponse<{ message: string; product: Product }>>(`/product/${id}`, { method: 'PUT', body: data }),
-    deleteProduct: (id: number) => request<ApiResponse<{ message: string }>>(`/product/${id}`, { method: 'DELETE' }),
+      request<ApiResponse<{ message: string; product: Product }>>(`/products/${id}`, { method: 'PUT', body: data }),
+    deleteProduct: (id: number) => request<ApiResponse<{ message: string }>>(`/products/${id}`, { method: 'DELETE' }),
   };
 };
