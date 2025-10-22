@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
     const bodySchema = z.object({
       name: z.string().max(255),
-      category: z.enum(['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta']),
+      category: z.string().max(50),
       description: z.string().max(500).optional(),
       precio_venta: z.number().min(1),
       precio_compra: z.number().min(1).optional(), // Si necesitas precio_compra, descomentar esta línea

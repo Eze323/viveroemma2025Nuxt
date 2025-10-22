@@ -152,7 +152,7 @@
             <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
             <select v-model="newProduct.category" class="input w-full text-sm py-1 px-2" required>
               <option value="" disabled>Seleccione una categoría</option>
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
           <div>
@@ -175,7 +175,7 @@
             <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
             <select v-model="newProduct.pot_size" class="input w-full text-sm py-1 px-2">
               <option value="">Sin especificar</option>
-              <option v-for="size in potSizes" :key="size" :value="size">{{ capitalize(size) }}</option>
+              <option v-for="size in potSizes" :key="size" :value="size">{{ size }}</option>
             </select>
           </div>
           <div>
@@ -204,7 +204,7 @@
             <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
             <select v-model="editingProduct.category" class="input w-full text-sm py-1 px-2" required>
               <option value="" disabled>Seleccione una categoría</option>
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
           <div>
@@ -228,7 +228,7 @@
             <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
             <select v-model="editingProduct.pot_size" class="input w-full text-sm py-1 px-2">
               <option value="">Sin especificar</option>
-              <option v-for="size in potSizes" :key="size" :value="size">{{ capitalize(size) }}</option>
+              <option v-for="size in potSizes" :key="size" :value="size">{{size }}</option>
             </select>
           </div>
           <div>
