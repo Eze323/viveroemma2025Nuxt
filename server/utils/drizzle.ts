@@ -28,6 +28,8 @@ export const tables = schema;
 export type Product = typeof schema.products.$inferSelect;
 export type PlantPotPrice = typeof schema.plantPotPrices.$inferSelect;
 export type User = typeof schema.users.$inferSelect;
+export type Sale = typeof schema.sales.$inferSelect;
+export type SaleItem = typeof schema.sale_items.$inferSelect;
 // Composable para endpoints
 export function useDrizzle() {
   return db;
