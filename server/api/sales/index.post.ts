@@ -15,7 +15,8 @@ interface SaleItem {
 interface SaleBody {
   customerId?: number;
   customer: string;
-  email?: string;
+  email?: string;  // Opcional, para unique check
+  address?: string;  // Opcional, guarda en customers si existe
   items: SaleItem[];
   subtotal?: number;
   iva?: number;
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody<SaleBody>(event);
     console.log('Body recibido en /api/sales:', body);  // DEBUG: Ve qué llega
 
-    const { customerId, customer, email, items, subtotal, iva, total } = body;
+    const { customerId: providedCustomerId, customer, email, address, items, subtotal, iva, total } = body;
 
     // Validar entrada
    if (!customer || !items || items.length === 0) {
@@ -69,20 +70,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Validar cliente (si se proporciona customerId)
-    if (customerId) {
-      const [customerExists] = await db
-        .select({ id: customers.id })
-        .from(customers)
-        .where(eq(customers.id, customerId))
-        .limit(1);
-      if (!customerExists) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: 'Cliente no encontrado',
-        });
-      }
-    }
+   
 
     // Validar productos y calcular total_price (usa total del body si viene, o calcula)
     let totalPrice = total || 0;
@@ -109,23 +97,53 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Crear la venta en una transacción
+     // Crear la venta en una transacción
     const newSale = await db.transaction(async (tx) => {
-      // Crear la venta
+      let finalCustomerId: number | null = providedCustomerId || null;
+      // NUEVA LÓGICA: Auto-crear o buscar cliente
+      if (!finalCustomerId) {
+        // Busca por nombre (o email si lo tenés) – unique check
+        const [existingCustomer] = await tx
+          .select({ id: customers.id })
+          .from(customers)
+          .where(eq(customers.name, customer))  // Ajustado: usa 'name' como columna del cliente
+          .limit(1);
+          if (existingCustomer) {
+          finalCustomerId = existingCustomer.id;
+          console.log('Cliente existente encontrado, ID:', finalCustomerId);
+        } else {
+          // Crea nuevo cliente
+          const [newCustomer] = await tx
+            .insert(customers)
+            .values({
+              name: customer,  // Nombre
+              address: address || null,
+              email: email || null,
+              // Agrega otros defaults: phone, created_at, etc. si schema lo requiere
+            })
+            .$returningId();
+
+          finalCustomerId = newCustomer.id;
+          console.log('Nuevo cliente creado, ID:', finalCustomerId);
+        }
+      }
+
+      // Ahora inserta la venta con el customerId
       const [sale] = await tx
         .insert(sales)
         .values({
-          userId: decoded.userId,  // ¡FIX! Usa decoded.userId (1), no customerId
-          customerId: customerId || null,  // Agrega customerId explícito si no tiene default
-          customer,
+          userId: decoded.userId,
+          customerId: finalCustomerId,  // Usa el ID resuelto
+          customer,  // String fallback por si querés redundancia
           email: email || null,
           seller: decoded.email,
           date: new Date(),
           time: new Date(),
           status: 'Pendiente',
           totalPrice,
-          subtotal: subtotal || 0,  // Guarda subtotal si viene
-          iva: iva || 0,  // Guarda IVA si viene
+          subtotal: subtotal || 0,
+          iva: iva || 0,
+          createdAt: new Date(),
         })
         .$returningId();  // ¡FIX! Usa .returning() para MySQL/Drizzle – no .$returningId()
 
@@ -153,6 +171,7 @@ export default defineEventHandler(async (event) => {
       data: {
         id: newSale.id,
         customer,
+        customerId: newSale.customerId,  // Incluye el ID para frontend
         subtotal: subtotal || 0,
         iva: iva || 0,
         total: totalPrice,

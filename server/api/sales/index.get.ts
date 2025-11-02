@@ -91,18 +91,18 @@ export default defineEventHandler(async (event) => {
     // Paso 1: Fetch ventas básicas (sin joins a customer/user)
     const baseSales = await db
       .select({
-        id: sales.id,
-        customer: sales.customer,
-        clientName: customers.name,
-        email: sales.email,
-        seller: sales.seller,
-        time: sql`DATE_FORMAT(${sales.createdAt}, '%H:%i %p')`.as('time'),  // Formato AM/PM desde DateTime
-        date: sql`DATE(${sales.date})`.as('date'),
-        amount: sales.totalPrice,
+      id: sales.id,
+      customer: sales.customerId,
+      clientName: sales.customer,
+      email: sales.email,
+      seller: sales.seller,
+      time: sql`DATE_FORMAT(${sales.date}, '%H:%i %p')`.as('time'),
+      date: sql`DATE(${sales.date})`.as('date'),
+      amount: sales.totalPrice,
       })
       .from(sales)
-      .innerJoin(customers, eq(sales.customerId, customers.id))
-      .orderBy(sales.date);  // Descendente: más recientes primero
+      //.innerJoin(customers, eq(sales.customerId, customers.id))
+      .orderBy(sql`${sales.date} DESC`); // Ordena por fecha más reciente primero
 
     // Paso 2: Para cada venta, fetch sus items con join a products
     const salesWithItems = await Promise.all(

@@ -40,6 +40,7 @@ export const customers = mysqlTable('customers', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).unique(),
+  address: varchar('address', { length: 500 }),
   phone: varchar('phone', { length: 20 }),
 });
 
@@ -48,6 +49,7 @@ export const sales = mysqlTable('sales', {
   id: serial('id').primaryKey().autoincrement(),
   userId: int('user_id').notNull(),
   customerId: int('customer_id').references(() => customers.id, { onDelete: 'set null' }),
+  //customer:varchar('name').references(() => customers.name), 
   customer: varchar('customer', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }),
   seller: varchar('seller', { length: 255 }).notNull(),
