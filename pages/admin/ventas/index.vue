@@ -94,10 +94,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useApiService } from '~/services/api/api';  // Ajusta path si es necesario
 import SaleModal from '~/components/admin/Ventas/SaleModal.vue';
+import { useVentasStore } from '~/stores/ventas';  // Importa el store
 
 definePageMeta({
   layout: 'admin',
@@ -113,12 +114,14 @@ const isModalOpen = ref(false);
 const modalMode = ref('create');
 const selectedSale = ref({});
 
+const store = useVentasStore();  // Instancia del store
+
 const navItems = [
   { title: 'Dashboard', icon: 'dashboard', href: '/admin', active: false },
   { title: 'Productos', icon: 'potted_plant', href: '/admin/productos', active: false },
-  { title: 'Ventas', icon: 'paid', href: '/ventas', active: true },
+  { title: 'Ventas', icon: 'paid', href: '/admin/ventas', active: true },  // ¡Acá! /admin/ventas
   { title: 'Clientes', icon: 'groups', href: '/admin/clientes', active: false },
-  { title: 'Más', icon: 'menu', href: '/admin/mas', active: false },
+  //{ title: 'Más', icon: 'menu', href: '/admin/mas', active: false },  // Si /admin/mas no existe, creá un stub o quitalo
 ];
 
 const loadSales = async () => {
@@ -162,25 +165,83 @@ const formatCurrency = (amount) => {
   }).format(amount || 0);
 };
 
-const openSaleModal = (mode, sale = {}) => {
+const openSaleModal = (mode: 'create' | 'edit', sale = {}) => {
   modalMode.value = mode;
   selectedSale.value = { ...sale };  // Clone, incluye items
+  
+  if (mode === 'create') {
+    store.limpiarItems();  // Limpia el store para nueva venta
+    selectedSale.value = { items: [], clientName: '', date: '', time: '' };  // Reset base
+  } else if (mode === 'edit') {
+    // Para edit, carga items existentes en el store (mapea a formato VentaItem)
+    store.limpiarItems();
+    if (sale.items && sale.items.length > 0) {
+      sale.items.forEach(item => {
+        store.agregarItem({
+          id: item.productId || item.id,
+          nombre: item.productName || item.nombre,
+          precioUnitario: item.precioUnitario || item.precio_unitario,
+          cantidad: item.quantity || item.cantidad
+        });
+      });
+    }
+  }
+  
   isModalOpen.value = true;
 };
 
-const handleSaleSubmit = async (saleData) => {
+const handleSaleSubmit = async (saleData: any) => {
   try {
-    if (modalMode.value === 'create') {
-      const response = await api.createSale(saleData);
-      if (response.success) {
-        await loadSales();  // Recarga
-      } else {
-        throw new Error(response.error);
+    let fullPayload = { ...saleData };  // { clientName, clientAddress }
+    
+    if (modalMode.value === 'create' || modalMode.value === 'edit') {
+      // DEBUG: Loggea el store antes del merge (quita después si querés)
+      console.log('Store items antes de merge:', store.items);
+      console.log('getPayload.value antes de spread:', store.getPayload.value);
+      
+      if (store.items.length === 0) {
+        throw new Error('No hay items en el carrito – agrega productos primero.');
       }
-    } else if (modalMode.value === 'edit') {
-      const response = await api.updateSale(selectedSale.value.id, saleData);
+      
+      // Fallback manual: Si getPayload.value es undefined o vacío, construye manual
+      let payloadFromStore = store.getPayload.value;
+      if (!payloadFromStore || !payloadFromStore.items || payloadFromStore.items.length === 0) {
+        console.warn('getPayload vacío, construyendo manual...');
+        payloadFromStore = {
+          items: store.items.map(i => ({ 
+            productId: i.id,
+            quantity: i.cantidad,
+            unitPrice: i.precioUnitario
+          })),
+          subtotal: store.subtotal,
+          iva: store.ivaTotal,
+          total: store.totalFinal
+        };
+      }
+      
+      fullPayload = {
+        customer: fullPayload.clientName,  // ¡ACÁ EL MAPEO CLAVE! clientName -> customer
+        address: fullPayload.clientAddress || null,  // Opcional, si schema lo tiene
+        ...payloadFromStore,  // Spread items, subtotal, etc.
+      };
+    }
+    
+    // DEBUG: Log final del payload (quita después)
+    console.log('Payload final enviado a /api/sales:', fullPayload);
+    
+    if (modalMode.value === 'create') {
+      const response = await api.createSale(fullPayload);
       if (response.success) {
         await loadSales();
+        store.limpiarItems();
+      } else {
+        throw new Error(response.error || 'Error en creación');
+      }
+    } else if (modalMode.value === 'edit') {
+      const response = await api.updateSale(selectedSale.value.id, fullPayload);
+      if (response.success) {
+        await loadSales();
+        store.limpiarItems();
       } else {
         throw new Error(response.error);
       }
@@ -192,7 +253,11 @@ const handleSaleSubmit = async (saleData) => {
   }
 };
 
-onMounted(loadSales);
+onMounted(() => {
+  loadSales();
+  // Opcional: Limpia store al montar si no hay modal abierta
+  if (!isModalOpen.value) store.limpiarItems();
+});
 </script>
 
 <style scoped>

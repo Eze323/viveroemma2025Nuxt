@@ -26,14 +26,14 @@
               <h3 class="text-xl font-bold text-content-light dark:text-content-dark mb-3">Cliente</h3>
               <div class="space-y-4">
                 <input
-                  v-model="saleData.clientName"
+                  v-model="clientName"
                   class="form-input w-full rounded-lg border-0 bg-surface-light dark:bg-surface-dark text-content-light dark:text-content-dark placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary h-14 p-4 text-base"
                   placeholder="Nombre del Cliente"
                   type="text"
                   :disabled="mode === 'view'"
                 />
                 <input
-                  v-model="saleData.clientAddress"
+                  v-model="clientAddress"
                   class="form-input w-full rounded-lg border-0 bg-surface-light dark:bg-surface-dark text-content-light dark:text-content-dark placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary h-14 p-4 text-base"
                   placeholder="Dirección del Cliente"
                   type="text"
@@ -45,51 +45,97 @@
             <!-- Products Section -->
             <section>
               <div class="flex justify-between items-center mb-3">
-                <h3 class="text-xl font-bold text-content-light dark:text-content-dark">Productos</h3>
+                <h3 class="text-xl font-bold text-content-light dark:text-content-dark">Productos ({{ store.items.length }})</h3>
                 <button
                   v-if="mode === 'create'"
-                  @click="openProductSelector"
+                  @click="toggleSearch"
                   class="flex items-center gap-1 text-primary font-semibold text-sm"
                 >
-                  <span class="material-symbols-outlined">add</span>
-                  Añadir
+                  <span class="material-symbols-outlined">{{ showSearch ? 'close' : 'search' }}</span>
+                  {{ showSearch ? 'Cerrar búsqueda' : 'Buscar Planta' }}
                 </button>
               </div>
+
+              <!-- Search Input and Results -->
+              <div v-if="mode === 'create' && showSearch" class="mb-4">
+                <input
+                  v-model="searchTerm"
+                  @input="debouncedSearch"
+                  class="form-input w-full rounded-lg border-0 bg-surface-light dark:bg-surface-dark text-content-light dark:text-content-dark placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary h-14 p-4 text-base"
+                  placeholder="Buscar planta por nombre..."
+                  type="text"
+                />
+                <div v-if="loading" class="mt-2 text-center text-subtle-light dark:text-subtle-dark">
+                  Cargando...
+                </div>
+                <div v-else-if="searchTerm && filteredProducts.length === 0" class="mt-2 text-center text-subtle-light dark:text-subtle-dark">
+                  No se encontró ninguna planta.
+                </div>
+                <div v-else-if="filteredProducts.length > 0" class="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                  <div
+                    v-for="product in filteredProducts.slice(0, 5)"
+                    :key="product.id"
+                    class="p-3 border rounded-lg cursor-pointer hover:bg-primary/10 flex items-center gap-3"
+                    @click="addProduct(product)"
+                  >
+                    <div
+                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-10"
+                      :style="{ backgroundImage: `url(${product.image_url || placeholderImage})` }"
+                    ></div>
+                    <div>
+                      <p class="font-medium text-content-light dark:text-content-dark">{{ product.nombre || product.name }}</p>
+                      <p class="text-sm text-subtle-light dark:text-subtle-dark">${{ Number(product.precio_venta || product.price || 0).toFixed(2) }}</p>
+                    </div>
+                  </div>
+                  <div v-if="filteredProducts.length > 5" class="text-center text-sm text-subtle-light dark:text-subtle-dark mt-2">
+                    Y {{ filteredProducts.length - 5 }} más...
+                  </div>
+                </div>
+              </div>
+
               <div class="space-y-2">
                 <div
-                  v-for="(product, index) in saleData.products"
-                  :key="index"
+                  v-for="item in store.items"
+                  :key="item.id"
                   class="flex items-center gap-4 rounded-lg bg-surface-light dark:bg-surface-dark p-3"
                 >
                   <div
                     class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-14"
-                    :style="{ backgroundImage: `url(${product.image})` }"
+                    :style="{ backgroundImage: `url(${item.image || placeholderImage})` }"
                   ></div>
                   <div class="flex-grow">
-                    <p class="font-bold text-content-light dark:text-content-dark">{{ product.name }}</p>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark">${{ product.price.toFixed(2) }}</p>
+                    <p class="font-bold text-content-light dark:text-content-dark">{{ item.nombre }}</p>
+                    <p class="text-sm text-subtle-light dark:text-subtle-dark">${{ Number(item.precioUnitario).toFixed(2) }}</p>
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2" v-if="mode === 'create'">
                     <button
-                      v-if="mode === 'create'"
-                      @click="updateQuantity(index, -1)"
+                      @click="updateQuantity(item.id, -1)"
                       class="size-6 rounded-full bg-primary/20 dark:bg-primary/30 text-primary flex items-center justify-center"
-                      :disabled="product.quantity <= 1"
+                      :disabled="item.cantidad <= 1"
                     >
                       -
                     </button>
                     <span class="font-bold text-content-light dark:text-content-dark w-4 text-center">{{
-                      product.quantity
+                      item.cantidad
                     }}</span>
                     <button
-                      v-if="mode === 'create'"
-                      @click="updateQuantity(index, 1)"
+                      @click="updateQuantity(item.id, 1)"
                       class="size-6 rounded-full bg-primary/20 dark:bg-primary/30 text-primary flex items-center justify-center"
                     >
                       +
                     </button>
+                    <button
+                      @click="store.removerItem(item.id)"
+                      class="text-red-500 hover:text-red-700 ml-2"
+                    >
+                      ×
+                    </button>
                   </div>
+                  <span v-else class="font-bold text-content-light dark:text-content-dark">x{{ item.cantidad }}</span>
                 </div>
+                <p v-if="store.items.length === 0 && mode === 'create'" class="text-center text-subtle-light dark:text-subtle-dark py-4">
+                  Agrega productos para continuar.
+                </p>
               </div>
             </section>
 
@@ -99,16 +145,16 @@
               <div class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark space-y-3">
                 <div class="flex justify-between items-center">
                   <p class="text-subtle-light dark:text-subtle-dark">Subtotal</p>
-                  <p class="font-medium text-content-light dark:text-content-dark">${{ subtotal.toFixed(2) }}</p>
+                  <p class="font-medium text-content-light dark:text-content-dark">${{ store.subtotal.toFixed(2) }}</p>
                 </div>
                 <div class="flex justify-between items-center">
                   <p class="text-subtle-light dark:text-subtle-dark">Impuestos (21%)</p>
-                  <p class="font-medium text-content-light dark:text-content-dark">${{ taxes.toFixed(2) }}</p>
+                  <p class="font-medium text-content-light dark:text-content-dark">${{ store.ivaTotal.toFixed(2) }}</p>
                 </div>
                 <div class="border-t border-subtle-light/20 dark:border-subtle-dark/20 my-2"></div>
                 <div class="flex justify-between items-center">
                   <p class="font-bold text-content-light dark:text-content-dark">Total</p>
-                  <p class="font-bold text-xl text-content-light dark:text-content-dark">${{ total.toFixed(2) }}</p>
+                  <p class="font-bold text-xl text-content-light dark:text-content-dark">${{ store.totalFinal.toFixed(2) }}</p>
                 </div>
               </div>
             </section>
@@ -126,7 +172,7 @@
               v-if="mode === 'create'"
               @click="submitSale"
               class="px-4 py-2 rounded-lg bg-primary text-white"
-              :disabled="!saleData.clientName || !saleData.products.length"
+              :disabled="!clientName || store.items.length === 0"
             >
               Guardar Venta
             </button>
@@ -137,7 +183,11 @@
   </ClientOnly>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { useApiService } from '~/services/api/api'; 
+import { useVentasStore } from '~/stores/ventas';  // Importa el store
+
 const props = defineProps({
   isOpen: Boolean,
   mode: {
@@ -152,64 +202,154 @@ const props = defineProps({
 
 const emit = defineEmits(['update:isOpen', 'submit']);
 
-const saleData = ref({
-  clientName: props.sale.clientName || '',
-  clientAddress: props.sale.clientAddress || '',
-  products: props.sale.products || [
-    {
-      name: 'Rosa',
-      price: 15000.0,
-      quantity: 1,
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuB9Z5pvN9wCPjCqlbwiUCKWjIcexul9t9QqfZ2m5PNPQaTKw3_SwVgyb56cj_f_zbulbCCSzL0qL91xFmjLteQRS6H4YrpyJ0UUwXxYl6feXqwEys4ODJHTGXJ9iDTUgllcnL7rtHBYvi60RsqrjPwAgdKzuL9knrC55TW7DLQGshB1DW8ChlIFCxS_oLb-jpUvVwtjRWnyRdIKknPY3lY-9J-7F6pAniujmkFZ70DzWzu9rKnRrWg7h35UZt9Sdig2oEN-aC7zE0rf',
-    },
-    {
-      name: 'Tulipán',
-      price: 1200.0,
-      quantity: 2,
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuArcqjd6W7dx_RITCll53wEef4aX6RVaCsc9NmQFXpbrGPAjeKqBMSb_Mfc-j4y9fQS2U0BFjvB7m94nP5d7vauQ3JSAJjr5VQ-hoABKw9uMb9wa2lfpVCZqDJemkUnWEXwqmP1QdbKBkuqtuc-i2bz2i0iz51QrTgL8syCnimsmlpKe6XOhtRB4mx5B0sl5g3dA5YHe1ZvXNAAm8QOFsGsY93yGQOLd77lL1jlM1iXlo7jGy7tg0EJPDIg1E5x21NHjktVqyfruNch',
-    },
-    {
-      name: 'Lirio',
-      price: 1000.0,
-      quantity: 1,
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBzHtc8eXFd1_NIPdgfu4L82NubnTbnHHsTxzCmGlZ2zPeuDy_vQqyK1anOBGK20T23xATijho_9chUZr113Cn-Auhw56MlANS0719AbFW7Fy4_Is8dWMMKMP7EyhDOjjM2HWxSUoMlUaUmte3egYZTZi-l8QN-aJZpxyAbsuYcQYWPe_75KxyV2T6Wdgv17wcELxevT620FL9q6lCyCaf6b8-wGWCZ94ER1nGAnFNo9aNES3E1OKRGwRMzh5xJ9luM7Btywv-blPb2',
-    },
-  ],
+const apiService = useApiService();
+const store = useVentasStore();  // Usa el store de Pinia
+
+const clientName = ref('');
+const clientAddress = ref('');
+const allProducts = ref([]);
+const searchTerm = ref('');
+const loading = ref(false);
+const showSearch = ref(false);
+const placeholderImage = 'https://via.placeholder.com/150?text=Planta';
+
+// Filtered products based on search
+const filteredProducts = computed(() => {
+  if (!searchTerm.value) return [];
+  return allProducts.value.filter(p => 
+    (p.nombre || p.name || '').toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
 });
 
-// Computed properties for summary
-const subtotal = computed(() =>
-  saleData.value.products.reduce((sum, product) => sum + product.price * product.quantity, 0)
-);
-const taxes = computed(() => subtotal.value * 0.21);
-const total = computed(() => subtotal.value + taxes.value);
-
-// Methods
-const closeModal = () => {
-  emit('update:isOpen', false);
+// Debounce function for search
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
 };
 
-const openProductSelector = () => {
-  // Placeholder for product selection logic (e.g., open another modal or dropdown)
-  console.log('Open product selector');
-  // Example: Add a new product
-  // saleData.value.products.push({ name: 'Nuevo Producto', price: 10.0, quantity: 1, image: '...' });
-};
-
-const updateQuantity = (index, change) => {
-  const newQuantity = saleData.value.products[index].quantity + change;
-  if (newQuantity >= 1) {
-    saleData.value.products[index].quantity = newQuantity;
+// Load all products (o usa API search para eficiencia)
+const loadProducts = async () => {
+  if (allProducts.value.length > 0) return;
+  loading.value = true;
+  try {
+    const res = await apiService.getProducts();
+    if (res.success) {
+      allProducts.value = res.data.map(p => ({
+        id: p.id,
+        nombre: p.nombre || p.name,
+        precio_venta: Number(p.precio_venta || p.price || 0),  // Cast to number here
+        image_url: p.image_url || p.image
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading products:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
+// Debounced search
+const debouncedSearch = debounce(() => {
+  loadProducts();
+}, 300);
+
+// Toggle search visibility
+const toggleSearch = () => {
+  showSearch.value = !showSearch.value;
+  if (showSearch.value) {
+    loadProducts();
+    nextTick(() => {
+      const input = document.querySelector('input[placeholder="Buscar planta por nombre..."]') as HTMLInputElement;
+      input?.focus();
+    });
+  } else {
+    searchTerm.value = '';
+  }
+};
+
+// Add product to store
+const addProduct = (product: any) => {
+  console.log('Agregando producto al store:', product);  // DEBUG
+  store.agregarItem({
+    id: product.id,
+    nombre: product.nombre || product.name,
+    precioUnitario: Number(product.precio_venta || product.price || 0),
+    cantidad: 1
+  });
+  console.log('Store items después de agregar:', store.items);  // DEBUG
+  searchTerm.value = '';
+};
+
+// Update quantity in store
+const updateQuantity = (id: number, change: number) => {
+  const currentQty = store.items.find(i => i.id === id)?.cantidad || 1;
+  const newQty = Math.max(1, currentQty + change);
+  store.actualizarCantidad(id, newQty);
+};
+
+// Close modal and reset
+const closeModal = () => {
+  emit('update:isOpen', false);
+  showSearch.value = false;
+  searchTerm.value = '';
+  clientName.value = '';
+  clientAddress.value = '';
+  // NO limpiar store aquí: el parent lo maneja post-submit o al abrir nuevo
+};
+
+// Submit: emite solo datos no-cart (parent mergea con store)
 const submitSale = () => {
-  emit('submit', saleData.value);
+  if (!clientName.value || store.items.length === 0) {  // Ya lo tenés, pero loggea
+    console.log('Submit falló: clientName=', clientName.value, 'items.length=', store.items.length);
+    alert('Completa el nombre del cliente y agrega al menos un producto.');
+    return;
+  }
+  emit('submit', {
+    clientName: clientName.value,
+    clientAddress: clientAddress.value
+  });
   closeModal();
 };
+
+// Watch for open: sync data from props
+watch(() => props.isOpen, (newVal) => {
+  if (newVal) {
+    if (props.mode === 'view' && props.sale) {
+      // View: set read-only, load items to store
+      clientName.value = props.sale.clientName || props.sale.customer || '';
+      clientAddress.value = props.sale.clientAddress || props.sale.address || '';
+      store.limpiarItems();  // Limpia antes de cargar
+      if (props.sale.items && props.sale.items.length > 0) {
+        props.sale.items.forEach((item: any) => {
+          store.agregarItem({
+            id: item.product_id || item.id,
+            nombre: item.nombre || item.productName || 'Desconocido',
+            precioUnitario: Number(item.precio_unitario || item.price || 0),
+            cantidad: item.cantidad || item.quantity || 1
+          });
+        });
+      }
+    } else if (props.mode === 'create') {
+      // Create: reset local, store ya limpio por parent
+      clientName.value = '';
+      clientAddress.value = '';
+      loadProducts();
+    }
+  } else {
+    // Al cerrar, reset local (store maneja parent)
+    clientName.value = '';
+    clientAddress.value = '';
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  if (props.isOpen && props.mode === 'create') {
+    loadProducts();
+  }
+});
 </script>
 
 <style scoped>
