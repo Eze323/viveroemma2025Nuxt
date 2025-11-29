@@ -16,7 +16,7 @@ interface AuthState {
 }
 
 export const useAuthStore = defineStore('auth', {
-  
+
   state: (): AuthState => ({
     user: null,
     token: null,
@@ -52,7 +52,7 @@ export const useAuthStore = defineStore('auth', {
           body: { email, password },
         });
 
-//        console.log('Respuesta cruda de /api/auth/login:', JSON.stringify(response, null, 2));
+        //        console.log('Respuesta cruda de /api/auth/login:', JSON.stringify(response, null, 2));
 
         // Manejar diferentes estructuras de respuesta
         let user: User, token: string;
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
           ({ user, token } = response as { user: User; token: string });
         }
 
-       // console.log('Datos procesados:', { user, token });
+        // console.log('Datos procesados:', { user, token });
 
         this.token = token;
         this.user = user;
@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', {
         // Solo usar localStorage en el cliente
         if (import.meta.client) {
           localStorage.setItem('token', token);
-         // console.log('Token guardado en localStorage:', localStorage.getItem('token'));
+          // console.log('Token guardado en localStorage:', localStorage.getItem('token'));
         }
 
         return response;
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', {
         });
 
         this.user = response as User;
-        console.log('Usuario obtenido:', this.user);
+        //console.log('Usuario obtenido:', this.user);
         return response;
       } catch (error: any) {
         this.error = error.data?.statusMessage || 'Error al obtener datos del usuario';
@@ -130,18 +130,16 @@ export const useAuthStore = defineStore('auth', {
     init() {
       if (import.meta.client) {
         const token = localStorage.getItem('token');
-        console.log('Inicializando store, token encontrado:', token);
+        //console.log('Inicializando store, token encontrado:', token);
         if (token) {
           this.token = token;
           this.fetchUser().catch(() => {
             this.token = null;
             this.user = null;
             localStorage.removeItem('token');
-            console.log('Token inválido, limpiando estado');
+            //console.log('Token inválido, limpiando estado');
           });
         }
-      } else {
-        console.log('Inicializando store en servidor, omitiendo localStorage');
       }
     },
   },

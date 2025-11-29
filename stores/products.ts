@@ -1,0 +1,110 @@
+import { defineStore } from 'pinia';
+/*// Tabla: products
+export const products = mysqlTable(
+  'products',
+  {
+    id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }).notNull(),
+  category: varchar('category', { length: 50 }).notNull(),
+  description: varchar('description', { length: 500 }),
+  precio_compra: decimal('precio_compra', { precision: 10, scale: 2 }).notNull().default('0.00'),
+  precio_venta: decimal('precio_venta', { precision: 10, scale: 2 }).notNull(),
+  stock: int('stock').notNull(),
+  pot_size: varchar('pot_size', { length: 50 }),
+  image_url: varchar('image_url', { length: 255 }),
+  publicado: boolean('publicado').notNull().default(true),
+  sku: varchar('sku', { length: 50 }).unique(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+  }
+);*/
+
+interface Product {
+    id: number;
+    name: string;
+    category: string;
+    description: string;
+    precio_compra: number;
+    precio_venta: number;
+    stock: number;
+    pot_size: string;
+    image_url: string;
+    publicado: boolean;
+    sku: string;
+    created_at: string;
+    updated_at: string;
+}
+
+// API Response types
+interface ProductsSuccessResponse {
+    success: true;
+    data: Product[];
+}
+
+interface ProductsErrorResponse {
+    success: false;
+    error: string;
+}
+
+type ProductsApiResponse = ProductsSuccessResponse | ProductsErrorResponse;
+
+interface ProductState {
+    products: Product[];
+    loading: boolean;
+    error: string | null;
+}
+
+export const useProductStore = defineStore('product', {
+    state: () => ({
+        products: [] as Product[],
+        loaded: false,
+        lastUpdate: null as number | null,
+        loading: false,
+        error: null as string | null,
+    }),
+    getters: {
+        getProducts: (state): Product[] => state.products,
+        isLoading: (state): boolean => state.loading,
+        hasError: (state): boolean => !!state.error,
+    },
+    actions: {
+        async fetchProducts(forceRefresh = false) {
+            if (this.loading) return
+            if (this.loaded && !forceRefresh) return
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const { data, error } = await useFetch<ProductsApiResponse>('/api/products');
+
+                if (error.value) {
+                    throw error.value;
+                }
+
+                // Type narrowing: check if response is successful
+                if (data.value && data.value.success) {
+                    // TypeScript now knows this is ProductsSuccessResponse
+                    this.products = data.value.data;
+                    this.loaded = true;
+                    this.lastUpdate = Date.now();
+                } else if (data.value && !data.value.success) {
+                    // TypeScript now knows this is ProductsErrorResponse
+                    throw new Error(data.value.error || 'Error al obtener productos');
+                } else {
+                    throw new Error('Error al obtener productos');
+                }
+            } catch (error: any) {
+                this.error = error.data?.statusMessage || error.message || 'Error al obtener productos';
+                console.error('Error en fetchProducts:', error);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        forceReload() {
+            this.loaded = false;
+            this.fetchProducts(true);
+        },
+    },
+}); 

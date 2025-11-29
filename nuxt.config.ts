@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-    // Importing modules
+  // Importing modules
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
@@ -14,30 +14,30 @@ export default defineNuxtConfig({
     '@nuxt/content',
     'nuxt-openapi-docs-module'
   ],
-  content:{
-    
-      database: {
-          type: 'sqlite',
-          filename: 'vivero_emma.sqlite',
-              },
-              watch:{
-                port: 4000,
-                showURL: true,
-              }
+  content: {
+
+    database: {
+      type: 'sqlite',
+      filename: 'vivero_emma.sqlite',
+    },
+    watch: {
+      port: 4000,
+      showURL: true,
+    }
   },
-openApiDocs: {
-  folder: './docs',
-  name: 'Vivero Emma API Documentation',
-  files:function(){return{'ApiVivero': 'Api Vivero'}}
-},
+  openApiDocs: {
+    folder: './docs',
+    name: 'Vivero Emma API Documentation',
+    files: function () { return { 'ApiVivero': 'Api Vivero' } }
+  },
 
 
   //image
   image: {
-    provider:'netlify',
+    provider: 'netlify',
     formats: ['webp', 'jpg'],
     dir: 'assets/images',
-     domains: ['images.pexels.com'],
+    domains: ['images.pexels.com'],
   },
   // Google Fonts configuration
   googleFonts: {
@@ -92,28 +92,19 @@ openApiDocs: {
 
   // Runtime config for API URLs
   runtimeConfig: {
+    // Private keys are only available on the server
+    dbHost: process.env.DB_HOST,
+    dbPort: process.env.DB_PORT,
+    dbDatabase: process.env.DB_DATABASE,
+    dbUsername: process.env.DB_USERNAME,
+    dbPassword: process.env.DB_PASSWORD,
+    dbBaseURL: process.env.DATABASE_URL,
+    jwtSecret: process.env.JWT_SECRET, // Added JWT Secret here for security
+
     public: {
       apiBaseUrl: process.env.API_BASE_URL,
-      dbHost: process.env.DB_HOST, 
-      dbPort: process.env.DB_PORT, 
-      dbDatabase: process.env.DB_DATABASE, 
-      dbUsername: process.env.DB_USERNAME, 
-      dbPassword: process.env.DB_PASSWORD, 
-      dbBaseURL: process.env.DATABASE_URL
+      // Only public variables here
     },
-    private:{
-      content: {
-        database: {
-          type: 'sqlite',
-          filename: process.env.DATABASE_FILENAME || 'vivero_emma.sqlite',
-        },
-        watch: {
-          port: Number(process.env.WATCH_PORT) || 4000,
-          showURL: process.env.WATCH_SHOW_URL === 'true',
-        },
-      },
-    },
-    
   },
 
 

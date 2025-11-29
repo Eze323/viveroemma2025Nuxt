@@ -1,138 +1,178 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark font-display text-content-light dark:text-content-dark">
-    <!-- Header -->
-    <!-- <header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
-      <div class="flex items-center justify-between p-4 border-b border-subtle-light dark:border-subtle-dark">
-        <div class="w-10"></div>
-        <h1 class="text-lg font-bold text-center">Panel de Administración</h1>
-        <button class="p-2 rounded-full hover:bg-subtle-light dark:hover:bg-subtle-dark">
-          <span class="material-symbols-outlined">settings</span>
-        </button>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-6">
+      <div class="max-w-7xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p class="mt-1 text-sm text-gray-600">Bienvenido de vuelta, {{ authStore.user?.name || 'Usuario' }}</p>
       </div>
-    </header> -->
+    </div>
 
     <!-- Main Content -->
-    <main class="flex-grow p-4">
-      <h2 class="text-2xl font-bold mb-4 px-2">Resumen</h2>
-      <div class="grid grid-cols-1 gap-4">
-        <NuxtLink
-          v-for="item in dashboardItems"
-          :key="item.title"
-          :to="item.href"
-          class="block bg-white dark:bg-subtle-dark rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-        >
-          <div class="flex items-center p-4">
-            <div class="flex-grow">
-              <h3 class="font-bold text-base">{{ item.title }}</h3>
-              <p class="text-sm text-content-light/70 dark:text-content-dark/70">{{ item.description }}</p>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- KPI Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <MetricCard
+          title="Ventas del Mes"
+          :value="45000"
+          prefix="$"
+          icon="heroicons:currency-dollar"
+          color="success"
+          :trend="12.5"
+          comparison="vs mes anterior"
+        />
+        <MetricCard
+          title="Productos Vendidos"
+          :value="328"
+          icon="heroicons:shopping-bag"
+          color="primary"
+          :trend="8.2"
+          comparison="vs mes anterior"
+        />
+        <MetricCard
+          title="Nuevos Clientes"
+          :value="42"
+          icon="heroicons:user-group"
+          color="info"
+          :trend="15.3"
+          comparison="vs mes anterior"
+        />
+        <MetricCard
+          title="Productos en Stock"
+          :value="1247"
+          icon="heroicons:cube"
+          color="warning"
+          :trend="-3.1"
+          comparison="vs mes anterior"
+        />
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mb-6 sm:mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <QuickActionCard
+            title="Nueva Venta"
+            description="Registrar una nueva venta"
+            icon="heroicons:shopping-cart"
+            href="/admin/ventas"
+            color="success"
+          />
+          <QuickActionCard
+            title="Agregar Producto"
+            description="Añadir producto al inventario"
+            icon="heroicons:plus-circle"
+            href="/admin/productos"
+            color="primary"
+          />
+          <QuickActionCard
+            title="Nuevo Cliente"
+            description="Registrar un nuevo cliente"
+            icon="heroicons:user-plus"
+            href="/admin/clientes"
+            color="info"
+          />
+        </div>
+      </div>
+
+      <!-- Charts and Tables Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Sales Chart - Takes 2 columns on large screens -->
+        <div class="lg:col-span-2">
+          <SalesChart 
+            title="Ventas" 
+            :data="chartData"
+          />
+        </div>
+
+        <!-- Top Sellers - Takes 1 column -->
+        <div class="lg:col-span-1">
+          <TopSellersTable :sellers="topSellers" />
+        </div>
+      </div>
+
+      <!-- Recent Sales Table - Full Width -->
+      <div class="mt-6 sm:mt-8">
+        <RecentSalesTable :sales="recentSales" />
+      </div>
+
+      <!-- Additional Info Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 sm:mt-8">
+        <!-- Popular Categories -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Categorías Populares</h3>
+          <div class="space-y-3">
+            <div v-for="category in popularCategories" :key="category.name" class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full" :style="{ backgroundColor: category.color }"></div>
+                <span class="text-sm text-gray-700">{{ category.name }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-gray-100 rounded-full h-2">
+                  <div 
+                    class="h-2 rounded-full transition-all duration-500" 
+                    :style="{ width: category.percentage + '%', backgroundColor: category.color }"
+                  ></div>
+                </div>
+                <span class="text-sm font-medium text-gray-900 w-12 text-right">{{ category.percentage }}%</span>
+              </div>
             </div>
-            <div
-              class="w-20 h-20 rounded-lg bg-cover bg-center ml-4"
-              :style="{ backgroundImage: `url(${item.image})` }"
-            ></div>
           </div>
-        </NuxtLink>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Actividad Reciente</h3>
+          <div class="space-y-4">
+            <div v-for="activity in recentActivity" :key="activity.id" class="flex gap-3">
+              <div class="flex-shrink-0">
+                <div 
+                  class="w-8 h-8 rounded-full flex items-center justify-center"
+                  :class="activity.iconBg"
+                >
+                  <Icon :name="activity.icon" class="w-4 h-4" :class="activity.iconColor" />
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-gray-900">{{ activity.title }}</p>
+                <p class="text-xs text-gray-500">{{ activity.time }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
-
-    <!-- Navigation -->
-    <!-- <nav class="sticky bottom-0 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm border-t border-subtle-light dark:border-subtle-dark">
-      <div class="flex justify-around p-2">
-        <NuxtLink
-          v-for="navItem in navItems"
-          :key="navItem.title"
-          :to="navItem.href"
-          class="flex flex-col items-center gap-1 p-2 rounded-lg"
-          :class="navItem.active ? 'text-primary' : 'text-content-light/70 dark:text-content-dark/70 hover:text-primary dark:hover:text-primary transition-colors'"
-        >
-          <span class="material-symbols-outlined" :style="navItem.active ? 'font-variation-settings: \'FILL\' 1' : ''">
-            {{ navItem.icon }}
-          </span>
-          <span class="text-xs font-medium">{{ navItem.title }}</span>
-        </NuxtLink>
-      </div>
-    </nav> -->
   </div>
 </template>
+
 <script setup>
 import { useAuthStore } from '~/stores/auth';
-
-definePageMeta({
-  middleware: ['auth'],
-});
-
-//const authStore = useAuthStore();
-
-//import { useAuthStore } from '~/stores/auth';
-import StatCard from '~/components/admin/Dashboard/StatCard.vue';
+import MetricCard from '~/components/admin/Dashboard/MetricCard.vue';
+import QuickActionCard from '~/components/admin/Dashboard/QuickActionCard.vue';
 import SalesChart from '~/components/admin/Dashboard/SalesChart.vue';
 import TopSellersTable from '~/components/admin/Dashboard/TopSellersTable.vue';
 import RecentSalesTable from '~/components/admin/Dashboard/RecentSalesTable.vue';
 
 definePageMeta({
+  middleware: ['auth'],
   layout: 'admin'
 });
 
 const authStore = useAuthStore();
-const dashboardItems = [
-  {
-    title: 'Productos',
-    description: 'Gestiona el inventario de plantas y productos.',
-    href: '/admin/productos',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCyyT6aSmnKFqqTP4YySwr_EjadBr2CUwaLo-4ny5OODvCqtGni3q_bt3Ym0LKYEmreA1VEXzU1kG5rLo--9gIlBpPQmdCX0BO_IGLsMYP4XVNPdtU0G00-F2KCKCc1iI8Qkbl8P0bDX1BxF0lnyWsB-A6FSvZ3lUNEYKgpJN9f0YnPygppWMB18tXaN4KQroDdL4LUk7YNrGV3RmjdQxZAuf35oSEmvKd_FyNVMrxJNWg1J_YXJRcEGe8c-3L0j8Zb3Zln4W1PLUz6',
-  },
-  {
-    title: 'Categorías',
-    description: 'Organiza los productos por tipo y características.',
-    href: '/admin/categorias',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDP0uhDzzg5IMfb5sPk1HV2rdcxCI-pAX__oo-yar_Qs-gH-x63LgYP-_NwsFsedsCA1---hk-VHvdrBxSR0NyzTC20UyBSlIuym4opIZf17d6ivFxPZAMlzqsxULiRzjLvQF30MZFSoBuReLfJFcLleNaAR_U22iLywmbHEOB2jTysbHuLsXDsThW_V3_biY9I94bWPynd2EBJ_XMia4LWkV3ZYIyD2wkZVKfzwrPta9EkrZIHBkFYrc-XmWGQ4ldR09vwPf5mxp46',
-  },
-  {
-    title: 'Clientes',
-    description: 'Administra la información de tus clientes.',
-    href: '/admin/clientes',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVBMnHF9KPVbTZlH-ETbiQUwjM7cdhH63J7Iflz8Qo5CKWqf3HZXd_R--Lb5KeUOpPC3VBpRi2VXJ0FwD5dzaeIHgldLdaBLOtwM3lAzYElOwR4Olaq7YQMWpEwdK9a8ZByM1R6gH7-HD_Aoo5Pdq8fd4WPfsjqkXLi8KNDFGbX_la9KhIP-6mH8Jgv6_jXNBW17dA-kZze4k0osJ_cF_xmh59lenF5uLC2zspg1fmF_K2PB3mD2RLWa8OHALg7rw15cBq9aIG280I',
-  },
-  {
-    title: 'Proveedores',
-    description: 'Controla los datos de tus proveedores.',
-    href: '/admin/proveedores',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB-v4jjt4ZHHw9UBNWXwFXkM2cS_P35iLm4MPzdCD10A9pV31LgvmY_0vOKOr3POYlgc_qc3cBdr4hc4eEb4ujDeL8ojrbxNdwaDo-p9u6xqgz3AMhacbupKncSKEJaHppa6o4Q3qbHlIOt9B4N_XJYI0iuERk-rvHhMYgg1nXCXIz7l0SpJ-6A4w1Y4g6BPLTvsUP2qjsblgTX4hjy0LQD7GHr0FQH1Vc-6psRyHEE_1R_L9RlJcVw2vEsVqR1nC97gN2k-MF1_oP_',
-  },
-  {
-    title: 'Ventas',
-    description: 'Revisa el historial de ventas y ganancias.',
-    href: '/admin/ventas',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKvpKIWkN6HF2Vz1mJVr-d6P9sl2COQUEZPK5k_xYr5Xkb9DyRFOHCW3Bee2Tub6y-Dd3ncmAvIG4MIjO2gFzBx_TpERiMNhbbydzSsjcnjrEDoIR83Vm4jn8VVwqowQFAZHqxnwAVdo2dejsEARA9k2RVnq-O66bibwEWf-4Iggvw3SBK4yEu_ZtH_QoEUVrGDkcnjRuqOHr9EaiFp8mkBCiJZdq4-q3MmJk7IIiWWkm_cSH0igSQf0hupj4bVyMKZhr5806f_zMw',
-  },
-  {
-    title: 'Premios',
-    description: 'Gestiona los programas de lealtad y descuentos.',
-    href: '/admin/premios',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAaI9a9EzumXQjjrNG1soAl6K-MycvVe_ohQcUP7V2NBnIfDCWi-EKkHg1e9DHlu--ZaZg6iKXQO-RAEp-KqtbO7gZpLJGwlM4SYCq6RxeFyOGwMxRAKmFiZqdMMS6muaP-J3ajWhPm9X_7SsTJtb4wZlkdCpCvlt9FgxTNsIP7J2Ptezcyju2RZGIceXKLTEretWYb86ThV8VCrWVsbmzEY1AHUZe5Flm35vlGcLF_iffvcP5536zTRA2DfN29vozDoJC-Kw95Gwd4',
-  },
-];
 
-// const navItems = [
-//   { title: 'Dashboard', icon: 'dashboard', href: '/admin', active: true },
-//   { title: 'Productos', icon: 'eco', href: '/admin/productos', active: false },
-//   { title: 'Ventas', icon: 'payments', href: '/admin/ventas', active: false },
-//   { title: 'Clientes', icon: 'groups', href: '/admin/clientes', active: false },
-//   { title: 'Más', icon: 'more_horiz', href: '/admin/mas', active: false },
-// ];
-// Mock data for charts
+// Chart data for sales
 const chartData = {
   día: {
     labels: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM'],
     values: [350, 420, 510, 790, 850, 760, 620, 590, 680, 740]
   },
   semana: {
-    labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
     values: [4200, 3800, 5100, 4700, 6200, 7800, 6500]
   },
   mes: {
-    labels: ['1 Mayo', '5 Mayo', '10 Mayo', '15 Mayo', '20 Mayo', '25 Mayo', '30 Mayo'],
-    values: [28500, 33400, 42000, 39600, 36800, 48500, 45000]
+    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+    values: [28500, 33400, 42000, 39600]
   },
   año: {
     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
@@ -238,13 +278,48 @@ const recentSales = [
   }
 ];
 
-</script>
-<style scoped>
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
+// Popular categories
+const popularCategories = [
+  { name: 'Plantas de Interior', percentage: 35, color: '#2D6A4F' },
+  { name: 'Plantas de Exterior', percentage: 28, color: '#40916C' },
+  { name: 'Suculentas', percentage: 20, color: '#10B981' },
+  { name: 'Árboles', percentage: 12, color: '#FFB627' },
+  { name: 'Otros', percentage: 5, color: '#9CA3AF' }
+];
 
-body {
-  min-height: max(884px, 100dvh);
-}
-</style>
+// Recent activity
+const recentActivity = [
+  {
+    id: 1,
+    title: 'Nueva venta registrada #12350',
+    time: 'Hace 5 minutos',
+    icon: 'heroicons:shopping-cart',
+    iconBg: 'bg-green-50',
+    iconColor: 'text-green-600'
+  },
+  {
+    id: 2,
+    title: 'Producto agregado: Monstera Deliciosa',
+    time: 'Hace 15 minutos',
+    icon: 'heroicons:plus-circle',
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-blue-600'
+  },
+  {
+    id: 3,
+    title: 'Nuevo cliente registrado',
+    time: 'Hace 1 hora',
+    icon: 'heroicons:user-plus',
+    iconBg: 'bg-purple-50',
+    iconColor: 'text-purple-600'
+  },
+  {
+    id: 4,
+    title: 'Stock actualizado: 15 productos',
+    time: 'Hace 2 horas',
+    icon: 'heroicons:arrow-path',
+    iconBg: 'bg-yellow-50',
+    iconColor: 'text-yellow-600'
+  }
+];
+</script>

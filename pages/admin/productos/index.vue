@@ -275,6 +275,7 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useApiService } from '~/services/api/api';
 import { useAuthStore } from '~/stores/auth';
+import { useProductStore } from '~/stores/products';
 import Modal from '~/components/Modal.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
 import placeHolderImg from '@/assets/images/placeholder.png';
@@ -287,13 +288,8 @@ definePageMeta({
 // Use the Product type from the shared types file for consistency
 import type { Product } from '~/types/product';
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  error?: string;
-}
-
 const authStore = useAuthStore();
+const productStore = useProductStore();
 const api = useApiService();
 
 const categories = ['planta', 'arbusto', 'plantin', 'otro', 'semilla', 'herramienta'] as const;
@@ -306,9 +302,9 @@ const filters = reactive({
   sort: 'name' as 'name' | 'precio_venta' | 'stock',
 });
 
-const allProducts = ref<Product[]>([]);
-const loading = ref(false);
-const error = ref<string | null>(null);
+// Use store state instead of local state
+const loading = computed(() => productStore.isLoading);
+const error = computed(() => productStore.error);
 
 const notification = reactive({
   isOpen: false,
@@ -361,12 +357,14 @@ const isDetailsOpen = (productId: number) => {
 };
 
 const filteredProducts = computed(() => {
-  if (!Array.isArray(allProducts.value)) {
-    console.warn('allProducts.value no es un array:', allProducts.value);
+  const products = productStore.getProducts;
+  
+  if (!Array.isArray(products)) {
+    console.warn('products no es un array:', products);
     return [];
   }
 
-  return allProducts.value
+  return products
     .filter((product): product is Product => {
       if (!product?.id || !product.name) {
         console.warn('Invalid product:', product);
@@ -390,27 +388,11 @@ const filteredProducts = computed(() => {
 });
 
 const loadProducts = async () => {
-  loading.value = true;
-  error.value = null;
   try {
-    const response = await api.getProducts();
-    if (response && response.success && Array.isArray(response.data)) {
-      allProducts.value = response.data.map((p: any) => ({
-        ...p,
-        description: p.description === null ? undefined : p.description,
-      }));
-    } else {
-      allProducts.value = [];
-      error.value = response.error || 'No se pudieron cargar los productos.';
-      showNotification(error.value ?? '', 'error');
-    }
+    await productStore.fetchProducts();
   } catch (err: any) {
-    error.value = err.message || 'No se pudieron cargar los productos.';
     console.error('Error loading products:', err);
-    allProducts.value = [];
-    showNotification(error.value ?? '', 'error');
-  } finally {
-    loading.value = false;
+    showNotification(err.message || 'No se pudieron cargar los productos.', 'error');
   }
 };
 
@@ -519,8 +501,7 @@ const isValidUrl = (url: string) => {
 
 const createProduct = async () => {
   if (!validateProduct(newProduct)) return;
-  loading.value = true;
-  error.value = null;
+  
   try {
     const productData = {
       name: newProduct.name,
@@ -534,24 +515,20 @@ const createProduct = async () => {
       pot_size: newProduct.pot_size || 'Sin especificar',
       image_url: newProduct.image_url || '/placeholder.png',
     };
-    const response = await api.createProduct(productData);
-    allProducts.value.push(response.data);
+    await api.createProduct(productData);
     closeCreateModal();
     showNotification('Producto creado exitosamente!');
-    loadProducts();
+    // Reload products from store to get the updated list
+    productStore.forceReload();
   } catch (err: any) {
-    error.value = err.message || 'Error al crear el producto.';
     console.error('Error creating product:', err);
-    showNotification(error.value ?? '', 'error');
-  } finally {
-    loading.value = false;
+    showNotification(err.message || 'Error al crear el producto.', 'error');
   }
 };
 
 const updateProduct = async () => {
   if (!validateProduct(editingProduct)) return;
-  loading.value = true;
-  error.value = null;
+  
   try {
     const productData = {
       name: editingProduct.name,
@@ -565,42 +542,29 @@ const updateProduct = async () => {
       pot_size: editingProduct.pot_size || 'Sin especificar',
       image_url: editingProduct.image_url || '/placeholder.png',
     };
-    const response = await api.updateProduct(editingProduct.id!, productData);
-    const updatedProduct = response.data;
-    const index = allProducts.value.findIndex((p) => p.id === editingProduct.id);
-    if (index !== -1) {
-      allProducts.value[index] = updatedProduct;
-    } else {
-      allProducts.value.push(updatedProduct);
-    }
+    await api.updateProduct(editingProduct.id!, productData);
     closeEditModal();
     showNotification('Producto actualizado exitosamente!');
-    loadProducts();
+    // Reload products from store to get the updated list
+    productStore.forceReload();
   } catch (err: any) {
-    error.value = err.message || 'Error al actualizar el producto.';
     console.error('Error updating product:', err);
-    showNotification(error.value ?? '', 'error');
-  } finally {
-    loading.value = false;
+    showNotification(err.message || 'Error al actualizar el producto.', 'error');
   }
 };
 
 const deleteProduct = async (productId: number) => {
   if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
-  loading.value = true;
-  error.value = null;
+  
   try {
     await api.deleteProduct(productId);
-    allProducts.value = allProducts.value.filter((p) => p.id !== productId);
     openDetails.value = openDetails.value.filter((id) => id !== productId);
     showNotification('Producto eliminado exitosamente!');
-    loadProducts();
+    // Reload products from store to get the updated list
+    productStore.forceReload();
   } catch (err: any) {
-    error.value = err.message || 'Error al eliminar el producto.';
     console.error('Error deleting product:', err);
-    showNotification(error.value ?? '', 'error');
-  } finally {
-    loading.value = false;
+    showNotification(err.message || 'Error al eliminar el producto.', 'error');
   }
 };
 

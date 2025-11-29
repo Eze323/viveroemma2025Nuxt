@@ -17,7 +17,7 @@ export const useApiService = () => {
   }
 
   const normalizeResponse = <T>(response: any): ApiResponse<T> => {
-    console.log('Respuesta cruda:', response)
+    // console.log('Respuesta cruda:', response)
 
     // Si ya viene { success, data }
     if (response && response.success !== undefined && response.data !== undefined) {
@@ -40,7 +40,7 @@ export const useApiService = () => {
   const request = async <T>(url: string, options: any = {}): Promise<ApiResponse<T>> => {
     try {
       const fullUrl = `${baseUrl}${url}`
-      console.log('Haciendo solicitud a:', fullUrl)
+      //console.log('Haciendo solicitud a:', fullUrl)
 
       const response = await $fetch(fullUrl, {
         ...options,
@@ -68,7 +68,7 @@ export const useApiService = () => {
     createSale: (data: any) => request<ApiResponse<{ message: string; sale: any }>>('/sales', { method: 'POST', body: data }),
     updateSale: (id: number, data: any) => request<ApiResponse<{ message: string; sale: any }>>(`/sales/${id}`, { method: 'PUT', body: data }),
     deleteSale: (id: number) => request<ApiResponse<{ message: string }>>(`/sales/${id}`, { method: 'DELETE' }),
-    
+
     //products
     getProducts: () => request<ApiResponse<Product[]>>('/products'), // Corregido de /product a /products
     getProduct: (id: number) => request<ApiResponse<Product>>(`/products/${id}`),

@@ -25,7 +25,7 @@ async function createAdminUser() {
       createdAt: new Date(),
     });
 
-    console.log('Usuario administrador creado exitosamente');
+    //console.log('Usuario administrador creado exitosamente');
   } catch (error) {
     console.error('Error al crear el usuario:', error);
   } finally {

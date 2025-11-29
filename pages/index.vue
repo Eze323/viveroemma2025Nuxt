@@ -21,13 +21,14 @@
           </div>
         </div>
         <div class="lg:w-1/2 relative animate-fade-in" style="animation-delay: 0.3s;">
-          <NuxtImg 
-            src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-            alt="Vivero Emma - Plantas" 
-            class="rounded-lg shadow-2xl relative z-10 max-w-full h-auto"
-            loading="lazy"
-            :placeholder="img(`placeholder.png`, { w: 900, f: 'png', blur: 2, q: 50 })"
-          />
+          <div class="hero-image-container rounded-lg shadow-2xl relative z-10">
+            <NuxtImg 
+              src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+              alt="Vivero Emma - Plantas" 
+              loading="lazy"
+              :placeholder="img(`placeholder.png`, { w: 900, f: 'png', blur: 2, q: 50 })"
+            />
+          </div>
           <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-accent rounded-full z-0"></div>
           <div class="absolute -top-6 -left-6 w-16 h-16 bg-secondary rounded-full z-0"></div>
         </div>
@@ -75,15 +76,13 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div v-for="(product, index) in products" :key="index" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div class="h-64 relative overflow-hidden">
+            <div class="product-image-container">
               <NuxtImg
-              :src="product.image" 
-              :alt="product.name" 
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
-              loading="lazy"
-              
-            :placeholder="img(`placeholder.png`, { w: 200, f: 'png', blur: 2, q: 50 })"
-
+                :src="product.image" 
+                :alt="product.name" 
+                class="hover:scale-105 transition-transform duration-300" 
+                loading="lazy"
+                :placeholder="img(`placeholder.png`, { w: 200, f: 'png', blur: 2, q: 50 })"
               />
             </div>
             <div class="p-6">
@@ -325,9 +324,93 @@ const testimonials = [
 ];
 </script>
 
-<style >
-
+<style scoped>
 .bg-pattern {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Prevent layout shift with aspect ratios */
+.hero-image-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.hero-image-container img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.product-image-container {
+  width: 100%;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+.product-image-container img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
+/* Ensure animations don't cause layout issues */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+}
+
+/* Prevent cumulative layout shift */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure container doesn't overflow */
+.container-custom {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 </style>
