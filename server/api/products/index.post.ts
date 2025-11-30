@@ -1,68 +1,97 @@
-// // server/api/products/index.post.ts
-import { useDrizzle } from '~/server/utils/drizzle';
-import { requireAuth } from '~/server/utils/auth';
-import { products } from '~/src/db/schema';
-import { z } from 'zod';
-import { defineEventHandler, readBody, createError } from 'h3';
+// server/api/products/index.post.ts
+import { useDrizzle } from '~/server/utils/drizzle'
+import { requireAuth } from '~/server/utils/auth'
+import { products } from '~/src/db/schema'
+import { eq } from 'drizzle-orm'
+import { defineEventHandler, readBody, createError } from 'h3'
+import { validateProductData, ValidationError } from '~/server/utils/validation'
 
 /**
  * @api {post} /api/products Create Product
  * @apiName CreateProduct
  * @apiGroup Products
- * @apiDescription Create a new product in the database.
+ * @apiDescription Create a new product in the database with validation
  * @apiPermission admin, encargado
- * @apiHeader {String} Authorization Bearer token
- * @apiBody {String} name Product name
- * @apiBody {String} category Product category
- * @apiBody {Number} precio_venta Selling price
- * @apiBody {Number} stock Stock quantity
  */
 export default defineEventHandler(async (event) => {
   try {
-    await requireAuth(event);
-    const db = useDrizzle();
+    await requireAuth(event)
+    const db = useDrizzle()
 
-    const bodySchema = z.object({
-      name: z.string().max(255),
-      category: z.string().max(50),
-      description: z.string().max(500).optional(),
-      precio_venta: z.number().min(1),
-      precio_compra: z.number().min(1).optional(), // Si necesitas precio_compra, descomentar esta línea
-      publicado: z.boolean().optional(), // Si necesitas el campo publicado, descomentar esta línea
-      sku: z.string().max(50).nullable().optional(), // SKU opc
-      stock: z.number().int().min(1),
-      pot_size: z.enum(['Sin especificar', 'pequeña', 'mediana', 'grande', '3 Lts', '4 Lts', '7 Lts', '10 Lts']).optional(),
-      image_url: z.string().nullable().optional(),
-    });
+    const body = await readBody(event)
 
-    const body = await readBody(event);
-    const validated = bodySchema.parse(body);
+    // Validate product data
+    try {
+      validateProductData(body)
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: error.message,
+        })
+      }
+      throw error
+    }
 
+    // Check for duplicate SKU if provided
+    if (body.sku) {
+      const [existing] = await db
+        .select({ id: products.id })
+        .from(products)
+        .where(eq(products.sku, body.sku))
+        .limit(1)
+
+      if (existing) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Ya existe un producto con el SKU: ${body.sku}`,
+        })
+      }
+    }
+
+    // Insert product
     const [product] = await db
       .insert(products)
       .values({
-        name: validated.name,
-        category: validated.category,
-        description: validated.description || null, // Asegurarse de que sea null si no se proporciona
-        precio_venta: Number(validated.precio_venta).toFixed(2), // Convertir a string con 2 decimales
-        precio_compra: validated.precio_compra ? Number(validated.precio_compra).toFixed(2) : '0.00', // Convertir a string con 2 decimales
-        publicado: validated.publicado !== undefined ? validated.publicado : true, // Por defecto true
-        sku: validated.sku || null, // Asegurarse de que sea null si
-        stock: validated.stock,
-        pot_size: validated.pot_size,
-        image_url: validated.image_url,
+        name: body.name,
+        category: body.category,
+        description: body.description || null,
+        precio_venta: Number(body.precio_venta).toFixed(2),
+        precio_compra: body.precio_compra ? Number(body.precio_compra).toFixed(2) : '0.00',
+        publicado: body.publicado !== undefined ? body.publicado : true,
+        sku: body.sku || null,
+        stock: body.stock,
+        pot_size: body.pot_size || 'Sin especificar',
+        image_url: body.image_url || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
-      ;
+      .$returningId()
 
     return {
       success: true,
-      data: { message: 'Producto creado', product }
-    };
+      data: {
+        id: product.id,
+        name: body.name,
+        category: body.category,
+        precio_venta: body.precio_venta,
+        stock: body.stock,
+      },
+    }
   } catch (error) {
-    console.error('Error in /api/product POST:', error);
+    console.error('Error in /api/products POST:', error)
+
+    if (error instanceof ValidationError) {
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+
+    const err = error as { statusCode?: number; statusMessage?: string }
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
-    };
+      error: err.statusMessage || 'Error al crear producto',
+    }
   }
-});
+})

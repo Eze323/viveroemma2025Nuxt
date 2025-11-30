@@ -1,360 +1,566 @@
 <template>
   <ClientOnly>
     <Teleport to="body">
-      <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div
-          class="bg-white dark:bg-background-dark rounded-lg shadow-lg w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto"
-        >
-          <!-- Modal Header -->
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-content-light dark:text-content-dark">
-              {{ mode === 'create' ? 'Crear Venta' : 'Ver Venta' }}
+      <div v-if="isOpen" class="modal-overlay" @click="handleOverlayClick">
+        <div class="modal-container" @click.stop>
+          <!-- Header -->
+          <div class="modal-header">
+            <h2 class="modal-title">
+              {{ mode === 'create' ? 'Nueva Venta' : 'Detalle de Venta' }}
             </h2>
             <button
               @click="closeModal"
-              class="text-content-light dark:text-content-dark hover:text-primary"
+              class="close-button"
               aria-label="Cerrar modal"
             >
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          <!-- Modal Content -->
-          <main class="space-y-6">
-            <!-- Client Section -->
-            <section>
-              <h3 class="text-xl font-bold text-content-light dark:text-content-dark mb-3">Cliente</h3>
-              <div class="space-y-4">
+          <!-- Content -->
+          <div class="modal-content">
+            <!-- Cliente Section -->
+            <section class="section">
+              <h3 class="section-title">Cliente</h3>
+              <div class="client-inputs">
                 <input
                   v-model="clientName"
-                  class="form-input w-full rounded-lg border-0 bg-surface-light dark:bg-surface-dark text-content-light dark:text-content-dark placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary h-14 p-4 text-base"
-                  placeholder="Nombre del Cliente"
+                  class="input-field"
+                  placeholder="Nombre del Cliente *"
                   type="text"
                   :disabled="mode === 'view'"
+                  required
                 />
                 <input
                   v-model="clientAddress"
-                  class="form-input w-full rounded-lg border-0 bg-surface-light dark:bg-surface-dark text-content-light dark:text-content-dark placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary h-14 p-4 text-base"
-                  placeholder="Dirección del Cliente"
+                  class="input-field"
+                  placeholder="Dirección (opcional)"
                   type="text"
                   :disabled="mode === 'view'"
                 />
               </div>
             </section>
 
-            <!-- Products Section -->
-            <section>
-              <div class="flex justify-between items-center mb-3">
-                <h3 class="text-xl font-bold text-content-light dark:text-content-dark">Productos ({{ store.items.length }})</h3>
+            <!-- Búsqueda de Productos (solo en create) -->
+            <section v-if="mode === 'create'" class="section">
+              <h3 class="section-title">Buscar Producto</h3>
+              <ProductSearch @select="handleProductSelect" />
+            </section>
+
+            <!-- Carrito Section -->
+            <section class="section">
+              <div class="section-header">
+                <h3 class="section-title">
+                  Carrito ({{ store.items.length }})
+                </h3>
                 <button
-                  v-if="mode === 'create'"
-                  @click="toggleSearch"
-                  class="flex items-center gap-1 text-primary font-semibold text-sm"
+                  v-if="mode === 'create' && store.items.length > 0"
+                  @click="store.limpiarItems()"
+                  class="clear-cart-button"
                 >
-                  <span class="material-symbols-outlined">{{ showSearch ? 'close' : 'search' }}</span>
-                  {{ showSearch ? 'Cerrar búsqueda' : 'Buscar Planta' }}
+                  <span class="material-symbols-outlined">delete_sweep</span>
+                  Limpiar
                 </button>
               </div>
 
-              <!-- Search Input and Results -->
-              <div v-if="mode === 'create' && showSearch" class="mb-4">
-                <input
-                  v-model="searchTerm"
-                  @input="debouncedSearch"
-                  class="form-input w-full rounded-lg border-0 bg-surface-light dark:bg-surface-dark text-content-light dark:text-content-dark placeholder-subtle-light dark:placeholder-subtle-dark focus:ring-2 focus:ring-primary h-14 p-4 text-base"
-                  placeholder="Buscar planta por nombre..."
-                  type="text"
-                />
-                <div v-if="loading" class="mt-2 text-center text-subtle-light dark:text-subtle-dark">
-                  Cargando...
-                </div>
-                <div v-else-if="searchTerm && filteredProducts.length === 0" class="mt-2 text-center text-subtle-light dark:text-subtle-dark">
-                  No se encontró ninguna planta.
-                </div>
-                <div v-else-if="filteredProducts.length > 0" class="mt-2 space-y-2 max-h-40 overflow-y-auto">
-                  <div
-                    v-for="product in filteredProducts.slice(0, 5)"
-                    :key="product.id"
-                    class="p-3 border rounded-lg cursor-pointer hover:bg-primary/10 flex items-center gap-3"
-                    @click="addProduct(product)"
-                  >
-                    <div
-                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-10"
-                      :style="{ backgroundImage: `url(${product.image_url || placeholderImage})` }"
-                    ></div>
-                    <div>
-                      <p class="font-medium text-content-light dark:text-content-dark">{{ product.nombre || product.name }}</p>
-                      <p class="text-sm text-subtle-light dark:text-subtle-dark">${{ Number(product.precio_venta || product.price || 0).toFixed(2) }}</p>
-                    </div>
-                  </div>
-                  <div v-if="filteredProducts.length > 5" class="text-center text-sm text-subtle-light dark:text-subtle-dark mt-2">
-                    Y {{ filteredProducts.length - 5 }} más...
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <div
+              <!-- Lista de items -->
+              <div v-if="store.items.length > 0" class="cart-items">
+                <CartItem
                   v-for="item in store.items"
                   :key="item.id"
-                  class="flex items-center gap-4 rounded-lg bg-surface-light dark:bg-surface-dark p-3"
-                >
-                  <div
-                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-14"
-                    :style="{ backgroundImage: `url(${item.image || placeholderImage})` }"
-                  ></div>
-                  <div class="flex-grow">
-                    <p class="font-bold text-content-light dark:text-content-dark">{{ item.nombre }}</p>
-                    <p class="text-sm text-subtle-light dark:text-subtle-dark">${{ Number(item.precioUnitario).toFixed(2) }}</p>
-                  </div>
-                  <div class="flex items-center gap-2" v-if="mode === 'create'">
-                    <button
-                      @click="updateQuantity(item.id, -1)"
-                      class="size-6 rounded-full bg-primary/20 dark:bg-primary/30 text-primary flex items-center justify-center"
-                      :disabled="item.cantidad <= 1"
-                    >
-                      -
-                    </button>
-                    <span class="font-bold text-content-light dark:text-content-dark w-4 text-center">{{
-                      item.cantidad
-                    }}</span>
-                    <button
-                      @click="updateQuantity(item.id, 1)"
-                      class="size-6 rounded-full bg-primary/20 dark:bg-primary/30 text-primary flex items-center justify-center"
-                    >
-                      +
-                    </button>
-                    <button
-                      @click="store.removerItem(item.id)"
-                      class="text-red-500 hover:text-red-700 ml-2"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <span v-else class="font-bold text-content-light dark:text-content-dark">x{{ item.cantidad }}</span>
-                </div>
-                <p v-if="store.items.length === 0 && mode === 'create'" class="text-center text-subtle-light dark:text-subtle-dark py-4">
-                  Agrega productos para continuar.
-                </p>
+                  :item="item"
+                  :readonly="mode === 'view'"
+                  @update-quantity="handleUpdateQuantity"
+                  @replace="handleReplaceItem"
+                  @remove="handleRemoveItem"
+                />
+              </div>
+
+              <!-- Empty state -->
+              <div v-else class="empty-cart">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <p>El carrito está vacío</p>
+                <p class="empty-cart-hint">Busca y agrega productos para continuar</p>
               </div>
             </section>
 
-            <!-- Summary Section -->
-            <section>
-              <h3 class="text-xl font-bold text-content-light dark:text-content-dark mb-3">Resumen</h3>
-              <div class="p-4 rounded-lg bg-surface-light dark:bg-surface-dark space-y-3">
-                <div class="flex justify-between items-center">
-                  <p class="text-subtle-light dark:text-subtle-dark">Subtotal</p>
-                  <p class="font-medium text-content-light dark:text-content-dark">${{ store.subtotal.toFixed(2) }}</p>
+            <!-- Resumen Section -->
+            <section v-if="store.items.length > 0" class="section summary-section">
+              <h3 class="section-title">Resumen</h3>
+              <div class="summary-card">
+                <div class="summary-row">
+                  <span class="summary-label">Subtotal</span>
+                  <span class="summary-value">${{ formatPrice(store.subtotal) }}</span>
                 </div>
-                <div class="flex justify-between items-center">
-                  <p class="text-subtle-light dark:text-subtle-dark">Impuestos (21%)</p>
-                  <p class="font-medium text-content-light dark:text-content-dark">${{ store.ivaTotal.toFixed(2) }}</p>
+                <div class="summary-row">
+                  <span class="summary-label">IVA (21%)</span>
+                  <span class="summary-value">${{ formatPrice(store.ivaTotal) }}</span>
                 </div>
-                <div class="border-t border-subtle-light/20 dark:border-subtle-dark/20 my-2"></div>
-                <div class="flex justify-between items-center">
-                  <p class="font-bold text-content-light dark:text-content-dark">Total</p>
-                  <p class="font-bold text-xl text-content-light dark:text-content-dark">${{ store.totalFinal.toFixed(2) }}</p>
+                <div class="summary-divider"></div>
+                <div class="summary-row total">
+                  <span class="summary-label">Total</span>
+                  <span class="summary-value">${{ formatPrice(store.totalFinal) }}</span>
                 </div>
               </div>
             </section>
-          </main>
+          </div>
 
-          <!-- Modal Footer -->
-          <div class="flex justify-end gap-4 mt-6">
+          <!-- Footer -->
+          <div class="modal-footer">
             <button
               @click="closeModal"
-              class="px-4 py-2 rounded-lg bg-subtle-light dark:bg-subtle-dark text-content-light dark:text-content-dark"
+              class="button button-secondary"
             >
               {{ mode === 'create' ? 'Cancelar' : 'Cerrar' }}
             </button>
             <button
               v-if="mode === 'create'"
               @click="submitSale"
-              class="px-4 py-2 rounded-lg bg-primary text-white"
-              :disabled="!clientName || store.items.length === 0"
+              class="button button-primary"
+              :disabled="!canSubmit"
             >
-              Guardar Venta
+              <span class="material-symbols-outlined">payments</span>
+              Cobrar Venta
             </button>
           </div>
         </div>
       </div>
+
+      <!-- Product Replacer Modal -->
+      <ProductReplacer
+        :is-open="isReplacerOpen"
+        :current-product="itemToReplace"
+        @close="closeReplacer"
+        @replace="handleReplace"
+      />
     </Teleport>
   </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useApiService } from '~/services/api/api'; 
-import { useVentasStore } from '~/stores/ventas';  // Importa el store
+import { ref, computed, watch } from 'vue'
+import { useVentasStore } from '~/stores/ventas'
+import type { VentaItem } from '~/stores/ventas'
+import ProductSearch from './ProductSearch.vue'
+import CartItem from './CartItem.vue'
+import ProductReplacer from './ProductReplacer.vue'
 
-const props = defineProps({
-  isOpen: Boolean,
-  mode: {
-    type: String,
-    default: 'create', // 'create' or 'view'
-  },
-  sale: {
-    type: Object,
-    default: () => ({}),
-  },
-});
+interface Props {
+  isOpen: boolean
+  mode: 'create' | 'view' | 'edit'
+  sale?: any
+}
 
-const emit = defineEmits(['update:isOpen', 'submit']);
+const props = defineProps<Props>()
 
-const apiService = useApiService();
-const store = useVentasStore();  // Usa el store de Pinia
+const emit = defineEmits<{
+  'update:isOpen': [value: boolean]
+  submit: [data: { clientName: string; clientAddress: string }]
+}>()
 
-const clientName = ref('');
-const clientAddress = ref('');
-const allProducts = ref([]);
-const searchTerm = ref('');
-const loading = ref(false);
-const showSearch = ref(false);
-const placeholderImage = 'https://via.placeholder.com/150?text=Planta';
+const store = useVentasStore()
 
-// Filtered products based on search
-const filteredProducts = computed(() => {
-  if (!searchTerm.value) return [];
-  return allProducts.value.filter(p => 
-    (p.nombre || p.name || '').toLowerCase().includes(searchTerm.value.toLowerCase())
-  );
-});
+// Local state
+const clientName = ref('')
+const clientAddress = ref('')
+const isReplacerOpen = ref(false)
+const itemToReplace = ref<VentaItem | null>(null)
 
-// Debounce function for search
-const debounce = (fn: Function, delay: number) => {
-  let timeoutId: NodeJS.Timeout;
-  return (...args: any[]) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
-  };
-};
+// Computed
+const canSubmit = computed(() => {
+  return clientName.value.trim() !== '' && store.items.length > 0
+})
 
-// Load all products (o usa API search para eficiencia)
-const loadProducts = async () => {
-  if (allProducts.value.length > 0) return;
-  loading.value = true;
-  try {
-    const res = await apiService.getProducts();
-    if (res.success) {
-      allProducts.value = res.data.map(p => ({
-        id: p.id,
-        nombre: p.nombre || p.name,
-        precio_venta: Number(p.precio_venta || p.price || 0),  // Cast to number here
-        image_url: p.image_url || p.image
-      }));
-    }
-  } catch (error) {
-    console.error('Error loading products:', error);
-  } finally {
-    loading.value = false;
+// Formatear precio
+const formatPrice = (price: number): string => {
+  return price.toFixed(2)
+}
+
+// Handlers
+const handleProductSelect = (product: Omit<VentaItem, 'subtotal'>) => {
+  store.agregarItem(product)
+}
+
+const handleUpdateQuantity = (id: number, quantity: number) => {
+  store.actualizarCantidad(id, quantity)
+}
+
+const handleReplaceItem = (id: number) => {
+  const item = store.items.find(i => i.id === id)
+  if (item) {
+    itemToReplace.value = item
+    isReplacerOpen.value = true
   }
-};
+}
 
-// Debounced search
-const debouncedSearch = debounce(() => {
-  loadProducts();
-}, 300);
-
-// Toggle search visibility
-const toggleSearch = () => {
-  showSearch.value = !showSearch.value;
-  if (showSearch.value) {
-    loadProducts();
-    nextTick(() => {
-      const input = document.querySelector('input[placeholder="Buscar planta por nombre..."]') as HTMLInputElement;
-      input?.focus();
-    });
-  } else {
-    searchTerm.value = '';
+const handleRemoveItem = (id: number) => {
+  if (confirm('¿Eliminar este producto del carrito?')) {
+    store.removerItem(id)
   }
-};
+}
 
-// Add product to store
-const addProduct = (product: any) => {
-  console.log('Agregando producto al store:', product);  // DEBUG
-  store.agregarItem({
-    id: product.id,
-    nombre: product.nombre || product.name,
-    precioUnitario: Number(product.precio_venta || product.price || 0),
-    cantidad: 1
-  });
-  console.log('Store items después de agregar:', store.items);  // DEBUG
-  searchTerm.value = '';
-};
+const handleReplace = (newProduct: Omit<VentaItem, 'subtotal'>, keepQuantity: boolean) => {
+  if (itemToReplace.value) {
+    store.reemplazarItem(itemToReplace.value.id, newProduct)
+  }
+  closeReplacer()
+}
 
-// Update quantity in store
-const updateQuantity = (id: number, change: number) => {
-  const currentQty = store.items.find(i => i.id === id)?.cantidad || 1;
-  const newQty = Math.max(1, currentQty + change);
-  store.actualizarCantidad(id, newQty);
-};
+const closeReplacer = () => {
+  isReplacerOpen.value = false
+  itemToReplace.value = null
+}
 
-// Close modal and reset
-const closeModal = () => {
-  emit('update:isOpen', false);
-  showSearch.value = false;
-  searchTerm.value = '';
-  clientName.value = '';
-  clientAddress.value = '';
-  // NO limpiar store aquí: el parent lo maneja post-submit o al abrir nuevo
-};
-
-// Submit: emite solo datos no-cart (parent mergea con store)
 const submitSale = () => {
-  if (!clientName.value || store.items.length === 0) {  // Ya lo tenés, pero loggea
-    console.log('Submit falló: clientName=', clientName.value, 'items.length=', store.items.length);
-    alert('Completa el nombre del cliente y agrega al menos un producto.');
-    return;
+  if (!canSubmit.value) {
+    alert('Completa el nombre del cliente y agrega al menos un producto.')
+    return
   }
+
   emit('submit', {
     clientName: clientName.value,
     clientAddress: clientAddress.value
-  });
-  closeModal();
-};
+  })
 
-// Watch for open: sync data from props
-watch(() => props.isOpen, (newVal) => {
-  if (newVal) {
+  closeModal()
+}
+
+const closeModal = () => {
+  emit('update:isOpen', false)
+  // Reset local state
+  clientName.value = ''
+  clientAddress.value = ''
+}
+
+const handleOverlayClick = () => {
+  if (mode === 'view') {
+    closeModal()
+  }
+}
+
+// Watch for modal open/close
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
     if (props.mode === 'view' && props.sale) {
-      // View: set read-only, load items to store
-      clientName.value = props.sale.clientName || props.sale.customer || '';
-      clientAddress.value = props.sale.clientAddress || props.sale.address || '';
-      store.limpiarItems();  // Limpia antes de cargar
+      // Load sale data for viewing
+      clientName.value = props.sale.clientName || props.sale.customer || ''
+      clientAddress.value = props.sale.clientAddress || props.sale.address || ''
+      
+      // Load items into store
+      store.limpiarItems()
       if (props.sale.items && props.sale.items.length > 0) {
         props.sale.items.forEach((item: any) => {
           store.agregarItem({
             id: item.product_id || item.id,
             nombre: item.nombre || item.productName || 'Desconocido',
             precioUnitario: Number(item.precio_unitario || item.price || 0),
-            cantidad: item.cantidad || item.quantity || 1
-          });
-        });
+            cantidad: item.cantidad || item.quantity || 1,
+            image: item.image || item.image_url
+          })
+        })
       }
     } else if (props.mode === 'create') {
-      // Create: reset local, store ya limpio por parent
-      clientName.value = '';
-      clientAddress.value = '';
-      loadProducts();
+      // Reset for new sale
+      clientName.value = ''
+      clientAddress.value = ''
     }
   } else {
-    // Al cerrar, reset local (store maneja parent)
-    clientName.value = '';
-    clientAddress.value = '';
+    // Reset on close
+    clientName.value = ''
+    clientAddress.value = ''
   }
-}, { immediate: true });
-
-onMounted(() => {
-  if (props.isOpen && props.mode === 'create') {
-    loadProducts();
-  }
-});
+})
 </script>
 
 <style scoped>
-/* Ensure Material Symbols are styled */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.close-button {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.client-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-field {
+  width: 100%;
+  height: 56px;
+  padding: 0 16px;
+  font-size: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-field:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.clear-cart-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-cart-button:hover {
+  background: #fee2e2;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-cart .material-symbols-outlined {
+  font-size: 64px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.empty-cart p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.empty-cart-hint {
+  font-size: 14px !important;
+  color: #9ca3af !important;
+  margin-top: 8px !important;
+}
+
+.summary-section {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 0;
+}
+
+.summary-card {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.summary-row.total {
+  padding-top: 12px;
+}
+
+.summary-label {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.summary-row.total .summary-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.summary-row.total .summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.summary-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.button-secondary {
+  background: white;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.button-secondary:hover {
+  background: #f9fafb;
+}
+
+.button-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.button-primary:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .modal-container {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .modal-header,
+  .modal-content,
+  .modal-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .button {
+    flex: 1;
+    min-width: 0;
+  }
 }
 </style>

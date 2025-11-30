@@ -1,143 +1,205 @@
 <template>
-  <div>
-    <div class="mb-4 flex justify-between items-center">
-      <div>
-        <h1 class="text-xl font-bold text-gray-900">Productos</h1>
-        <p class="text-sm text-gray-600">Gestiona el inventario de productos</p>
+  <div class="min-h-screen bg-gray-50 pb-20">
+    <!-- Header & Stats -->
+    <div class="bg-white border-b border-gray-200 px-4 py-4 mb-4">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Productos</h1>
+          <p class="text-sm text-gray-600">Gestiona tu inventario</p>
+        </div>
+        
+        <button 
+          @click="openCreateModal" 
+          class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full shadow-lg"
+          title="Crear nuevo producto"
+        >
+          <Icon name="heroicons:plus" class="w-6 h-6" />
+        </button>
       </div>
-      
-      <button 
-  @click="openCreateModal" 
-  class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0 relative group"
-  title="Crear nuevo producto"
->
-  <Icon name="heroicons:plus" class="w-5 h-5" />
-  <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2">
-    Crear nuevo producto
-  </span>
-</button>
-    </div>
 
-    <div class="bg-white rounded-lg shadow-sm p-3 mb-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Buscar</label>
-          <input
-            v-model="filters.search"
-            type="text"
-            placeholder="Nombre..."
-            class="input w-full text-xs py-1 px-2"
-            @input="applyFilters"
-          />
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+        <!-- Total Products -->
+        <div class="product-stat-card total">
+          <div class="product-stat-icon">
+            <Icon name="heroicons:cube" class="w-6 h-6" />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Total Productos</p>
+            <p class="stat-value">{{ totalProducts }}</p>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
-          <select v-model="filters.category" class="input w-full text-xs py-1 px-2" @change="applyFilters">
-            <option value="">Todas</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
-          </select>
+
+        <!-- Inventory Value -->
+        <div class="product-stat-card value">
+          <div class="product-stat-icon">
+            <Icon name="heroicons:currency-dollar" class="w-6 h-6" />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Valor Inventario</p>
+            <p class="stat-value">{{ formatCurrency(totalInventoryValue) }}</p>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
-          <select v-model="filters.stock" class="input w-full text-xs py-1 px-2" @change="applyFilters">
-            <option value="">Todos</option>
-            <option value="in">En stock</option>
-            <option value="low">Stock bajo</option>
-            <option value="out">Sin stock</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Ordenar por</label>
-          <select v-model="filters.sort" class="input w-full text-xs py-1 px-2" @change="applyFilters">
-            <option value="name">Nombre</option>
-            <option value="precio_venta">Precio</option>
-            <option value="stock">Stock</option>
-          </select>
+
+        <!-- Low Stock -->
+        <div class="product-stat-card low-stock">
+          <div class="product-stat-icon">
+            <Icon name="heroicons:exclamation-triangle" class="w-6 h-6" />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Stock Bajo</p>
+            <p class="stat-value">{{ lowStockCount }}</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-4">
-      <p class="text-sm text-gray-600">Cargando productos...</p>
-    </div>
-    <div v-else-if="!filteredProducts.length" class="text-center py-4">
-      <p class="text-sm text-gray-600">No se encontraron productos.</p>
-    </div>
-    <div v-else class="space-y-4">
-  <div
-    v-for="product in filteredProducts"
-    :key="product.id"
-    class="flex items-center gap-4 rounded-lg bg-white dark:bg-black/20 p-3 shadow-sm transition-all hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer"
-    @click="toggleDetails(product.id)"
-  >
-    <!-- Image with Status Indicator -->
-    <div class="relative h-16 w-16 shrink-0">
-  <img
-    loading="lazy"
-    :src="product.image_url || '/placeholder.png'"
-    :alt="product.name"
-    class="h-full w-full rounded-lg object-cover"
-    @error="product.image_url = placeHolderImg"
-  />
-<div
-  class="absolute -right-2 -top-2 h-7 w-7 text-center rounded-full border-2 border-white dark:border-background-dark"
-  :style="{ backgroundColor: product.stock === 0 ? '#ef4444' : product.stock < 10 ? '#f59e0b' : '#10b981' }"
-  :title="getStockStatusText(product.stock)"
->{{ product.stock }}</div>
-</div>
+    <div class="px-4">
+      <!-- Filters -->
+      <div class="filters-card">
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label class="filter-label">Buscar</label>
+            <div class="relative">
+              <input
+                v-model="filters.search"
+                type="text"
+                placeholder="Nombre, SKU..."
+                class="filter-input w-full pl-9"
+                @input="applyFilters"
+              />
+              <Icon name="heroicons:magnifying-glass" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Categoría</label>
+            <select v-model="filters.category" class="filter-select w-full" @change="applyFilters">
+              <option value="">Todas las categorías</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ capitalize(cat) }}</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Estado Stock</label>
+            <select v-model="filters.stock" class="filter-select w-full" @change="applyFilters">
+              <option value="">Todos</option>
+              <option value="in">En stock</option>
+              <option value="low">Stock bajo (< 10)</option>
+              <option value="out">Sin stock</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-    <!-- Product Details -->
-    <div class="flex-1">
-      <p class="font-semibold text-text-primary-light dark:text-text-primary-dark">{{ product.name }}</p>
-      <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">${{ product.precio_venta }}</p>
-    </div>
+      <!-- Loading State -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+        <Icon name="heroicons:arrow-path" class="w-8 h-8 text-primary animate-spin mb-2" />
+        <p class="text-sm text-gray-500">Cargando inventario...</p>
+      </div>
 
-    <!-- Chevron Icon -->
-    <span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark">chevron_right</span>
+      <!-- Empty State -->
+      <div v-else-if="!filteredProducts.length" class="empty-state">
+        <div class="empty-icon">
+          <Icon name="heroicons:cube-transparent" class="w-16 h-16" />
+        </div>
+        <h3 class="empty-title">No se encontraron productos</h3>
+        <p class="empty-description">Intenta ajustar los filtros o crea un nuevo producto</p>
+        <button @click="openCreateModal" class="empty-action">
+          <Icon name="heroicons:plus" class="w-5 h-5" />
+          Crear producto
+        </button>
+      </div>
 
-    <!-- Details Section (Collapsible) -->
-    <div
-      v-show="isDetailsOpen(product.id)"
-      class="p-3 bg-gray-50 dark:bg-gray-900 transition-all duration-300 ease-in-out w-full"
-      :id="'details-' + product.id"
-    >
-      <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark capitalize">{{ product.category }}</p>
-      <p
-        class="text-xs"
-        :class="product.publicado ? 'text-success' : 'text-text-secondary-light dark:text-text-secondary-dark'"
-      >
-        {{ product.publicado ? 'Publicado' : 'No publicado' }}
-      </p>
-      <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-        Stock: {{ product.stock ? product.stock : 'N/A' }}
-      </p>
-      <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-        Maceta: {{ product.pot_size ? capitalize(product.pot_size) : 'N/A' }}
-      </p>
-      <div class="flex flex-col gap-1 mt-2">
-        <div class="text-sm font-bold text-primary">${{ product.precio_compra }}</div>
+      <!-- Products List -->
+      <div v-else class="space-y-3">
+        <div
+          v-for="product in filteredProducts"
+          :key="product.id"
+          class="product-card"
+          @click="toggleDetails(product.id)"
+        >
+          <div class="product-header">
+            <!-- Image & Badge -->
+            <div class="product-image-container">
+              <img
+                loading="lazy"
+                :src="product.image_url || '/placeholder.png'"
+                :alt="product.name"
+                class="product-image"
+                @error="product.image_url = '/placeholder.png'"
+              />
+              <div 
+                class="stock-badge"
+                :class="{
+                  'in-stock': product.stock >= 10,
+                  'low-stock': product.stock > 0 && product.stock < 10,
+                  'out-of-stock': product.stock === 0
+                }"
+              >
+                {{ product.stock }}
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="product-info">
+              <span class="product-category">{{ product.category }}</span>
+              <h3 class="product-name">{{ product.name }}</h3>
+              <p class="product-price">{{ formatCurrency(product.precio_venta) }}</p>
+            </div>
+
+            <!-- Chevron -->
+            <Icon 
+              name="heroicons:chevron-down" 
+              class="w-5 h-5 text-gray-400 transition-transform duration-200"
+              :class="{ 'rotate-180': isDetailsOpen(product.id) }"
+            />
+          </div>
+
+          <!-- Expandable Details -->
+          <div v-show="isDetailsOpen(product.id)" class="product-details">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 mb-4">
+              <div class="detail-row">
+                <span class="detail-label">SKU</span>
+                <span class="detail-value">{{ product.sku || '-' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Tamaño</span>
+                <span class="detail-value">{{ product.pot_size || '-' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Costo</span>
+                <span class="detail-value text-gray-500">{{ formatCurrency(Number(product.precio_compra || 0)) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Margen</span>
+                <span class="detail-value text-green-600">
+                  {{ Math.round(((product.precio_venta - Number(product.precio_compra || 0)) / product.precio_venta) * 100) }}%
+                </span>
+              </div>
+            </div>
+
+            <div class="product-actions">
+              <button 
+                @click.stop="openEditModal(product)"
+                class="product-action-btn edit"
+                title="Editar"
+              >
+                <Icon name="heroicons:pencil-square" class="w-5 h-5" />
+              </button>
+              <button 
+                @click.stop="deleteProduct(product.id)"
+                class="product-action-btn delete"
+                title="Eliminar"
+              >
+                <Icon name="heroicons:trash" class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="flex gap-2">
-      <button
-        @click.stop="openEditModal(product)"
-        class="btn btn-outline text-xs px-2 py-1 min-w-[44px] min-h-[44px]"
-        aria-label="Editar producto"
-      >
-        <span class="material-symbols-outlined">edit</span>
-      </button>
-      <button
-        @click.stop="deleteProduct(product.id)"
-        class="btn btn-outline text-error hover:bg-error/10 text-xs px-2 py-1 min-w-[44px] min-h-[44px]"
-        aria-label="Eliminar producto"
-      >
-        <span class="material-symbols-outlined">delete</span>
-      </button>
-    </div>
-  </div>
-</div>
 
     <!-- Modal de Creación -->
     <Modal :open="isCreateModalOpen" @close="closeCreateModal" class="sm:max-w-full sm:h-full">
@@ -400,6 +462,24 @@ const applyFilters = () => {
   filters.search = filters.search.trim();
 };
 
+// Estadísticas computadas
+const totalProducts = computed(() => filteredProducts.value.length);
+
+const totalInventoryValue = computed(() => {
+  return filteredProducts.value.reduce((sum, p) => sum + (p.precio_venta * p.stock), 0);
+});
+
+const lowStockCount = computed(() => {
+  return filteredProducts.value.filter(p => p.stock < 10).length;
+});
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS'
+  }).format(amount);
+};
+
 const formatPrice = (precio_venta: string) => {
   return parseFloat(precio_venta).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
@@ -585,7 +665,10 @@ onMounted(loadProducts);
 
 </script>
 
+
 <style scoped>
+@import '@/assets/css/products.css';
+
 /* Estilos existentes */
 .input {
   border: 1px solid #d1d5db;
@@ -639,42 +722,7 @@ onMounted(loadProducts);
 .bg-error\/10 { background-color: rgba(239, 68, 68, 0.1); }
 .text-primary { color: #3b82f6; }
 
-/* Estilos móviles */
-@media (max-width: 640px) {
-  .input {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.6rem;
-  }
-  .btn:not(.rounded-full) {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-  }
-  .grid-cols-2 {
-    gap: 1rem;
-  }
-  .aspect-w-4.aspect-h-3 img {
-    height: 8rem;
-  }
-  .p-3 {
-    padding: 0.5rem;
-  }
-  h1.text-xl {
-    font-size: 1rem;
-  }
-  .text-sm {
-    font-size: 0.75rem;
-  }
-  .transition-all {
-    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  }
-  [v-show="false"] {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-  }
-  [v-show="true"] {
-    max-height: 200px;
-    opacity: 1;
-  }
+body {
+  min-height: max(884px, 100dvh);
 }
 </style>

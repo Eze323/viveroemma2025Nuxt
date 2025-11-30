@@ -1,0 +1,363 @@
+/* Statistics Cards */
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.revenue {
+    border-left: 4px solid #10b981;
+}
+
+.stat-card.sales {
+    border-left: 4px solid #3b82f6;
+}
+
+.stat-card.product {
+    border-left: 4px solid #f59e0b;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.stat-card.revenue .stat-icon {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.stat-card.sales .stat-icon {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.stat-card.product .stat-icon {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Sales Cards */
+.sale-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sale-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.sale-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.client-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.sale-client {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sale-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6b7280;
+    flex-wrap: wrap;
+}
+
+.sale-id {
+    font-weight: 600;
+    color: #3b82f6;
+}
+
+.sale-separator {
+    color: #d1d5db;
+}
+
+.sale-date,
+.sale-time {
+    color: #6b7280;
+}
+
+.sale-amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: #10b981;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.sale-items {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0 0 0;
+}
+
+/* Expandable Details */
+.sale-details {
+    margin-top: 16px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+.details-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin-bottom: 16px;
+}
+
+.details-section {
+    margin-bottom: 16px;
+}
+
+.details-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    font-size: 14px;
+    color: #111827;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-quantity {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    background: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.item-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.details-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.action-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button.view {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-button.view:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border-radius: 50%;
+    color: #9ca3af;
+    margin-bottom: 24px;
+}
+
+.empty-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 8px 0;
+}
+
+.empty-description {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+}
+
+.empty-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.empty-action:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .sale-card {
+        padding: 12px;
+    }
+
+    .sale-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .sale-amount {
+        font-size: 18px;
+    }
+
+    .action-button {
+        padding: 12px;
+        font-size: 14px;
+    }
+}

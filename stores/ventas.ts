@@ -1,25 +1,36 @@
-// stores/ventas.ts – Versión corregida con logs y safe guards
+// stores/ventas.ts – Store optimizado para ventas móviles con soporte offline
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useSyncQueueStore } from './syncQueue'
+import { useNetworkStatus } from '~/composables/useNetworkStatus'
 
-interface VentaItem {
+export interface VentaItem {
   id: number
   nombre: string
   cantidad: number
   precioUnitario: number
   subtotal?: number
+  image?: string  // Agregado para mostrar imagen en carrito
 }
 
 export const useVentasStore = defineStore('ventas', () => {
   const items = ref<VentaItem[]>([])
   const ivaRate = ref(0.21)
+  const syncQueue = useSyncQueueStore()
 
+  /**
+   * Agrega un item al carrito. Si ya existe, suma la cantidad.
+   */
   const agregarItem = (nuevoItem: Omit<VentaItem, 'subtotal'>) => {
     const existingIndex = items.value.findIndex(i => i.id === nuevoItem.id)
+
     if (existingIndex > -1) {
+      // Si ya existe, sumar cantidad
       items.value[existingIndex].cantidad += nuevoItem.cantidad || 1
-      items.value[existingIndex].subtotal = items.value[existingIndex].cantidad * items.value[existingIndex].precioUnitario
+      items.value[existingIndex].subtotal =
+        items.value[existingIndex].cantidad * items.value[existingIndex].precioUnitario
     } else {
+      // Si no existe, agregar nuevo
       const item: VentaItem = {
         ...nuevoItem,
         cantidad: nuevoItem.cantidad || 1,
@@ -29,6 +40,9 @@ export const useVentasStore = defineStore('ventas', () => {
     }
   }
 
+  /**
+   * Actualiza la cantidad de un item específico
+   */
   const actualizarCantidad = (id: number, cantidad: number) => {
     const item = items.value.find(i => i.id === id)
     if (item) {
@@ -37,50 +51,124 @@ export const useVentasStore = defineStore('ventas', () => {
     }
   }
 
+  /**
+   * Reemplaza un item por otro, manteniendo la cantidad actual
+   * Útil para cambiar por producto más barato
+   */
+  const reemplazarItem = (idActual: number, nuevoProducto: Omit<VentaItem, 'subtotal'>) => {
+    const index = items.value.findIndex(i => i.id === idActual)
+
+    if (index > -1) {
+      const cantidadActual = items.value[index].cantidad
+
+      items.value[index] = {
+        ...nuevoProducto,
+        cantidad: cantidadActual,
+        subtotal: nuevoProducto.precioUnitario * cantidadActual
+      }
+    }
+  }
+
+  /**
+   * Elimina un item del carrito
+   */
   const removerItem = (id: number) => {
     items.value = items.value.filter(i => i.id !== id)
   }
 
+  /**
+   * Limpia todos los items del carrito
+   */
   const limpiarItems = () => {
     items.value = []
   }
 
+  /**
+   * Actualiza la tasa de IVA
+   */
   const setIvaRate = (rate: number) => {
     ivaRate.value = rate
   }
 
-  const subtotal = computed(() => 
-    items.value.reduce((sum, item) => sum + (item.subtotal || item.precioUnitario * item.cantidad), 0)
+  /**
+   * Guarda una venta (online o offline)
+   */
+  const guardarVenta = async (saleData: any): Promise<{ success: boolean; offline?: boolean; error?: string }> => {
+    const { isOnline } = useNetworkStatus()
+
+    // Preparar payload
+    const payload = {
+      ...saleData,
+      items: getPayload.value.items,
+      subtotal: getPayload.value.subtotal,
+      iva: getPayload.value.iva,
+      total: getPayload.value.total,
+    }
+
+    if (!isOnline.value) {
+      // Modo offline: guardar en cola
+      console.log('Sin conexión - guardando venta en cola de sincronización')
+
+      syncQueue.addOperation({
+        type: 'sale',
+        action: 'create',
+        data: payload,
+      })
+
+      return {
+        success: true,
+        offline: true,
+      }
+    }
+
+    // Modo online: intentar guardar directamente
+    // (esto se maneja en el componente que llama a esta función)
+    return {
+      success: true,
+      offline: false,
+    }
+  }
+
+  // Computed properties para cálculos automáticos
+  const subtotal = computed(() =>
+    items.value.reduce((sum, item) =>
+      sum + (item.subtotal || item.precioUnitario * item.cantidad), 0
+    )
   )
 
   const ivaTotal = computed(() => subtotal.value * ivaRate.value)
 
   const totalFinal = computed(() => subtotal.value + ivaTotal.value)
 
-  // Payload para backend – con safe guard para evitar undefined
-  const getPayload = computed(() => {
-    const payload = {
-      items: items.value.map(i => ({ 
-        productId: i.id,
-        quantity: i.cantidad,
-        unitPrice: i.precioUnitario
-      })),
-      subtotal: subtotal.value,
-      iva: ivaTotal.value,
-      total: totalFinal.value
-    }
-    console.log('getPayload computed retornando:', payload)  // DEBUG: Confirma que retorna object
-    return payload
-  })
+  /**
+   * Genera el payload para enviar al backend
+   */
+  const getPayload = computed(() => ({
+    items: items.value.map(i => ({
+      productId: i.id,
+      quantity: i.cantidad,
+      unitPrice: i.precioUnitario
+    })),
+    subtotal: subtotal.value,
+    iva: ivaTotal.value,
+    total: totalFinal.value
+  }))
 
   return {
+    // State
     items,
     ivaRate,
+
+    // Actions
     agregarItem,
     actualizarCantidad,
+    reemplazarItem,  // Nueva función
     removerItem,
     limpiarItems,
     setIvaRate,
+    guardarVenta,
+
+    // Getters
     subtotal,
     ivaTotal,
     totalFinal,

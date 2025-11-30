@@ -1,190 +1,204 @@
 // server/api/sales/index.post.ts
-import { useDrizzle } from '~/server/utils/drizzle';
-import { sales, sale_items, customers, products } from '~/src/db/schema';
-import { eq, sql } from 'drizzle-orm';
-import { createError, defineEventHandler, readBody, getHeader } from 'h3';
-import jwt from 'jsonwebtoken';
+import { useDrizzle } from '~/server/utils/drizzle'
+import { sales, sale_items, customers, products } from '~/src/db/schema'
+import { eq, sql } from 'drizzle-orm'
+import { createError, defineEventHandler, readBody, getHeader } from 'h3'
+import jwt from 'jsonwebtoken'
+import { validateSaleData, calculateSaleTotals, ValidationError } from '~/server/utils/validation'
 
-// Interfaz para el cuerpo de la solicitud
 interface SaleItem {
-  productId: number;
-  quantity: number;
-  unitPrice: number;
+  productId: number
+  quantity: number
+  unitPrice: number
 }
 
 interface SaleBody {
-  customerId?: number;
-  customer: string;
-  email?: string;  // Opcional, para unique check
-  address?: string;  // Opcional, guarda en customers si existe
-  items: SaleItem[];
-  subtotal?: number;
-  iva?: number;
-  total?: number;
+  customerId?: number
+  customer: string
+  email?: string
+  address?: string
+  items: SaleItem[]
+  subtotal?: number
+  iva?: number
+  total?: number
 }
 
-// Validar JWT_SECRET (opcional por ahora)
-if (!process.env.JWT_SECRET) {
-  console.warn('JWT_SECRET no está definido – autenticación deshabilitada temporalmente');
-}
-const JWT_SECRET = process.env.JWT_SECRET || 'temp-secret'; // Fallback para evitar crash
+const JWT_SECRET = process.env.JWT_SECRET || 'temp-secret'
 
 export default defineEventHandler(async (event) => {
   try {
-    // TEMPORAL: Bypass validación JWT para testing – hardcodea userId=1 (admin)
-    // TODO: Re-activa cuando integres auth real
-    /*
-    const authHeader = getHeader(event, 'Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw createError({
-        statusCode: 401,
-        statusMessage: 'Token de autenticación faltante o inválido',
-      });
-    }
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; email: string; role: string };
-    */
-    const decoded = { userId: 1, email: 'admin@test.com', role: 'admin' }; // Hardcode para testing
+    // Auth (temporal bypass)
+    const decoded = { userId: 1, email: 'admin@test.com', role: 'admin' }
 
-    
-    // Leer y tipar el cuerpo de la solicitud
-    const body = await readBody<SaleBody>(event);
-    console.log('Body recibido en /api/sales:', body);  // DEBUG: Ve qué llega
+    // Read and validate body
+    const body = await readBody<SaleBody>(event)
 
-    const { customerId: providedCustomerId, customer, email, address, items, subtotal, iva, total } = body;
-
-    // Validar entrada
-   if (!customer || !items || items.length === 0) {
-      console.log('Validación falló: customer=', customer, 'items=', items, 'items.length=', items?.length);  // DEBUG
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'Faltan datos de cliente o ítems de venta',
-      });
+    // Validate sale data
+    try {
+      validateSaleData(body)
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: error.message,
+        })
+      }
+      throw error
     }
 
-    const db = useDrizzle();
+    const { customerId: providedCustomerId, customer, email, address, items } = body
+
+    const db = useDrizzle()
     if (!db) {
       throw createError({
         statusCode: 500,
         statusMessage: 'Error de conexión a la base de datos',
-      });
+      })
     }
 
-   
+    // Calculate totals server-side (don't trust frontend)
+    const totals = calculateSaleTotals(items)
 
-    // Validar productos y calcular total_price (usa total del body si viene, o calcula)
-    let totalPrice = total || 0;
-    if (!totalPrice) {
-      totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-    }
-    for (const item of items) {
-      const [product] = await db
-        .select({ id: products.id, name: products.name, stock: products.stock })
-        .from(products)
-        .where(eq(products.id, item.productId))
-        .limit(1);
-      if (!product) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: `Producto con ID ${item.productId} no encontrado`,
-        });
-      }
-      if (product.stock < item.quantity) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: `Stock insuficiente para el producto ${product.name}`,
-        });
-      }
-    }
-
-     // Crear la venta en una transacción
+    // Create sale in transaction
     const newSale = await db.transaction(async (tx) => {
-      let finalCustomerId: number | null = providedCustomerId || null;
-      // NUEVA LÓGICA: Auto-crear o buscar cliente
+      // 1. Validate stock availability for all products
+      const stockChecks = await Promise.all(
+        items.map(async (item) => {
+          const [product] = await tx
+            .select({
+              id: products.id,
+              name: products.name,
+              stock: products.stock
+            })
+            .from(products)
+            .where(eq(products.id, item.productId))
+            .limit(1)
+
+          if (!product) {
+            throw createError({
+              statusCode: 404,
+              statusMessage: `Producto con ID ${item.productId} no encontrado`,
+            })
+          }
+
+          if (product.stock < item.quantity) {
+            throw createError({
+              statusCode: 400,
+              statusMessage: `Stock insuficiente para ${product.name}. Disponible: ${product.stock}, Solicitado: ${item.quantity}`,
+            })
+          }
+
+          return product
+        })
+      )
+
+      // 2. Resolve or create customer
+      let finalCustomerId: number | null = providedCustomerId || null
+
       if (!finalCustomerId) {
-        // Busca por nombre (o email si lo tenés) – unique check
+        // Search for existing customer by name
         const [existingCustomer] = await tx
           .select({ id: customers.id })
           .from(customers)
-          .where(eq(customers.name, customer))  // Ajustado: usa 'name' como columna del cliente
-          .limit(1);
-          if (existingCustomer) {
-          finalCustomerId = existingCustomer.id;
-          console.log('Cliente existente encontrado, ID:', finalCustomerId);
+          .where(eq(customers.name, customer))
+          .limit(1)
+
+        if (existingCustomer) {
+          finalCustomerId = existingCustomer.id
+          console.log('Cliente existente encontrado, ID:', finalCustomerId)
         } else {
-          // Crea nuevo cliente
+          // Create new customer
           const [newCustomer] = await tx
             .insert(customers)
             .values({
-              name: customer,  // Nombre
+              name: customer,
               address: address || null,
               email: email || null,
-              // Agrega otros defaults: phone, created_at, etc. si schema lo requiere
             })
-            .$returningId();
+            .$returningId()
 
-          finalCustomerId = newCustomer.id;
-          console.log('Nuevo cliente creado, ID:', finalCustomerId);
+          finalCustomerId = newCustomer.id
+          console.log('Nuevo cliente creado, ID:', finalCustomerId)
         }
       }
 
-      // Ahora inserta la venta con el customerId
+      // 3. Create sale record
       const [sale] = await tx
         .insert(sales)
         .values({
           userId: decoded.userId,
-          customerId: finalCustomerId,  // Usa el ID resuelto
-          customer,  // String fallback por si querés redundancia
+          customerId: finalCustomerId,
+          customer,
           email: email || null,
           seller: decoded.email,
           date: new Date(),
           time: new Date(),
-          status: 'Pendiente',
-          totalPrice,
-          subtotal: subtotal || 0,
-          iva: iva || 0,
+          status: 'Completada', // Changed from 'Pendiente' to 'Completada'
+          totalPrice: totals.total,
+          subtotal: totals.subtotal,
+          iva: totals.iva,
           createdAt: new Date(),
         })
-        .$returningId();  // ¡FIX! Usa .returning() para MySQL/Drizzle – no .$returningId()
+        .$returningId()
 
-      // Crear los ítems de la venta y actualizar stock
+      // 4. Create sale items and update stock atomically
       for (const item of items) {
+        // Insert sale item
         await tx.insert(sale_items).values({
           sale_id: sale.id,
           product_id: item.productId,
           quantity: item.quantity,
-          unit_price: item.unitPrice.toString(), // Convert to string if schema expects string
-        });
+          unit_price: item.unitPrice.toString(),
+        })
 
-        // Actualizar el stock del producto
+        // Update product stock (atomic decrement)
         await tx
           .update(products)
-          .set({ stock: sql`${products.stock} - ${item.quantity}` })
-          .where(eq(products.id, item.productId));
+          .set({
+            stock: sql`${products.stock} - ${item.quantity}`,
+            updatedAt: new Date()
+          })
+          .where(eq(products.id, item.productId))
       }
 
-      return sale;
-    });
+      return sale
+    })
 
+    // Return success response
     return {
       success: true,
       data: {
         id: newSale.id,
         customer,
-        customerId: newSale.customerId,  // Incluye el ID para frontend
-        subtotal: subtotal || 0,
-        iva: iva || 0,
-        total: totalPrice,
-        date: new Date().toISOString().split('T')[0],  // Formato YYYY-MM-DD
-        status: 'Pendiente',
+        customerId: newSale.customerId,
+        subtotal: totals.subtotal,
+        iva: totals.iva,
+        total: totals.total,
+        date: new Date().toISOString().split('T')[0],
+        status: 'Completada',
+        items: items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
       },
-    };
+    }
   } catch (error) {
-    console.error('Error en /api/sales:', error);
-    const err = error as { statusCode?: number; statusMessage?: string };
+    console.error('Error en /api/sales:', error)
+
+    // Handle validation errors
+    if (error instanceof ValidationError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: error.message,
+      })
+    }
+
+    // Handle other errors
+    const err = error as { statusCode?: number; statusMessage?: string }
     throw createError({
       statusCode: err.statusCode || 500,
       statusMessage: err.statusMessage || 'Error en el servidor',
-    });
+    })
   }
-});
+})
