@@ -172,8 +172,8 @@ const canSubmit = computed(() => {
 })
 
 // Formatear precio
-const formatPrice = (price: number): string => {
-  return price.toFixed(2)
+const formatPrice = (price: number | undefined | null): string => {
+  return Number(price || 0).toFixed(2)
 }
 
 // Handlers
@@ -241,7 +241,7 @@ const handleOverlayClick = () => {
 // Watch for modal open/close
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
-    if (props.mode === 'view' && props.sale) {
+    if ((props.mode === 'view' || props.mode === 'edit') && props.sale) {
       // Load sale data for viewing
       clientName.value = props.sale.clientName || props.sale.customer || ''
       clientAddress.value = props.sale.clientAddress || props.sale.address || ''
@@ -253,7 +253,7 @@ watch(() => props.isOpen, (isOpen) => {
           store.agregarItem({
             id: item.product_id || item.id,
             nombre: item.nombre || item.productName || 'Desconocido',
-            precioUnitario: Number(item.precio_unitario || item.price || 0),
+            precioUnitario: Number(item.unitPrice || item.precio_unitario || item.price || 0),
             cantidad: item.cantidad || item.quantity || 1,
             image: item.image || item.image_url
           })

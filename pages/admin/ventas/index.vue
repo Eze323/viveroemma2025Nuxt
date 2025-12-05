@@ -253,7 +253,10 @@ const loadSales = async () => {
   try {
     const response = await api.getSales();
     if (response && response.success && Array.isArray(response.data)) {
-      sales.value = response.data;
+      sales.value = response.data.map(s => ({
+        ...s,
+        items: Array.isArray(s.items) ? s.items : []
+      }));
     } else {
       sales.value = [];
       error.value = response.error || 'No se pudieron cargar las ventas.';
@@ -326,7 +329,7 @@ const openSaleModal = (mode: 'create' | 'edit', sale = {}) => {
         store.agregarItem({
           id: item.productId || item.id,
           nombre: item.productName || item.nombre,
-          precioUnitario: item.precioUnitario || item.precio_unitario,
+          precioUnitario: item.unitPrice || item.precioUnitario || item.precio_unitario,
           cantidad: item.quantity || item.cantidad
         });
       });

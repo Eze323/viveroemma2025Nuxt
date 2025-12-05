@@ -84,8 +84,8 @@ const emit = defineEmits<{
 
 const placeholderImage = 'https://via.placeholder.com/80?text=🌱'
 
-const formatPrice = (price: number): string => {
-  return price.toFixed(2)
+const formatPrice = (price: number | undefined | null): string => {
+  return Number(price || 0).toFixed(2)
 }
 
 const increaseQuantity = () => {

@@ -6,6 +6,7 @@ import { createError, defineEventHandler, readBody, getHeader } from 'h3'
 import jwt from 'jsonwebtoken'
 import { validateSaleData, calculateSaleTotals, ValidationError } from '~/server/utils/validation'
 
+
 interface SaleItem {
   productId: number
   quantity: number
@@ -58,6 +59,7 @@ export default defineEventHandler(async (event) => {
 
     // Calculate totals server-side (don't trust frontend)
     const totals = calculateSaleTotals(items)
+    let finalCustomerId: number | null = null
 
     // Create sale in transaction
     const newSale = await db.transaction(async (tx) => {
@@ -93,7 +95,7 @@ export default defineEventHandler(async (event) => {
       )
 
       // 2. Resolve or create customer
-      let finalCustomerId: number | null = providedCustomerId || null
+      finalCustomerId = providedCustomerId || null
 
       if (!finalCustomerId) {
         // Search for existing customer by name
@@ -132,12 +134,10 @@ export default defineEventHandler(async (event) => {
           email: email || null,
           seller: decoded.email,
           date: new Date(),
-          time: new Date(),
-          status: 'Completada', // Changed from 'Pendiente' to 'Completada'
-          totalPrice: totals.total,
-          subtotal: totals.subtotal,
-          iva: totals.iva,
-          createdAt: new Date(),
+          time: new Date().toLocaleTimeString('en-GB', { hour12: false }),
+          status: 'Completada',
+          totalPrice: totals.total.toString(),
+          // created_at will be set automatically by defaultNow
         })
         .$returningId()
 
@@ -156,7 +156,7 @@ export default defineEventHandler(async (event) => {
           .update(products)
           .set({
             stock: sql`${products.stock} - ${item.quantity}`,
-            updatedAt: new Date()
+            updated_at: new Date(),
           })
           .where(eq(products.id, item.productId))
       }
@@ -170,7 +170,7 @@ export default defineEventHandler(async (event) => {
       data: {
         id: newSale.id,
         customer,
-        customerId: newSale.customerId,
+        customerId: finalCustomerId,
         subtotal: totals.subtotal,
         iva: totals.iva,
         total: totals.total,

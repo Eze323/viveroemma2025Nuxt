@@ -91,17 +91,18 @@ export default defineEventHandler(async (event) => {
     // Paso 1: Fetch ventas básicas (sin joins a customer/user)
     const baseSales = await db
       .select({
-      id: sales.id,
-      customer: sales.customerId,
-      clientName: sales.customer,
-      email: sales.email,
-      seller: sales.seller,
-      time: sql`DATE_FORMAT(${sales.date}, '%H:%i %p')`.as('time'),
-      date: sql`DATE(${sales.date})`.as('date'),
-      amount: sales.totalPrice,
+        id: sales.id,
+        customer: sales.customerId,
+        clientName: sales.customer,
+        email: sales.email,
+        seller: sales.seller,
+        time: sql`DATE_FORMAT(${sales.date}, '%H:%i %p')`.as('time'),
+        date: sql`DATE(${sales.date})`.as('date'),
+        amount: sales.totalPrice,
+        address: customers.address,
       })
       .from(sales)
-      //.innerJoin(customers, eq(sales.customerId, customers.id))
+      .leftJoin(customers, eq(sales.customerId, customers.id))
       .orderBy(sql`${sales.date} DESC`); // Ordena por fecha más reciente primero
 
     // Paso 2: Para cada venta, fetch sus items con join a products
@@ -111,7 +112,7 @@ export default defineEventHandler(async (event) => {
           .select({
             id: sale_items.id,
             productId: sale_items.product_id,
-            productName: products.name,  // Opcional: nombre del producto
+            productName: sql`COALESCE(${products.name}, 'Producto eliminado')`.as('productName'),
             quantity: sale_items.quantity,
             unitPrice: sale_items.unit_price,
             subtotal: sql`${sale_items.quantity} * ${sale_items.unit_price}`.as('subtotal'),
@@ -119,6 +120,12 @@ export default defineEventHandler(async (event) => {
           .from(sale_items)
           .leftJoin(products, eq(sale_items.product_id, products.id))
           .where(eq(sale_items.sale_id, baseSale.id));
+
+        if (items.length === 0) {
+          console.log(`No items found for sale ${baseSale.id}`);
+        } else {
+          console.log(`Found ${items.length} items for sale ${baseSale.id}`);
+        }
 
         return {
           ...baseSale,
@@ -134,15 +141,15 @@ export default defineEventHandler(async (event) => {
 
     console.log(`GET /api/sales: Retornando ${salesWithItems.length} ventas con items`);
 
-    return { 
-      success: true, 
-      data: salesWithItems 
+    return {
+      success: true,
+      data: salesWithItems
     };
   } catch (error) {
     console.error('Error in /api/sales:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : String(error) 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 });

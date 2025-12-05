@@ -63,8 +63,8 @@ export default defineEventHandler(async (event) => {
         stock: body.stock,
         pot_size: body.pot_size || 'Sin especificar',
         image_url: body.image_url || null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        // createdAt: new Date(),
+        // updatedAt: new Date(),
       })
       .$returningId()
 
