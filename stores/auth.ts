@@ -26,15 +26,15 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state): boolean => {
-      /*console.log('isAuthenticated verificado:', {
+      console.log('isAuthenticated verificado:', {
         hasToken: !!state.token,
         token: state.token,
-      });*/
+      });
       return !!state.token;
     },
     isAdmin: (state): boolean => {
       const isAdmin = state.user?.role === 'admin';
-      //console.log('isAdmin:', isAdmin, 'User:', state.user);
+      console.log('isAdmin:', isAdmin, 'User:', state.user);
       return isAdmin;
     },
     isEncargado: (state): boolean => state.user?.role === 'encargado',
@@ -52,7 +52,7 @@ export const useAuthStore = defineStore('auth', {
           body: { email, password },
         });
 
-        //        console.log('Respuesta cruda de /api/auth/login:', JSON.stringify(response, null, 2));
+        console.log('Respuesta cruda de /api/auth/login:', JSON.stringify(response, null, 2));
 
         // Manejar diferentes estructuras de respuesta
         let user: User, token: string;
@@ -62,15 +62,16 @@ export const useAuthStore = defineStore('auth', {
           ({ user, token } = response as { user: User; token: string });
         }
 
-        // console.log('Datos procesados:', { user, token });
+        console.log('Datos procesados:', { user, token });
 
         this.token = token;
         this.user = user;
 
         // Solo usar localStorage en el cliente
         if (import.meta.client) {
-          localStorage.setItem('token', token);
-          // console.log('Token guardado en localStorage:', localStorage.getItem('token'));
+          //localStorage.setItem('token', token);
+          localStorage.setItem('token', this.token!)
+          console.log('Token guardado en localStorage:', localStorage.getItem('token'));
         }
 
         return response;
