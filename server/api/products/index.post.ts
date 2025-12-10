@@ -13,6 +13,8 @@ import { validateProductData, ValidationError } from '~/server/utils/validation'
  * @apiDescription Create a new product in the database with validation
  * @apiPermission admin, encargado
  */
+
+const JWT_SECRET = process.env.JWT_SECRET || 'temp-secret'
 export default defineEventHandler(async (event) => {
   try {
     await requireAuth(event)
