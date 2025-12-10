@@ -10,14 +10,21 @@ export async function requireAuth(event: H3Event) {
         headers.Authorization ||
         headers.AUTHORIZATION
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    let token: string | undefined;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else {
+        // Try to get token from cookie
+        token = getCookie(event, 'token');
+    }
+
+    if (!token) {
         throw createError({
             statusCode: 401,
             statusMessage: 'No token provided',
         })
     }
-
-    const token = authHeader.split(' ')[1]
 
     const config = useRuntimeConfig()
     const jwtSecret = config.jwtSecret || process.env.JWT_SECRET

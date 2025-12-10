@@ -64,15 +64,10 @@ export const useAuthStore = defineStore('auth', {
 
         console.log('Datos procesados:', { user, token });
 
+        const tokenCookie = useCookie('token');
+        tokenCookie.value = token;
         this.token = token;
         this.user = user;
-
-        // Solo usar localStorage en el cliente
-        if (import.meta.client) {
-          //localStorage.setItem('token', token);
-          localStorage.setItem('token', this.token!)
-          console.log('Token guardado en localStorage:', localStorage.getItem('token'));
-        }
 
         return response;
       } catch (error: any) {
@@ -99,9 +94,8 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.token = null;
         this.user = null;
-        if (import.meta.client) {
-          localStorage.removeItem('token');
-        }
+        const tokenCookie = useCookie('token');
+        tokenCookie.value = null;
         this.loading = false;
       }
     },
@@ -129,18 +123,14 @@ export const useAuthStore = defineStore('auth', {
     },
 
     init() {
-      if (import.meta.client) {
-        const token = localStorage.getItem('token');
-        //console.log('Inicializando store, token encontrado:', token);
-        if (token) {
-          this.token = token;
-          this.fetchUser().catch(() => {
-            this.token = null;
-            this.user = null;
-            localStorage.removeItem('token');
-            //console.log('Token inválido, limpiando estado');
-          });
-        }
+      const tokenCookie = useCookie('token');
+      if (tokenCookie.value) {
+        this.token = tokenCookie.value;
+        this.fetchUser().catch(() => {
+          this.token = null;
+          this.user = null;
+          tokenCookie.value = null;
+        });
       }
     },
   },

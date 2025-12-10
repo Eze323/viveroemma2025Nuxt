@@ -68,6 +68,13 @@ export default defineEventHandler(async (event: H3Event) => {
       { expiresIn: '1h' }
     );
 
+    // Set cookie
+    setCookie(event, 'token', token, {
+      httpOnly: false, // Allow client-side access for store init
+      path: '/',
+      maxAge: 60 * 60, // 1 hour
+    });
+
     return {
       user: {
         id: user.id,
