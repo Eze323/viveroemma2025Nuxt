@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
       publicado: z.boolean().optional(), // Si necesitas el campo publicado, descomentar esta línea
       sku: z.string().max(50).nullable().optional(), // SKU opcional
       stock: z.number().int().min(0),
-      pot_size: z.enum(['pequeña', 'mediana', 'grande']).optional(),
+      pot_size: z.string().max(50).optional(),
       image_url: z.string().url().optional(),
     });
 
