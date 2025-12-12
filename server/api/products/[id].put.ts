@@ -3,10 +3,12 @@ import { useDrizzle } from '~/server/utils/drizzle';
 import { products } from '~/src/db/schema';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
+import { requireAuth } from '~/server/utils/auth';
+import { readBody } from 'h3';
 
 export default defineEventHandler(async (event) => {
   try {
-    //await requireAuth(event);
+    await requireAuth(event);
     const db = useDrizzle();
 
     const bodySchema = z.object({
@@ -29,35 +31,57 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     const validated = bodySchema.parse(body);
 
-    const [product] = await db
-      .update(products)
-      .set({
-        name: validated.name,
-        category: validated.category,
-        description: validated.description,
-        precio_compra: validated.precio_compra.toFixed(2),
-        precio_venta: validated.precio_venta.toFixed(2),
-        publicado: validated.publicado !== undefined ? validated.publicado : true,
-        sku: validated.sku || null,
-        stock: validated.stock,
-        pot_size: validated.pot_size,
-        image_url: validated.image_url,
-      })
-      .where(eq(products.id, id))
-      ;
+    // Prepare update data
+    const updateData: any = {
+      name: validated.name,
+      category: validated.category,
+      description: validated.description,
+      precio_venta: validated.precio_venta.toFixed(2),
+      stock: validated.stock,
+      pot_size: validated.pot_size,
+      image_url: validated.image_url,
+    };
 
-    if (!product) {
+    if (validated.precio_compra !== undefined) {
+      updateData.precio_compra = validated.precio_compra.toFixed(2);
     }
 
-    return { 
-      success: true, 
-      data: { message: 'Producto actualizado', product } 
+    if (validated.publicado !== undefined) {
+      updateData.publicado = validated.publicado;
+    }
+
+    if (validated.sku !== undefined) {
+      updateData.sku = validated.sku;
+    }
+
+    await db
+      .update(products)
+      .set(updateData)
+      .where(eq(products.id, id));
+
+    // Fetch updated product
+    const [product] = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, id))
+      .limit(1);
+
+    if (!product) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Producto no encontrado',
+      });
+    }
+
+    return {
+      success: true,
+      data: { message: 'Producto actualizado', product }
     };
   } catch (error) {
     console.error('Error in /api/products/[id] PUT:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : String(error) 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 });

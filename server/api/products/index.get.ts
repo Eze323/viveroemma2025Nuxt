@@ -19,7 +19,7 @@
 
 import { useDrizzle } from '~/server/utils/drizzle';
 import { products } from '~/src/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -36,19 +36,21 @@ export default defineEventHandler(async (event) => {
       .select()
       .from(products)
       //.where(eq(products.publicado, true))  // Opcional: solo publicados; quita si querés todos
-      .orderBy(products.name);  // Ordena por nombre para consistencia
+      //.where(eq(products.publicado, true))  // Opcional: solo publicados; quita si querés todos
+      .orderBy(asc(products.name));  // Ordena por nombre para consistencia
 
     console.log(`GET /api/products: Retornando ${productRecords.length} productos`);  // Log de salida
 
-    return { 
-      success: true, 
-      data: productRecords 
+    return {
+      success: true,
+      data: productRecords
     };
   } catch (error) {
     console.error('Error in /api/products:', error);  // Ya lo tenías
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : String(error) 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+      details: error // Include full error for debugging
     };
   }
 });
