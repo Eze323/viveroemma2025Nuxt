@@ -37,9 +37,12 @@
       <AdminNavbar :isOpen="isSidebarOpen" @toggle-sidebar="toggleSidebar" />
       
       <!-- Main content area with smooth scroll -->
-      <main class="flex-1 overflow-y-auto">
+      <main class="flex-1 overflow-y-auto pb-20 md:pb-0">
         <slot />
       </main>
+      
+      <!-- Bottom Navigation for mobile -->
+      <BottomNav />
     </div>
   </div>
 </template>
@@ -47,6 +50,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
+import BottomNav from '~/components/admin/BottomNav.vue';
 
 const authStore = useAuthStore();
 const isSidebarOpen = ref(false);

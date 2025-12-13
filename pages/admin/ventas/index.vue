@@ -194,26 +194,7 @@
       </main>
     </div>
 
-    <!-- Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 border-t border-border-light bg-background-light/90 px-4 pb-safe-bottom pt-2 backdrop-blur-sm dark:border-border-dark dark:bg-background-dark/90">
-      <div class="flex justify-around">
-        <NuxtLink
-          v-for="navItem in navItems"
-          :key="navItem.title"
-          :to="navItem.href"
-          class="flex flex-1 flex-col items-center justify-center gap-1 py-1"
-          :class="navItem.active ? 'rounded-full bg-primary/10 text-primary dark:bg-primary/20' : 'text-foreground-light/70 dark:text-foreground-dark/70'"
-        >
-          <span
-            class="material-symbols-outlined"
-            :style="navItem.active ? 'font-variation-settings: \'FILL\' 1' : ''"
-          >
-            {{ navItem.icon }}
-          </span>
-          <span :class="['text-xs', navItem.active ? 'font-bold' : 'font-medium']">{{ navItem.title }}</span>
-        </NuxtLink>
-      </div>
-    </nav>
+
   </div>
 </template>
 
