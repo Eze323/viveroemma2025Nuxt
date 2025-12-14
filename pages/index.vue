@@ -25,7 +25,9 @@
             <NuxtImg 
               src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
               alt="Vivero Emma - Plantas" 
-              loading="lazy"
+              loading="eager"
+              fetchpriority="high"
+              preload
               :placeholder="img(`placeholder.png`, { w: 900, f: 'png', blur: 2, q: 50 })"
             />
           </div>
@@ -193,18 +195,30 @@
             </NuxtLink>
           </div>
           
-          <div class="bg-gray-200 rounded-lg overflow-hidden h-96 shadow-lg">
-            <!-- Google Maps embed would go here -->
+          <div class="bg-gray-200 rounded-lg overflow-hidden h-96 shadow-lg relative cursor-pointer group" @click="showMap = true">
+            <template v-if="!showMap">
+              <NuxtImg
+                src="/images/map-placeholder.jpg"
+                alt="Ubicación en el mapa"
+                class="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+              />
+              <div class="absolute inset-0 flex items-center justify-center">
+                <button class="btn btn-primary shadow-lg animate-bounce">
+                  Cargar Mapa
+                </button>
+              </div>
+            </template>
             <iframe 
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.041380756593!2d-58.8047355!3d-34.5380952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bc97de6e6869bb%3A0xba563040b080cdf9!2sVivero%20Emma!5e0!3m2!1ses!2sar!4v1716842345678!5m2!1ses!2sar" 
-    width="100%" 
-    height="100%" 
-    style="border:0;" 
-    allowfullscreen="" 
-    loading="lazy" 
-    referrerpolicy="no-referrer-when-downgrade"
-    title="Ubicación de Vivero Emma"
-  ></iframe>
+              v-else
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.041380756593!2d-58.8047355!3d-34.5380952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bc97de6e6869bb%3A0xba563040b080cdf9!2sVivero%20Emma!5e0!3m2!1ses!2sar!4v1716842345678!5m2!1ses!2sar" 
+              width="100%" 
+              height="100%" 
+              style="border:0;" 
+              allowfullscreen="" 
+              loading="lazy" 
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Ubicación de Vivero Emma"
+            ></iframe>
           </div>
         </div>
       </div>
@@ -234,6 +248,7 @@
 
 <script setup>
 const img = useImage()
+const showMap = ref(false)
 const {data: home } = await useAsyncData('home', () => 
   queryCollection('content').path('/').first()
 );

@@ -34,9 +34,9 @@ export default defineNuxtConfig({
 
   //image
   image: {
-    provider: 'netlify',
+    //provider: 'netlify',
     formats: ['webp', 'jpg'],
-    dir: 'assets/images',
+    //dir: 'assets/images',
     domains: ['images.pexels.com'],
   },
   // Google Fonts configuration
