@@ -100,6 +100,7 @@ export default defineNuxtConfig({
     dbPassword: process.env.DB_PASSWORD,
     dbBaseURL: process.env.DATABASE_URL,
     jwtSecret: process.env.JWT_SECRET, // Added JWT Secret here for security
+    imgbbApiKey: process.env.IMGBB_API_KEY,
 
     public: {
       apiBaseUrl: process.env.API_BASE_URL,

@@ -126,8 +126,9 @@
                 loading="lazy"
                 :src="product.image_url || '/placeholder.png'"
                 :alt="product.name"
-                class="product-image"
+                class="product-image cursor-zoom-in"
                 @error="product.image_url = '/placeholder.png'"
+                @click.stop="openImageViewer(product.image_url || '/placeholder.png', product.name)"
               />
               <div 
                 class="stock-badge"
@@ -241,8 +242,15 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL)</label>
-            <input v-model="newProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL o Subir Archivo)</label>
+            <div class="flex gap-2">
+              <input v-model="newProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
+              <input type="file" ref="fileInput" @change="(e) => handleFileUpload(e, 'create')" class="hidden" accept="image/*" />
+              <button type="button" @click="$refs.fileInput.click()" class="btn btn-outline text-xs px-2 whitespace-nowrap">
+                <Icon name="heroicons:arrow-up-tray" class="w-4 h-4 mr-1" /> Subir
+              </button>
+            </div>
+            <div v-if="uploading" class="text-xs text-blue-500 mt-1">Subiendo imagen...</div>
           </div>
         </div>
         <div class="mt-4 flex flex-col gap-2">
@@ -294,8 +302,15 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL)</label>
-            <input v-model="editingProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
+            <label class="block text-xs font-medium text-gray-700 mb-1">Imagen (URL o Subir Archivo)</label>
+            <div class="flex gap-2">
+              <input v-model="editingProduct.image_url" type="url" class="input w-full text-sm py-1 px-2" placeholder="https://example.com/image.jpg" />
+              <input type="file" ref="editFileInput" @change="(e) => handleFileUpload(e, 'edit')" class="hidden" accept="image/*" />
+              <button type="button" @click="$refs.editFileInput.click()" class="btn btn-outline text-xs px-2 whitespace-nowrap">
+                <Icon name="heroicons:arrow-up-tray" class="w-4 h-4 mr-1" /> Subir
+              </button>
+            </div>
+            <div v-if="uploading" class="text-xs text-blue-500 mt-1">Subiendo imagen...</div>
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Publicado</label>
@@ -330,6 +345,13 @@
       :type="notification.type"
       @close="closeNotification"
     />
+
+    <ImageViewerModal
+      :is-open="isImageViewerOpen"
+      :image-url="selectedImage || ''"
+      :alt-text="selectedImageAlt || ''"
+      @close="closeImageViewer"
+    />
   </div>
 </template>
 
@@ -340,7 +362,8 @@ import { useAuthStore } from '~/stores/auth';
 import { useProductStore } from '~/stores/products';
 import Modal from '~/components/Modal.vue';
 import NotificationModal from '~/components/NotificationModal.vue';
-import placeHolderImg from '@/assets/images/placeholder.png';
+import ImageViewerModal from '~/components/ImageViewerModal.vue';
+
 
 definePageMeta({
   layout: 'admin',
@@ -658,6 +681,75 @@ const getStockStatusText = (stock: number) => {
   if (stock === 0) return 'Sin stock';
   if (stock < 10) return 'Stock bajo';
   return 'En stock';
+};
+
+// Image Viewer State
+const isImageViewerOpen = ref(false);
+const selectedImage = ref<string | null>(null);
+const selectedImageAlt = ref<string | null>(null);
+
+const openImageViewer = (imageUrl: string, altText: string) => {
+  selectedImage.value = imageUrl;
+  selectedImageAlt.value = altText;
+  isImageViewerOpen.value = true;
+};
+
+const closeImageViewer = () => {
+  isImageViewerOpen.value = false;
+  selectedImage.value = null;
+  selectedImageAlt.value = null;
+};
+
+// Image Upload Logic
+const uploading = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
+const editFileInput = ref<HTMLInputElement | null>(null);
+
+const handleFileUpload = async (event: Event, mode: 'create' | 'edit') => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  
+  if (!file) return;
+
+  // Basic validation (optional)
+  if (!file.type.startsWith('image/')) {
+    showNotification('Por favor seleccione un archivo de imagen válido.', 'error');
+    return;
+  }
+
+  uploading.value = true;
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const { data, error: uploadError } = await useFetch('/api/upload/imgbb', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (uploadError.value) {
+      throw new Error(uploadError.value.statusMessage || 'Error al subir la imagen');
+    }
+
+    const imageUrl = data.value?.url;
+    
+    if (imageUrl) {
+      if (mode === 'create') {
+        newProduct.image_url = imageUrl;
+      } else {
+        editingProduct.image_url = imageUrl;
+      }
+      showNotification('Imagen subida exitosamente!');
+    }
+  } catch (err: any) {
+    console.error('Error uploading image:', err);
+    showNotification('Error al subir la imagen a ImgBB. Verifique su API Key.', 'error');
+  } finally {
+    uploading.value = false;
+    // Reset inputs
+    if (fileInput.value) fileInput.value.value = '';
+    if (editFileInput.value) editFileInput.value.value = '';
+  }
 };
 
 onMounted(loadProducts);
