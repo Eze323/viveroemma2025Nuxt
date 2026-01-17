@@ -61,18 +61,35 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
-    // Generar token JWT
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+    // Generar Access Token (15 minutos)
+    const accessToken = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role, type: 'access' },
       JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '15m' }
     );
 
-    // Set cookie
-    setCookie(event, 'token', token, {
-      httpOnly: false, // Allow client-side access for store init
+    // Generar Refresh Token (7 días)
+    const refreshToken = jwt.sign(
+      { userId: user.id, type: 'refresh' },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Set Refresh Token Cookie (HttpOnly)
+    setCookie(event, 'refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/api/auth/refresh', // Solo se envía al endpoint de refresh
+      maxAge: 7 * 24 * 60 * 60, // 7 días
+    });
+
+    // Set Access Token Cookie (Accessible by client if httpOnly false - optional for SSR)
+    // Para SSR mantenemos una cookie, pero con vida corta
+    setCookie(event, 'token', accessToken, {
+      httpOnly: false,
       path: '/',
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 15 * 60, // 15 minutos
     });
 
     return {
@@ -82,7 +99,7 @@ export default defineEventHandler(async (event: H3Event) => {
         email: user.email,
         role: user.role,
       },
-      token,
+      token: accessToken,
     };
   } catch (error) {
     console.error('Error en /api/auth/login:', error);

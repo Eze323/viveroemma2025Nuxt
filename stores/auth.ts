@@ -25,18 +25,8 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAuthenticated: (state): boolean => {
-      console.log('isAuthenticated verificado:', {
-        hasToken: !!state.token,
-        token: state.token,
-      });
-      return !!state.token;
-    },
-    isAdmin: (state): boolean => {
-      const isAdmin = state.user?.role === 'admin';
-      console.log('isAdmin:', isAdmin, 'User:', state.user);
-      return isAdmin;
-    },
+    isAuthenticated: (state): boolean => !!state.token,
+    isAdmin: (state): boolean => state.user?.role === 'admin',
     isEncargado: (state): boolean => state.user?.role === 'encargado',
     isEmpleado: (state): boolean => state.user?.role === 'empleado',
   },
@@ -45,6 +35,7 @@ export const useAuthStore = defineStore('auth', {
     async login(email: string, password: string) {
       this.loading = true;
       this.error = null;
+      const tokenCookie = useCookie('token');
 
       try {
         const response = await $fetch('/api/auth/login', {
@@ -52,27 +43,15 @@ export const useAuthStore = defineStore('auth', {
           body: { email, password },
         });
 
-        console.log('Respuesta cruda de /api/auth/login:', JSON.stringify(response, null, 2));
+        const { user, token } = response as { user: User; token: string };
 
-        // Manejar diferentes estructuras de respuesta
-        let user: User, token: string;
-        if ('data' in response && response.data) {
-          ({ user, token } = response.data as { user: User; token: string });
-        } else {
-          ({ user, token } = response as { user: User; token: string });
-        }
-
-        console.log('Datos procesados:', { user, token });
-
-        const tokenCookie = useCookie('token');
-        tokenCookie.value = token;
         this.token = token;
         this.user = user;
+        tokenCookie.value = token;
 
         return response;
       } catch (error: any) {
-        this.error = error.data?.statusMessage || 'Error al iniciar sesión';
-        console.error('Error en login:', error);
+        this.error = error.data?.statusMessage || 'Credenciales incorrectas';
         throw error;
       } finally {
         this.loading = false;
@@ -81,27 +60,37 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       this.loading = true;
-
+      const tokenCookie = useCookie('token');
       try {
-        await $fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        });
-      } catch (error: any) {
-        console.error('Error durante el cierre de sesión:', error);
+        await $fetch('/api/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.error('Error logging out:', error);
       } finally {
-        this.token = null;
-        this.user = null;
-        const tokenCookie = useCookie('token');
+        this.resetState();
         tokenCookie.value = null;
-        this.loading = false;
+      }
+    },
+
+    async refreshSession() {
+      const tokenCookie = useCookie('token');
+      try {
+        const response = await $fetch('/api/auth/refresh', { method: 'POST' });
+        const { user, token } = response as { user: User; token: string };
+
+        this.token = token;
+        this.user = user;
+        tokenCookie.value = token;
+
+        return true;
+      } catch (error) {
+        this.resetState();
+        tokenCookie.value = null;
+        return false;
       }
     },
 
     async fetchUser() {
-      this.loading = true;
+      if (!this.token) return;
 
       try {
         const response = await $fetch('/api/auth/user', {
@@ -109,29 +98,37 @@ export const useAuthStore = defineStore('auth', {
             Authorization: `Bearer ${this.token}`,
           },
         });
-
         this.user = response as User;
-        //console.log('Usuario obtenido:', this.user);
-        return response;
       } catch (error: any) {
-        this.error = error.data?.statusMessage || 'Error al obtener datos del usuario';
-        console.error('Error en fetchUser:', error);
-        throw error;
-      } finally {
-        this.loading = false;
+        if (error.statusCode === 401) {
+          const refreshed = await this.refreshSession();
+          if (!refreshed) throw error;
+        } else {
+          throw error;
+        }
       }
     },
 
-    init() {
+    async init() {
       const tokenCookie = useCookie('token');
+
       if (tokenCookie.value) {
         this.token = tokenCookie.value;
-        this.fetchUser().catch(() => {
-          this.token = null;
-          this.user = null;
-          tokenCookie.value = null;
-        });
+        try {
+          await this.fetchUser();
+        } catch (e) {
+          await this.refreshSession();
+        }
+      } else {
+        await this.refreshSession();
       }
     },
+
+    resetState() {
+      this.token = null;
+      this.user = null;
+      this.loading = false;
+      this.error = null;
+    }
   },
 });

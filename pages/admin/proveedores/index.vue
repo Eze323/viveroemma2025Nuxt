@@ -1,17 +1,24 @@
 <template>
-    <div class="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-      <!-- Encabezado -->
-      <div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+  <div class="min-h-screen bg-gray-50 pb-20">
+    <div class="bg-white border-b border-gray-200 px-4 py-4 mb-4">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Proveedores</h1>
+          <h1 class="text-xl font-bold text-gray-900">Proveedores</h1>
           <p class="text-sm text-gray-600">Gestiona los proveedores de tu vivero</p>
         </div>
-        <button @click="openCreateModal" class="btn btn-primary w-full sm:w-auto text-base py-2">
-          <Icon name="heroicons:plus" class="w-5 h-5 mr-2" />
-          Nuevo Proveedor
+        <button 
+          @click="openCreateModal" 
+          class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full shadow-lg group relative"
+        >
+          <Icon name="heroicons:plus" class="w-6 h-6" />
+          <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+            Nuevo Proveedor
+          </span>
         </button>
       </div>
-  
+    </div>
+
+    <div class="px-4">
       <!-- Filtros -->
       <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
         <div class="grid grid-cols-1 gap-4">
@@ -66,83 +73,84 @@
       <div v-if="error && !notification.isOpen" class="text-center py-4 text-error text-sm">
         <p>{{ error }}</p>
       </div>
-  
-      <!-- Modal de Creación -->
-      <Modal :open="isCreateModalOpen" @close="closeCreateModal">
-        <h2 class="text-xl font-bold mb-4">Nuevo Proveedor</h2>
-        <form @submit.prevent="createSupplier">
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <input v-model="newSupplier.name" type="text" class="input w-full text-sm" required />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-              <input v-model="newSupplier.last_name" type="text" class="input w-full text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input v-model="newSupplier.email" type="email" class="input w-full text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <input v-model="newSupplier.phone" type="tel" class="input w-full text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <input v-model="newSupplier.address" type="text" class="input w-full text-sm" />
-            </div>
-          </div>
-          <div class="mt-6 flex flex-col sm:flex-row gap-4">
-            <button type="submit" class="btn btn-primary flex-1 py-2 text-sm" :disabled="loading">Guardar Proveedor</button>
-            <button type="button" @click="closeCreateModal" class="btn btn-outline flex-1 py-2 text-sm" :disabled="loading">Cancelar</button>
-          </div>
-        </form>
-      </Modal>
-  
-      <!-- Modal de Edición -->
-      <Modal :open="isEditModalOpen" @close="closeEditModal">
-        <h2 class="text-xl font-bold mb-4">Editar Proveedor</h2>
-        <form @submit.prevent="updateSupplier">
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <input v-model="editingSupplier.name" type="text" class="input w-full text-sm" required />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-              <input v-model="editingSupplier.last_name" type="text" class="input w-full text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input v-model="editingSupplier.email" type="email" class="input w-full text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <input v-model="editingSupplier.phone" type="tel" class="input w-full text-sm" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <input v-model="editingSupplier.address" type="text" class="input w-full text-sm" />
-            </div>
-          </div>
-          <div class="mt-6 flex flex-col sm:flex-row gap-4">
-            <button type="submit" class="btn btn-primary flex-1 py-2 text-sm" :disabled="loading">Guardar Cambios</button>
-            <button type="button" @click="closeEditModal" class="btn btn-outline flex-1 py-2 text-sm" :disabled="loading">Cancelar</button>
-          </div>
-        </form>
-        <div v-if="error && !notification.isOpen" class="mt-4 text-error text-center text-sm">{{ error }}</div>
-      </Modal>
-  
-      <!-- Modal de Notificación -->
-      <NotificationModal
-        :is-open="notification.isOpen"
-        :message="notification.message"
-        :type="notification.type"
-        @close="closeNotification"
-      />
     </div>
-  </template>
+
+    <!-- Modal de Creación -->
+    <Modal :open="isCreateModalOpen" @close="closeCreateModal">
+      <h2 class="text-xl font-bold mb-4">Nuevo Proveedor</h2>
+      <form @submit.prevent="createSupplier">
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <input v-model="newSupplier.name" type="text" class="input w-full text-sm" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+            <input v-model="newSupplier.last_name" type="text" class="input w-full text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input v-model="newSupplier.email" type="email" class="input w-full text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+            <input v-model="newSupplier.phone" type="tel" class="input w-full text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+            <input v-model="newSupplier.address" type="text" class="input w-full text-sm" />
+          </div>
+        </div>
+        <div class="mt-6 flex flex-col sm:flex-row gap-4">
+          <button type="submit" class="btn btn-primary flex-1 py-2 text-sm" :disabled="loading">Guardar Proveedor</button>
+          <button type="button" @click="closeCreateModal" class="btn btn-outline flex-1 py-2 text-sm" :disabled="loading">Cancelar</button>
+        </div>
+      </form>
+    </Modal>
+
+    <!-- Modal de Edición -->
+    <Modal :open="isEditModalOpen" @close="closeEditModal">
+      <h2 class="text-xl font-bold mb-4">Editar Proveedor</h2>
+      <form @submit.prevent="updateSupplier">
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <input v-model="editingSupplier.name" type="text" class="input w-full text-sm" required />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+            <input v-model="editingSupplier.last_name" type="text" class="input w-full text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input v-model="editingSupplier.email" type="email" class="input w-full text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+            <input v-model="editingSupplier.phone" type="tel" class="input w-full text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+            <input v-model="editingSupplier.address" type="text" class="input w-full text-sm" />
+          </div>
+        </div>
+        <div class="mt-6 flex flex-col sm:flex-row gap-4">
+          <button type="submit" class="btn btn-primary flex-1 py-2 text-sm" :disabled="loading">Guardar Cambios</button>
+          <button type="button" @click="closeEditModal" class="btn btn-outline flex-1 py-2 text-sm" :disabled="loading">Cancelar</button>
+        </div>
+      </form>
+      <div v-if="error && !notification.isOpen" class="mt-4 text-error text-center text-sm">{{ error }}</div>
+    </Modal>
+
+    <!-- Modal de Notificación -->
+    <NotificationModal
+      :is-open="notification.isOpen"
+      :message="notification.message"
+      :type="notification.type"
+      @close="closeNotification"
+    />
+  </div>
+</template>
   
   <script setup>
   import { ref, reactive, onMounted, computed } from 'vue';

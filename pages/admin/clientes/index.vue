@@ -1,136 +1,142 @@
 <template>
-  <div>
-    <div class="mb-6 flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Clientes</h1>
-        <p class="text-gray-600">Administra los compradores del vivero</p>
-      </div>
-      <button class="btn btn-primary">
-        <Icon name="heroicons:plus" class="w-5 h-5 mr-2" />
-        Nuevo Comprador
-      </button>
-    </div>
-
-    <!-- Filters -->
-    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="min-h-screen bg-gray-50 pb-20">
+    <div class="bg-white border-b border-gray-200 px-4 py-4 mb-4">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-          <input 
-            type="text" 
-            v-model="filters.search" 
-            placeholder="Nombre, email..." 
-            class="input w-full"
-          />
+          <h1 class="text-xl font-bold text-gray-900">Clientes</h1>
+          <p class="text-sm text-gray-600">Administra los compradores del vivero</p>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-          <select v-model="filters.status" class="input w-full">
-            <option value="">Todos</option>
-            <option value="active">Activo</option>
-            <option value="inactive">Inactivo</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-          <select v-model="filters.sort" class="input w-full">
-            <option value="name">Nombre</option>
-            <option value="sales">Compras</option>
-            <option value="date">Fecha</option>
-          </select>
-        </div>
+        <button class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full shadow-lg group relative">
+          <Icon name="heroicons:plus" class="w-6 h-6" />
+          <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+            Nuevo Comprador
+          </span>
+        </button>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Comprador
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Compras
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Última compra
-              </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="seller in sellers" :key="seller.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                    <span class="font-medium text-primary">{{ getInitials(seller.name) }}</span>
-                  </div>
-                  <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">{{ seller.name }}</div>
-                    <div class="text-sm text-gray-500">ID: {{ seller.id }}</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ seller.email }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${{ seller.sales.toLocaleString() }}</div>
-                <div class="text-sm text-gray-500">{{ seller.totalSales }} ventas</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-medium rounded-full" 
-                  :class="seller.status === 'active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-800'">
-                  {{ seller.status === 'active' ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ seller.lastSale }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-primary hover:text-primary-dark mr-3">
-                  <Icon name="heroicons:pencil-square" class="w-5 h-5" />
-                </button>
-                <button class="text-error hover:text-error-dark">
-                  <Icon name="heroicons:trash" class="w-5 h-5" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 flex justify-between sm:hidden">
-            <button class="btn btn-outline">Anterior</button>
-            <button class="btn btn-outline">Siguiente</button>
+    <div class="px-4">
+      <!-- Filters -->
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+            <input 
+              type="text" 
+              v-model="filters.search" 
+              placeholder="Nombre, email..." 
+              class="input w-full"
+            />
           </div>
-          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p class="text-sm text-gray-700">
-                Mostrando <span class="font-medium">1</span> a <span class="font-medium">10</span> de{' '}
-                <span class="font-medium">20</span> resultados
-              </p>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <select v-model="filters.status" class="input w-full">
+              <option value="">Todos</option>
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+            <select v-model="filters.sort" class="input w-full">
+              <option value="name">Nombre</option>
+              <option value="sales">Compras</option>
+              <option value="date">Fecha</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Comprador
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Compras
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Última compra
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="seller in sellers" :key="seller.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                      <span class="font-medium text-primary">{{ getInitials(seller.name) }}</span>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ seller.name }}</div>
+                      <div class="text-sm text-gray-500">ID: {{ seller.id }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ seller.email }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">${{ seller.sales.toLocaleString() }}</div>
+                  <div class="text-sm text-gray-500">{{ seller.totalSales }} ventas</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 py-1 text-xs font-medium rounded-full" 
+                    :class="seller.status === 'active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-800'">
+                    {{ seller.status === 'active' ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ seller.lastSale }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button class="text-primary hover:text-primary-dark mr-3">
+                    <Icon name="heroicons:pencil-square" class="w-5 h-5" />
+                  </button>
+                  <button class="text-error hover:text-error-dark">
+                    <Icon name="heroicons:trash" class="w-5 h-5" />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <button class="btn btn-outline">Anterior</button>
+              <button class="btn btn-outline">Siguiente</button>
             </div>
-            <div>
-              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                <button class="btn btn-outline rounded-l-md">Anterior</button>
-                <button class="btn btn-primary">1</button>
-                <button class="btn btn-outline">2</button>
-                <button class="btn btn-outline rounded-r-md">Siguiente</button>
-              </nav>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700">
+                  Mostrando <span class="font-medium">1</span> a <span class="font-medium">10</span> de{' '}
+                  <span class="font-medium">20</span> resultados
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button class="btn btn-outline rounded-l-md">Anterior</button>
+                  <button class="btn btn-primary">1</button>
+                  <button class="btn btn-outline">2</button>
+                  <button class="btn btn-outline rounded-r-md">Siguiente</button>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
