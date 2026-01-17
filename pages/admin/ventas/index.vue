@@ -1,16 +1,16 @@
 <template>
-  <div class="relative flex h-auto min-h-screen w-full flex-col justify-between overflow-x-hidden bg-background-light dark:bg-background-dark font-display">
-    <div class="flex-grow pb-28">
+  <div class="min-h-screen bg-gray-50 pb-20">
+    <div class="bg-white border-b border-gray-200 px-4 py-4 mb-4">
       <!-- Header -->
-      <div class="mb-6 flex justify-between items-center">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Ventas</h1>
-          <p class="text-gray-600">Administra las ventas del vivero</p>
+          <h1 class="text-xl font-bold text-gray-900">Ventas</h1>
+          <p class="text-sm text-gray-600">Administra las ventas del vivero</p>
         </div>
         
         <button 
           @click="openSaleModal('create')" title="Crear nueva venta"
-          class="btn btn-primary flex items-center justify-center w-12 h-12 rounded-full p-0 relative group shadow-lg hover:shadow-xl transition-shadow"
+          class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full shadow-lg"
         >
           <Icon name="heroicons:plus" class="w-6 h-6" />
           <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
@@ -19,182 +19,175 @@
         </button>
       </div>
 
-      <!-- Modal -->
-      <SaleModal
-        :is-open="isModalOpen"
-        :mode="modalMode"
-        :sale="selectedSale"
-        @update:isOpen="isModalOpen = $event"
-        @submit="handleSaleSubmit"
-      />
-
-      <!-- Main Content -->
-      <main class="p-4">
-        <!-- Loading/Error -->
-        <div v-if="loading" class="text-center py-8">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-          <p class="text-gray-500 mt-4">Cargando ventas...</p>
-        </div>
-        <div v-else-if="error" class="text-center py-8">
-          <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto">
-            <Icon name="heroicons:exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-2" />
-            <p class="text-red-600 font-medium">{{ error }}</p>
+      <!-- Statistics Section - Moved inside header -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+        <!-- Total Revenue Card -->
+        <div class="stat-card revenue">
+          <div class="stat-icon">
+            <Icon name="heroicons:currency-dollar" class="w-6 h-6" />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Ingresos totales</p>
+            <p class="stat-value">{{ formatCurrency(totalRevenue) }}</p>
           </div>
         </div>
-        <div v-else>
-          <!-- Statistics Section -->
-          <section class="mb-8">
-            <h2 class="mb-4 text-xl font-bold text-foreground-light dark:text-foreground-dark">Estadísticas</h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <!-- Total Revenue Card -->
-              <div class="stat-card revenue">
-                <div class="stat-icon">
-                  <Icon name="heroicons:currency-dollar" class="w-6 h-6" />
-                </div>
-                <div class="stat-content">
-                  <p class="stat-label">Ingresos totales</p>
-                  <p class="stat-value">{{ formatCurrency(totalRevenue) }}</p>
-                </div>
-              </div>
 
-              <!-- Total Sales Card -->
-              <div class="stat-card sales">
-                <div class="stat-icon">
-                  <Icon name="heroicons:shopping-bag" class="w-6 h-6" />
-                </div>
-                <div class="stat-content">
-                  <p class="stat-label">Número de ventas</p>
-                  <p class="stat-value">{{ totalSales }}</p>
-                </div>
-              </div>
-
-              <!-- Most Sold Product Card -->
-              <div class="stat-card product sm:col-span-2 lg:col-span-1">
-                <div class="stat-icon">
-                  <Icon name="heroicons:star" class="w-6 h-6" />
-                </div>
-                <div class="stat-content">
-                  <p class="stat-label">Producto más vendido</p>
-                  <p class="stat-value truncate">{{ mostSoldProduct }}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Sales History Section -->
-          <section>
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold text-foreground-light dark:text-foreground-dark">
-                Historial de Ventas
-              </h2>
-              <div class="text-sm text-gray-500">
-                {{ sales.length }} {{ sales.length === 1 ? 'venta' : 'ventas' }}
-              </div>
-            </div>
-
-            <!-- Sales List -->
-            <div v-if="sales.length > 0" class="space-y-3">
-              <div
-                v-for="sale in sales"
-                :key="sale.id"
-                class="sale-card"
-                @click="toggleSaleDetails(sale.id)"
-              >
-                <!-- Card Header -->
-                <div class="sale-header">
-                  <!-- Left: Client & ID -->
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                      <div class="client-avatar">
-                        <Icon name="heroicons:user" class="w-4 h-4" />
-                      </div>
-                      <h3 class="sale-client">{{ sale.clientName }}</h3>
-                    </div>
-                    <div class="sale-meta">
-                      <span class="sale-id">#{{ sale.id }}</span>
-                      <span class="sale-separator">•</span>
-                      <span class="sale-date">{{ formatDate(sale.date) }}</span>
-                      <span class="sale-separator">•</span>
-                      <span class="sale-time">{{ sale.time }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Right: Amount & Arrow -->
-                  <div class="flex items-center gap-3">
-                    <div class="text-right">
-                      <p class="sale-amount">{{ formatCurrency(sale.amount) }}</p>
-                      <p class="sale-items">{{ sale.items.length }} {{ sale.items.length === 1 ? 'item' : 'items' }}</p>
-                    </div>
-                    <Icon 
-                      name="heroicons:chevron-down" 
-                      class="w-5 h-5 text-gray-400 transition-transform"
-                      :class="{ 'rotate-180': expandedSales.includes(sale.id) }"
-                    />
-                  </div>
-                </div>
-
-                <!-- Expandable Details -->
-                <div 
-                  v-if="expandedSales.includes(sale.id)"
-                  class="sale-details"
-                >
-                  <div class="details-divider"></div>
-                  
-                  <!-- Items List -->
-                  <div class="details-section">
-                    <h4 class="details-title">Productos</h4>
-                    <div class="items-list">
-                      <div
-                        v-for="(item, index) in sale.items"
-                        :key="index"
-                        class="item-row"
-                      >
-                        <div class="item-info">
-                          <span class="item-name">{{ item.productName || item.nombre }}</span>
-                          <span class="item-quantity">x{{ item.quantity || item.cantidad }}</span>
-                        </div>
-                        <span class="item-price">
-                          ${{ formatPrice((item.unitPrice || item.precioUnitario) * (item.quantity || item.cantidad)) }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Actions -->
-                  <div class="details-actions">
-                    <button
-                      @click.stop="openSaleModal('edit', sale)"
-                      class="action-button view"
-                    >
-                      <Icon name="heroicons:eye" class="w-5 h-5" />
-                      Ver detalles
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Empty State -->
-            <div v-else class="empty-state">
-              <div class="empty-icon">
-                <Icon name="heroicons:shopping-cart" class="w-16 h-16" />
-              </div>
-              <h3 class="empty-title">No hay ventas registradas</h3>
-              <p class="empty-description">Comienza creando tu primera venta</p>
-              <button
-                @click="openSaleModal('create')"
-                class="empty-action"
-              >
-                <Icon name="heroicons:plus" class="w-5 h-5" />
-                Crear venta
-              </button>
-            </div>
-          </section>
+        <!-- Total Sales Card -->
+        <div class="stat-card sales">
+          <div class="stat-icon">
+            <Icon name="heroicons:shopping-bag" class="w-6 h-6" />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Número de ventas</p>
+            <p class="stat-value">{{ totalSales }}</p>
+          </div>
         </div>
-      </main>
+
+        <!-- Most Sold Product Card -->
+        <div class="stat-card product">
+          <div class="stat-icon">
+            <Icon name="heroicons:star" class="w-6 h-6" />
+          </div>
+          <div class="stat-content">
+            <p class="stat-label">Producto más vendido</p>
+            <p class="stat-value truncate">{{ mostSoldProduct }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- Modal -->
+    <SaleModal
+      :is-open="isModalOpen"
+      :mode="modalMode"
+      :sale="selectedSale"
+      @update:isOpen="isModalOpen = $event"
+      @submit="handleSaleSubmit"
+    />
 
+    <!-- Main Content -->
+    <div class="px-4">
+      <!-- Loading/Error -->
+      <div v-if="loading" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+        <p class="text-gray-500 mt-4">Cargando ventas...</p>
+      </div>
+      <div v-else-if="error" class="text-center py-8">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto">
+          <Icon name="heroicons:exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-2" />
+          <p class="text-red-600 font-medium">{{ error }}</p>
+        </div>
+      </div>
+      <div v-else>
+        <!-- Sales History Section -->
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-900">
+            Historial de Ventas
+          </h2>
+          <div class="text-sm text-gray-500">
+            {{ sales.length }} {{ sales.length === 1 ? 'venta' : 'ventas' }}
+          </div>
+        </div>
+
+        <!-- Sales List -->
+        <div v-if="sales.length > 0" class="space-y-3">
+          <div
+            v-for="sale in sales"
+            :key="sale.id"
+            class="sale-card"
+            @click="toggleSaleDetails(sale.id)"
+          >
+            <!-- Card Header -->
+            <div class="sale-header">
+              <!-- Left: Client & ID -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <div class="client-avatar">
+                    <Icon name="heroicons:user" class="w-4 h-4" />
+                  </div>
+                  <h3 class="sale-client">{{ sale.clientName }}</h3>
+                </div>
+                <div class="sale-meta">
+                  <span class="sale-id">#{{ sale.id }}</span>
+                  <span class="sale-separator">•</span>
+                  <span class="sale-date">{{ formatDate(sale.date) }}</span>
+                  <span class="sale-separator">•</span>
+                  <span class="sale-time">{{ sale.time }}</span>
+                </div>
+              </div>
+
+              <!-- Right: Amount & Arrow -->
+              <div class="flex items-center gap-3">
+                <div class="text-right">
+                  <p class="sale-amount">{{ formatCurrency(sale.amount) }}</p>
+                  <p class="sale-items">{{ sale.items.length }} {{ sale.items.length === 1 ? 'item' : 'items' }}</p>
+                </div>
+                <Icon 
+                  name="heroicons:chevron-down" 
+                  class="w-5 h-5 text-gray-400 transition-transform"
+                  :class="{ 'rotate-180': expandedSales.includes(sale.id) }"
+                />
+              </div>
+            </div>
+
+            <!-- Expandable Details -->
+            <div 
+              v-if="expandedSales.includes(sale.id)"
+              class="sale-details"
+            >
+              <div class="details-divider"></div>
+              
+              <!-- Items List -->
+              <div class="details-section">
+                <h4 class="details-title">Productos</h4>
+                <div class="items-list">
+                  <div
+                    v-for="(item, index) in sale.items"
+                    :key="index"
+                    class="item-row"
+                  >
+                    <div class="item-info">
+                      <span class="item-name">{{ item.productName || item.nombre }}</span>
+                      <span class="item-quantity">x{{ item.quantity || item.cantidad }}</span>
+                    </div>
+                    <span class="item-price">
+                      ${{ formatPrice((item.unitPrice || item.precioUnitario) * (item.quantity || item.cantidad)) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="details-actions">
+                <button
+                  @click.stop="openSaleModal('edit', sale)"
+                  class="action-button view"
+                >
+                  <Icon name="heroicons:eye" class="w-5 h-5" />
+                  Ver detalles
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <div class="empty-icon">
+            <Icon name="heroicons:shopping-cart" class="w-16 h-16" />
+          </div>
+          <h3 class="empty-title">No hay ventas registradas</h3>
+          <p class="empty-description">Comienza creando tu primera venta</p>
+          <button
+            @click="openSaleModal('create')"
+            class="empty-action"
+          >
+            <Icon name="heroicons:plus" class="w-5 h-5" />
+            Crear venta
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

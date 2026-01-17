@@ -220,6 +220,14 @@
     font-weight: 600;
 }
 
+.stat-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+}
+
 /* Filters Section */
 .filters-card {
     background: white;

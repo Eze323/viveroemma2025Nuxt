@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50 pb-20">
-    <!-- Header & Stats -->
     <div class="bg-white border-b border-gray-200 px-4 py-4 mb-4">
+      <!-- Header & Stats -->
       <div class="flex justify-between items-center mb-6">
         <div>
           <h1 class="text-xl font-bold text-gray-900">Productos</h1>
@@ -14,6 +14,9 @@
           title="Crear nuevo producto"
         >
           <Icon name="heroicons:plus" class="w-6 h-6" />
+          <span class="absolute hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 -top-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+            Crear nuevo producto
+          </span>
         </button>
       </div>
 
