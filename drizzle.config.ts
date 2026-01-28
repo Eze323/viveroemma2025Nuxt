@@ -1,20 +1,16 @@
 
-
-// drizzle.config.ts
 import { defineConfig } from 'drizzle-kit';
-import { useRuntimeConfig } from 'nuxt/app';
-const config = useRuntimeConfig();
+import 'dotenv/config';
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is missing');
+}
 
 export default defineConfig({
   dialect: "mysql",
   schema: "./src/db/schema.ts",
-  out:"./drizzle",
-  dbCredentials:{
-             host: config.public.dbHost,
-     port: Number(config.public.dbPort),
-     database: config.public.dbDatabase,
-     user: config.public.dbUsername,
-     password: config.public.dbPassword,
+  out: "./drizzle",
+  dbCredentials: {
+    url: process.env.DATABASE_URL,
   },
-
-  })
+});

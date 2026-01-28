@@ -7,39 +7,39 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const authStore = useAuthStore(pinia as import('pinia').Pinia);
 
   if (import.meta.server) {
-   // console.log('Middleware ejecutado en servidor, omitiendo');
+    console.log('Middleware ejecutado en servidor, omitiendo');
     return;
   }
 
-  /*console.log('Middleware ejecutado en cliente, estado:', {
-    path: to.path,
-    isAuthenticated: authStore.isAuthenticated,
-    token: authStore.token,
-    user: authStore.user,
-  });*/
+  console.log('Middleware ejecutado en cliente, estado:', {
+    /* path: to.path,
+     isAuthenticated: authStore.isAuthenticated,
+     token: authStore.token,
+     user: authStore.user,*/
+  });
 
   const publicRoutes = ['/', '/login', '/productos', '/nosotros', '/contacto', '/servicios'];
   const requiresAuth = to.path.startsWith('/admin');
 
   // Evitar redirección infinita durante el login
   if (to.path === '/login' && !authStore.isAuthenticated) {
-   // console.log('Permitiendo acceso a /login');
+    console.log('Permitiendo acceso a /login');
     return;
   }
 
   if (requiresAuth && !authStore.isAuthenticated) {
-    //console.log('No autenticado, redirigiendo a /login');
+    console.log('No autenticado, redirigiendo a /login');
     return navigateTo('/', { redirectCode: 302 });
   }
 
   if (authStore.isAuthenticated && to.path === '/') {
     const redirectPath = authStore.isAdmin ? '/admin' : '/dashboard';
-    //console.log('Autenticado, redirigiendo a:', redirectPath);
+    console.log('Autenticado, redirigiendo a:', redirectPath);
     return navigateTo(redirectPath, { redirectCode: 302 });
   }
 
   if (publicRoutes.includes(to.path)) {
-    //console.log('Ruta pública, permitiendo acceso:', to.path);
+    console.log('Ruta pública, permitiendo acceso:', to.path);
     return;
   }
 });

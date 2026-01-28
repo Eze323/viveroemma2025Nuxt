@@ -28,11 +28,22 @@
 // });
 
 // server/api/products/[id].delete.ts
-import { PrismaClient } from '@prisma/client';
+import { useDrizzle } from '~/server/utils/drizzle';
+import { products, sale_items } from '~/src/db/schema';
+import { eq, asc } from 'drizzle-orm';
+//import { PrismaClient } from '@prisma/client';
 import { createError, defineEventHandler, H3Event } from 'h3';
+
+
+
 import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
+//const prisma = new PrismaClient();
+const db = useDrizzle();
+if (!db) {
+  throw new Error('DB connection failed');
+}
+
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET no está definido en las variables de entorno');
@@ -62,9 +73,7 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // Verificar si el producto existe
-    const existingProduct = await prisma.products.findUnique({
-      where: { id: productId },
-    });
+    const existingProduct = await db.select().from(products).where(eq(products.id, productId));
     if (!existingProduct) {
       throw createError({
         statusCode: 404,
@@ -73,10 +82,8 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // Verificar si el producto está asociado a sale_items
-    const relatedSaleItems = await prisma.sale_items.count({
-      where: { product_id: productId },
-    });
-    if (relatedSaleItems > 0) {
+    const relatedSaleItems = await db.select().from(sale_items).where(eq(sale_items.product_id, productId));
+    if (relatedSaleItems.length > 0) {
       throw createError({
         statusCode: 400,
         statusMessage: 'No se puede eliminar el producto porque está asociado a una o más ventas',
@@ -84,9 +91,7 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // Eliminar el producto
-    await prisma.products.delete({
-      where: { id: productId },
-    });
+    await db.delete(products).where(eq(products.id, productId));
 
     return {
       success: true,
@@ -99,7 +104,5 @@ export default defineEventHandler(async (event: H3Event) => {
       statusCode: err.statusCode || 500,
       statusMessage: err.statusMessage || 'Error en el servidor',
     });
-  } finally {
-    await prisma.$disconnect();
   }
 });

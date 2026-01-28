@@ -1,9 +1,7 @@
 // server/api/sales/[id].delete.ts
-import { PrismaClient } from '@prisma/client';
-import { createError, defineEventHandler, H3Event } from 'h3';
+import { defineEventHandler, H3Event, createError } from 'h3';
+import * as salesApplications from '~/server/applications/salesApplications';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET no está definido en las variables de entorno');
@@ -31,60 +29,16 @@ export default defineEventHandler(async (event: H3Event) => {
       });
     }
 
-    // Obtener ID de la venta
-    const saleId = parseInt(event.context.params?.id || '');
-    if (isNaN(saleId)) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'ID de venta inválido',
-      });
+    return await salesApplications.eliminar(event);
+  } catch (error: any) {
+    // If it's already an H3 error, rethrow it
+    if (error.statusCode) {
+      throw error;
     }
-
-    // Verificar si la venta existe
-    const sale = await prisma.sales.findUnique({
-      where: { id: saleId },
-      include: { sale_items: true },
-    });
-    if (!sale) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Venta no encontrada',
-      });
-    }
-
-    // Eliminar la venta en una transacción
-    await prisma.$transaction(async (tx) => {
-      // Restaurar stock de los productos
-      for (const item of sale.sale_items) {
-        await tx.products.update({
-          where: { id: item.product_id },
-          data: { stock: { increment: item.quantity } },
-        });
-      }
-
-      // Eliminar ítems de la venta
-      await tx.sale_items.deleteMany({
-        where: { sale_id: saleId },
-      });
-
-      // Eliminar la venta
-      await tx.sales.delete({
-        where: { id: saleId },
-      });
-    });
-
-    return {
-      success: true,
-      message: 'Venta eliminada correctamente',
-    };
-  } catch (error) {
-    console.error('Error en DELETE /api/sales/[id]:', error);
-    const err = error as { statusCode?: number; statusMessage?: string };
+    // Otherwise wrap it
     throw createError({
-      statusCode: err.statusCode || 500,
-      statusMessage: err.statusMessage || 'Error en el servidor',
+      statusCode: 500,
+      statusMessage: error.message || 'Error interno del servidor',
     });
-  } finally {
-    await prisma.$disconnect();
   }
 });

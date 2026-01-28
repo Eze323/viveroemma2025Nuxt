@@ -75,7 +75,6 @@
 import { useDrizzle } from '~/server/utils/drizzle';
 import { sales, sale_items, products, customers } from '~/src/db/schema';  // Sin customers/users
 import { eq, sql } from 'drizzle-orm';
-import client from '~/src/generated/prisma/client';
 import { customType } from 'drizzle-orm/mysql-core';
 
 export default defineEventHandler(async (event) => {
