@@ -1,25 +1,15 @@
-// server/utils/db.ts
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
-import * as schema from '~/src/db/schema';
+import * as schema from '../db/schema';
+import * as relations from '../db/relations';
 
-// Configuración de la conexión a MySQL
-const connectionConfig = {
-  uri: process.env.DATABASE_URL , // Usar la URL de la base de datos
-};
+// Create a connection pool (better for performance)
+const connectionPool = mysql.createPool(process.env.DATABASE_URL!);
 
-
-
-// Crear un pool de conexiones
-const pool = mysql.createPool({
-  ...connectionConfig,
-  connectionLimit: 10,
+export const db = drizzle(connectionPool, {
+  schema: { ...schema, ...relations },
+  mode: "default"
 });
-
-// Inicializar Drizzle
-export const db = drizzle(pool, { schema, mode: 'default' });
-
-// Exportar utilidades de Drizzle
 
 // Exportar tablas
 export const tables = schema;
@@ -29,7 +19,8 @@ export type Product = typeof schema.products.$inferSelect;
 export type PlantPotPrice = typeof schema.plantPotPrices.$inferSelect;
 export type User = typeof schema.users.$inferSelect;
 export type Sale = typeof schema.sales.$inferSelect;
-export type SaleItem = typeof schema.sale_items.$inferSelect;
+export type SaleItem = typeof schema.saleItems.$inferSelect;
+
 // Composable para endpoints
 export function useDrizzle() {
   return db;

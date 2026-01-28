@@ -34,6 +34,7 @@
     
     <!-- Navigation menu -->
     <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <ClientOnly></ClientOnly>
       <NuxtLink 
         v-for="item in filteredMenuItems" 
         :key="item.to" 

@@ -1,6 +1,9 @@
 // server/middleware/auth.ts
-import { db } from '~/server/utils/db';
-import { users } from '~/src/db/schema';
+// import { db } from '~/server/utils/drizzle';
+// import { users } from '~/src/db/schema';
+// import { eq } from 'drizzle-orm';
+import { db } from '~/server/utils/drizzle';
+import { users } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 import { H3Event } from 'h3';

@@ -1,9 +1,7 @@
 // server/api/sales/[id].get.ts
-import { PrismaClient } from '@prisma/client';
 import { createError, defineEventHandler, H3Event } from 'h3';
+import { db } from '~/server/utils/drizzle';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET no está definido en las variables de entorno');
@@ -33,9 +31,15 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     // Buscar la venta
-    const sale = await prisma.sales.findUnique({
-      where: { id: saleId },
-      include: { sale_items: { include: { product: true } } },
+    const sale = await db.query.sales.findFirst({
+      where: (sales, { eq }) => eq(sales.id, saleId),
+      with: {
+        saleItems: {
+          with: {
+            product: true,
+          },
+        },
+      },
     });
 
     if (!sale) {
@@ -49,23 +53,23 @@ export default defineEventHandler(async (event: H3Event) => {
       success: true,
       sale: {
         id: sale.id,
-        user_id: sale.user_id,
-        customer_id: sale.customer_id,
+        user_id: sale.userId,
+        customer_id: sale.customerId,
         customer: sale.customer,
         email: sale.email,
         seller: sale.seller,
         date: sale.date,
         time: sale.time,
         status: sale.status,
-        total_price: sale.total_price,
-        created_at: sale.created_at,
-        updated_at: sale.updated_at,
-        sale_items: sale.sale_items.map(item => ({
+        total_price: sale.totalPrice,
+        created_at: sale.createdAt,
+        updated_at: sale.updatedAt,
+        sale_items: sale.saleItems.map(item => ({
           id: item.id,
-          product_id: item.product_id,
+          product_id: item.productId,
           product_name: item.product.name,
           quantity: item.quantity,
-          unit_price: item.unit_price,
+          unit_price: item.unitPrice,
           subtotal: item.subtotal,
         })),
       },
@@ -77,7 +81,5 @@ export default defineEventHandler(async (event: H3Event) => {
       statusCode: err.statusCode || 500,
       statusMessage: err.statusMessage || 'Error en el servidor',
     });
-  } finally {
-    await prisma.$disconnect();
   }
 });
