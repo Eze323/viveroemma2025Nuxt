@@ -202,46 +202,19 @@ definePageMeta({
 });
 
 const api = useApiService();
+const store = useVentasStore();  // Instancia del store
 
-const sales = ref([]);
-const loading = ref(false);
-const error = ref(null);
+const sales = computed(() => store.salesHistory);
+const loading = computed(() => store.historyLoading);
+const error = computed(() => store.historyError);
 const expandedSales = ref<number[]>([]); // Track expanded sales
 
 const isModalOpen = ref(false);
 const modalMode = ref('create');
 const selectedSale = ref({});
 
-const store = useVentasStore();  // Instancia del store
-
-const navItems = [
-  { title: 'Dashboard', icon: 'dashboard', href: '/admin', active: false },
-  { title: 'Productos', icon: 'potted_plant', href: '/admin/productos', active: false },
-  { title: 'Ventas', icon: 'paid', href: '/admin/ventas', active: true },
-  { title: 'Clientes', icon: 'groups', href: '/admin/clientes', active: false },
-];
-
 const loadSales = async () => {
-  loading.value = true;
-  error.value = null;
-  try {
-    const response = await api.getSales();
-    if (response && response.success && Array.isArray(response.data)) {
-      sales.value = response.data.map(s => ({
-        ...s,
-        items: Array.isArray(s.items) ? s.items : []
-      }));
-    } else {
-      sales.value = [];
-      error.value = response.error || 'No se pudieron cargar las ventas.';
-    }
-  } catch (err) {
-    error.value = err.message || 'Error al cargar las ventas.';
-    console.error('Error loading sales:', err);
-    sales.value = [];
-  } finally {
-    loading.value = false;
-  }
+  await store.fetchSalesHistory();
 };
 
 // Computed para stats (usa items para mostSoldProduct)

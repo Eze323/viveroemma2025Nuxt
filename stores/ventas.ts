@@ -13,8 +13,22 @@ export interface VentaItem {
   image?: string  // Agregado para mostrar imagen en carrito
 }
 
+export interface SaleRecord {
+  id: number
+  clientName: string
+  email: string
+  date: string
+  time: string
+  amount: number
+  items: any[]
+  status: string
+}
+
 export const useVentasStore = defineStore('ventas', () => {
   const items = ref<VentaItem[]>([])
+  const salesHistory = ref<SaleRecord[]>([])
+  const historyLoading = ref(false)
+  const historyError = ref<string | null>(null)
   const ivaRate = ref(0.21)
   const syncQueue = useSyncQueueStore()
 
@@ -172,6 +186,27 @@ export const useVentasStore = defineStore('ventas', () => {
     subtotal,
     ivaTotal,
     totalFinal,
-    getPayload
+    getPayload,
+
+    // History
+    salesHistory,
+    historyLoading,
+    historyError,
+    fetchSalesHistory: async () => {
+      historyLoading.value = true
+      historyError.value = null
+      try {
+        const { data, success, error } = await $fetch<{ data: SaleRecord[], success: boolean, error?: string }>('/api/sales')
+        if (success && data) {
+          salesHistory.value = data
+        } else {
+          historyError.value = error || 'Error fetching sales'
+        }
+      } catch (e) {
+        historyError.value = 'Error de conexión'
+      } finally {
+        historyLoading.value = false
+      }
+    }
   }
 })

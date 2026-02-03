@@ -98,6 +98,14 @@
                 </div>
               </div>
             </div>
+            <div class="flex items-center gap-2">
+  <span class="text-sm font-medium">Modo Papel:</span>
+  <input 
+    type="checkbox" 
+    v-model="configStore.simpleDashboard" 
+    class="w-10 h-5 bg-gray-200 rounded-full appearance-none checked:bg-primary-600 relative cursor-pointer transition-colors"
+  >
+</div>
 
             <div class="flex justify-end">
               <button type="submit" class="btn btn-primary">
@@ -171,7 +179,7 @@
 
             <div class="flex justify-end">
               <button type="submit" class="btn btn-primary">
-                Guardar configuración
+                Guardar configuración en taka taka
               </button>
             </div>
           </form>
@@ -228,10 +236,13 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-
+import { useConfigStore } from '~/stores/config'; // <-- Importa el nuevo store
 definePageMeta({
   layout: 'admin'
 });
+
+const configStore = useConfigStore(); // <-- Instancia el store
+console.log('Configuración de Dashboard Simple en Configuración:', configStore.simpleDashboard);
 
 // General settings state
 const generalSettings = reactive({

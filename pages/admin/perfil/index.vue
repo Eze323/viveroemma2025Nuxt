@@ -169,6 +169,17 @@
                     Alertas de stock bajo
                   </span>
                 </label>
+                <label class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    v-model="configStore.simpleDashboard" 
+                    class="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span class="ml-2 text-sm text-gray-600">
+                    Activar Modo Papel (Dashboard Simple)
+                  </span>
+                </label>
+                  
               </div>
             </div>
 
@@ -226,7 +237,10 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useRouter } from 'vue-router';
+import { useConfigStore } from '~/stores/config'; // <-- Importa el nuevo store
 
+const configStore = useConfigStore(); // <-- Instancia el store
+console.log('Configuración de Dashboard Simple en Configuración:', configStore.simpleDashboard);
 definePageMeta({
   layout: 'admin'
 });
