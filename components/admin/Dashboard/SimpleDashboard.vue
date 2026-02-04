@@ -31,7 +31,21 @@
       <div class="divide-y divide-gray-100">
         <div v-for="venta in sales" :key="venta.id" class="py-4 flex justify-between items-center">
           <div>
-            <p class="font-bold text-gray-900 text-lg">{{ venta.customer || 'Cliente Mostrador' }}</p>
+            <div class="flex items-center gap-2">
+              <p class="font-bold text-gray-900 text-lg">{{ venta.customer || 'Cliente Mostrador' }}</p>
+              <span 
+                v-if="venta.type === 'reseller'" 
+                class="px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 rounded-full"
+              >
+                CANASTERO
+              </span>
+              <span 
+                v-else-if="venta.type === 'admin'" 
+                class="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-700 rounded-full"
+              >
+                VENTA DIRECTA
+              </span>
+            </div>
             <p class="text-sm text-gray-500">{{ venta.time }} - {{ venta.items }} productos</p>
           </div>
           <div class="text-right">

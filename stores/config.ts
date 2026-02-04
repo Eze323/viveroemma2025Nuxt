@@ -6,6 +6,6 @@ interface ConfigState {
 
 export const useConfigStore = defineStore('config', {
   state: (): ConfigState => ({
-    simpleDashboard: false, // Por defecto, el modo normal
+    simpleDashboard: true, // Por defecto, el modo normal
   }),
 });

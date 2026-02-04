@@ -29,10 +29,10 @@
       />
 
       <ComplexDashboard v-else
+        :stats="dashboardStore.stats"
         :chartData="chartData"
         :topSellers="topSellers"
         :recentSales="recentSales"
-        
       />
 
     </main>
@@ -79,13 +79,8 @@ const chartData = {
   ]
 };
 
-// Compute daily total for SimpleDashboard
+// Compute daily total for SimpleDashboard (includes both admin sales and reseller orders)
 const totalHoy = computed(() => {
-    // This is a rough approximation or should be fetched.
-    // We'll use the daily revenue if available or just global revenue for now as placeholder
-    // unless we add specific "today" stat to API.
-    // Let's us global revenue for "Total" context if "Total Hoy" is not strictly required to be today only
-    // OR filter recentSales if they are from today.
     const today = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     return dashboardStore.recentSales
         .filter(s => s.date === today)

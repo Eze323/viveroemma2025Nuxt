@@ -14,6 +14,7 @@ export interface SellerStat {
     orders: number
     products: number
     conversionRate: number
+    type?: 'admin' | 'reseller'
 }
 
 export interface RecentSale {
@@ -25,6 +26,7 @@ export interface RecentSale {
     time: string
     status: string
     items: number
+    type?: 'admin' | 'reseller'
 }
 
 export const useDashboardStore = defineStore('dashboard', () => {

@@ -6,8 +6,8 @@
       <!-- KPI Metrics Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <MetricCard
-          title="Ventas del Mes"
-          :value="45000"
+          title="Ingresos Totales"
+          :value="stats.revenue"
           prefix="$"
           icon="heroicons:currency-dollar"
           color="success"
@@ -16,16 +16,16 @@
         />
         <MetricCard
           title="Productos Vendidos"
-          :value="328"
+          :value="stats.products"
           icon="heroicons:shopping-bag"
           color="primary"
           :trend="8.2"
           comparison="vs mes anterior"
         />
         <MetricCard
-          title="Nuevos Clientes"
-          :value="42"
-          icon="heroicons:user-group"
+          title="Órdenes Totales"
+          :value="stats.orders"
+          icon="heroicons:shopping-cart"
           color="info"
           :trend="15.3"
           comparison="vs mes anterior"
@@ -137,12 +137,21 @@
     </main>
  
 </template>
-<script setup>
+<script setup lang="ts">
 import MetricCard from '~/components/admin/Dashboard/MetricCard.vue';
 import QuickActionCard from '~/components/admin/Dashboard/QuickActionCard.vue';
 import SalesChart from '~/components/admin/Dashboard/SalesChart.vue';
 import TopSellersTable from '~/components/admin/Dashboard/TopSellersTable.vue';
 import RecentSalesTable from '~/components/admin/Dashboard/RecentSalesTable.vue';
+
+
+// Define props to receive data from parent
+const props = defineProps<{
+  stats?: { revenue: number, orders: number, products: number },  // ← coma aquí
+  topSellers?: Array<any>,
+  recentSales?: Array<any>,
+  chartData?: Array<any>,
+}>();
 
 definePageMeta({
   middleware: ['auth'],
@@ -151,8 +160,13 @@ definePageMeta({
 
 const authStore = useAuthStore();
 
-// Chart data for sales
-const chartData = {
+// Use props or fallback to empty defaults
+const stats = computed(() => props.stats || { revenue: 0, orders: 0, products: 0 });
+const topSellers = computed(() => props.topSellers || []);
+const recentSales = computed(() => props.recentSales || []);
+
+// Chart data for sales (use prop or fallback to default)
+const chartData = computed(() => props.chartData || {
   día: {
     labels: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM'],
     values: [350, 420, 510, 790, 850, 760, 620, 590, 680, 740]
@@ -169,105 +183,9 @@ const chartData = {
     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
     values: [38000, 42000, 35000, 32000, 45000, 50000, 48000, 61000, 54000, 56000, 62000, 78000]
   }
-};
+});
 
-// Top sellers data
-const topSellers = [
-  {
-    name: 'María López',
-    id: 'VE-001',
-    sales: 12680,
-    orders: 32,
-    products: 85,
-    conversionRate: 68
-  },
-  {
-    name: 'Juan Pérez',
-    id: 'VE-003',
-    sales: 10450,
-    orders: 28,
-    products: 74,
-    conversionRate: 61
-  },
-  {
-    name: 'Ana García',
-    id: 'VE-007',
-    sales: 9320,
-    orders: 25,
-    products: 65,
-    conversionRate: 57
-  },
-  {
-    name: 'Carlos Rodríguez',
-    id: 'VE-004',
-    sales: 7850,
-    orders: 19,
-    products: 53,
-    conversionRate: 52
-  },
-  {
-    name: 'Laura Martínez',
-    id: 'VE-010',
-    sales: 6420,
-    orders: 17,
-    products: 45,
-    conversionRate: 48
-  }
-];
-
-// Recent sales data
-const recentSales = [
-  {
-    id: '12345',
-    customer: 'Marta Gómez',
-    email: 'marta@gmail.com',
-    items: 3,
-    total: 4250,
-    date: '01/05/2025',
-    time: '14:30',
-    status: 'Completada'
-  },
-  {
-    id: '12346',
-    customer: 'Roberto Sánchez',
-    email: 'roberto@gmail.com',
-    items: 1,
-    total: 2100,
-    date: '01/05/2025',
-    time: '12:15',
-    status: 'Procesando'
-  },
-  {
-    id: '12347',
-    customer: 'Clara Fernández',
-    email: 'clara@gmail.com',
-    items: 4,
-    total: 5680,
-    date: '30/04/2025',
-    time: '18:45',
-    status: 'Completada'
-  },
-  {
-    id: '12348',
-    customer: 'Miguel Torres',
-    email: 'miguel@gmail.com',
-    items: 2,
-    total: 3420,
-    date: '30/04/2025',
-    time: '16:20',
-    status: 'Pendiente'
-  },
-  {
-    id: '12349',
-    customer: 'Sofía Ruiz',
-    email: 'sofia@gmail.com',
-    items: 5,
-    total: 7890,
-    date: '29/04/2025',
-    time: '11:10',
-    status: 'Completada'
-  }
-];
+// Removed hardcoded data - now using props
 
 // Popular categories
 const popularCategories = [
