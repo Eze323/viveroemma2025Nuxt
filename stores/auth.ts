@@ -6,6 +6,7 @@ interface User {
   name: string;
   email: string;
   role: 'admin' | 'encargado' | 'empleado';
+  points: number;
 }
 
 interface AuthState {

@@ -24,6 +24,7 @@ export interface SaleRecord {
   status: string
 }
 
+// console.log('useVentasStore')
 export const useVentasStore = defineStore('ventas', () => {
   const items = ref<VentaItem[]>([])
   const salesHistory = ref<SaleRecord[]>([])
@@ -121,7 +122,7 @@ export const useVentasStore = defineStore('ventas', () => {
 
     if (!isOnline.value) {
       // Modo offline: guardar en cola
-      console.log('Sin conexión - guardando venta en cola de sincronización')
+      // console.log('Sin conexión - guardando venta en cola de sincronización')
 
       syncQueue.addOperation({
         type: 'sale',

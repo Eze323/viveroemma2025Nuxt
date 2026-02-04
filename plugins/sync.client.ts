@@ -6,6 +6,6 @@ export default defineNuxtPlugin(() => {
         // Setup auto-sync on network reconnection
         setupAutoSync()
 
-        console.log('✅ Auto-sync initialized')
+        // console.log('✅ Auto-sync initialized')
     }
 })

@@ -29,6 +29,7 @@ const navItems = [
   { title: 'Dashboard', icon: 'dashboard', href: '/admin' },
   { title: 'Productos', icon: 'potted_plant', href: '/admin/productos' },
   { title: 'Ventas', icon: 'paid', href: '/admin/ventas' },
+  { title: 'Pedidos', icon: 'local_shipping', href: '/admin/pedidos-mayoristas' },
   { title: 'Clientes', icon: 'groups', href: '/admin/clientes' },
 ];
 

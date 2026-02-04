@@ -1,6 +1,6 @@
 // // server/api/auth/login.post.ts
 import { db } from '~/server/utils/drizzle';
-import { users } from '~/src/db/schema';
+import { users } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -40,6 +40,7 @@ export default defineEventHandler(async (event: H3Event) => {
         email: users.email,
         password: users.password,
         role: users.role,
+        points: users.points,
       })
       .from(users)
       .where(eq(users.email, email))
@@ -98,6 +99,7 @@ export default defineEventHandler(async (event: H3Event) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        points: user.points,
       },
       token: accessToken,
     };

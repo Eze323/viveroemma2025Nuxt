@@ -236,7 +236,7 @@ const products = ref([
 // Newsletter subscription
 const subscribeNewsletter = () => {
   // Here you would typically make an API call to handle the subscription
-  console.log('Subscribing email:', newsletterEmail.value);
+  // console.log('Subscribing email:', newsletterEmail.value);
   // Reset form
   newsletterEmail.value = '';
 };

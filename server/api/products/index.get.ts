@@ -24,7 +24,7 @@ import { eq, asc } from 'drizzle-orm';
 export default defineEventHandler(async (event) => {
   try {
     // await requireAuth(event);  // Mantenelo comentado para público
-    console.log('GET /api/products: Iniciando fetch...');  // Log para debug en Netlify Functions logs
+    // console.log('GET /api/products: Iniciando fetch...');  // Log para debug en Netlify Functions logs
 
     const db = useDrizzle();
     if (!db) {
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
       //.where(eq(products.publicado, true))  // Opcional: solo publicados; quita si querés todos
       .orderBy(asc(products.name));  // Ordena por nombre para consistencia
 
-    console.log(`GET /api/products: Retornando ${productRecords.length} productos`);  // Log de salida
+    // console.log(`GET /api/products: Retornando ${productRecords.length} productos`);  // Log de salida
 
     return {
       success: true,

@@ -199,7 +199,12 @@ const handleSubmit = async () => {
 
   try {
     await authStore.login(form.email, form.password);
-    navigateTo('/admin');
+    
+    if (authStore.user?.role === 'canastero') {
+        navigateTo('/canasteros');
+    } else {
+        navigateTo('/admin');
+    }
   } catch (error) {
     // Error is handled in store and displayed via authStore.error
   }

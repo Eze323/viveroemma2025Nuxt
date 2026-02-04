@@ -175,6 +175,32 @@ export const purchases = mysqlTable("purchases", {
 		index("purchases_invoice_id_foreign").on(table.invoiceId),
 	]);
 
+export const resellerOrders = mysqlTable("reseller_orders", {
+	id: int().autoincrement().notNull(),
+	userId: int("user_id").notNull().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" }),
+	total: decimal({ precision: 10, scale: 2 }).notNull(),
+	status: varchar({ length: 50 }).default('pending_payment').notNull(), // pending_payment, paid, completed, cancelled
+	paymentProofUrl: varchar("payment_proof_url", { length: 255 }).default('NULL'),
+	createdAt: timestamp("created_at", { mode: 'string' }).default('NULL'),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).default('NULL'),
+},
+	(table) => [
+		index("reseller_orders_user_id_foreign").on(table.userId),
+	]);
+
+export const resellerOrderItems = mysqlTable("reseller_order_items", {
+	id: int().autoincrement().notNull(),
+	orderId: int("order_id").notNull().references(() => resellerOrders.id, { onDelete: "cascade", onUpdate: "cascade" }),
+	productId: int("product_id").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+	quantity: int().notNull(),
+	unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+	subtotal: decimal({ precision: 10, scale: 2 }).notNull(),
+},
+	(table) => [
+		index("reseller_order_items_order_id_foreign").on(table.orderId),
+		index("reseller_order_items_product_id_foreign").on(table.productId),
+	]);
+
 export const rewards = mysqlTable("rewards", {
 	id: int().autoincrement().notNull(),
 	customerId: int("customer_id").notNull(),
@@ -272,6 +298,7 @@ export const users = mysqlTable("users", {
 	emailVerifiedAt: timestamp("email_verified_at", { mode: 'string' }).default('NULL'),
 	password: varchar({ length: 255 }).notNull(),
 	role: varchar({ length: 255 }).default('\'operario\'').notNull(),
+	points: int().default(0).notNull(),
 	rememberToken: varchar("remember_token", { length: 100 }).default('NULL'),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('NULL'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).default('NULL'),

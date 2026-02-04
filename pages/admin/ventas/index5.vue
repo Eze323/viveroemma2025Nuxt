@@ -201,7 +201,7 @@ const filters = reactive({
 const fetchSales = async () => {
   try {
     const res = await api.getSales();
-    console.log("Respuesta de ventas:", res)
+    // console.log("Respuesta de ventas:", res)
     sales.value = res.data
     filteredSales.value = res.data
     sellers.value = [...new Set(res.data.map((s: Sale) => s.seller))]

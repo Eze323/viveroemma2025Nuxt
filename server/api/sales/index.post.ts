@@ -107,7 +107,7 @@ export default defineEventHandler(async (event) => {
 
         if (existingCustomer) {
           finalCustomerId = existingCustomer.id
-          console.log('Cliente existente encontrado, ID:', finalCustomerId)
+          // console.log('Cliente existente encontrado, ID:', finalCustomerId)
         } else {
           // Create new customer
           const [newCustomer] = await tx
@@ -120,7 +120,7 @@ export default defineEventHandler(async (event) => {
             .$returningId()
 
           finalCustomerId = newCustomer.id
-          console.log('Nuevo cliente creado, ID:', finalCustomerId)
+          // console.log('Nuevo cliente creado, ID:', finalCustomerId)
         }
       }
 

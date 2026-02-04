@@ -36,6 +36,7 @@ export interface User {
   email: string;
   password: string;
   role: string;
+  points: number;
 
 }
 export interface ApiResponse<T> {

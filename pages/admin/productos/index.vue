@@ -595,7 +595,7 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
 };
 
 const isValidUrl = (url: string) => {
-  console.log('Validating URL:', url);
+  // console.log('Validating URL:', url);
   if (!url) return true;
   try {
     new URL(url);

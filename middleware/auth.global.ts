@@ -12,10 +12,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
 
   console.log('Middleware ejecutado en cliente, estado:', {
-    /* path: to.path,
-     isAuthenticated: authStore.isAuthenticated,
-     token: authStore.token,
-     user: authStore.user,*/
+    path: to.path,
+    isAuthenticated: authStore.isAuthenticated,
+    token: authStore.token,
+    user: authStore.user,
   });
 
   const publicRoutes = ['/', '/login', '/productos', '/nosotros', '/contacto', '/servicios'];

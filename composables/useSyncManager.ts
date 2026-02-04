@@ -56,7 +56,7 @@ export const useSyncManager = () => {
     // Sync all pending operations
     const syncAll = async (): Promise<{ success: number; failed: number }> => {
         if (isSyncing.value) {
-            console.log('Sync already in progress')
+            // console.log('Sync already in progress')
             return { success: 0, failed: 0 }
         }
 
@@ -119,9 +119,9 @@ export const useSyncManager = () => {
     const setupAutoSync = () => {
         if (process.client) {
             window.addEventListener('network-reconnected', async () => {
-                console.log('Network reconnected, starting auto-sync...')
+                // console.log('Network reconnected, starting auto-sync...')
                 const result = await syncAll()
-                console.log('Auto-sync completed:', result)
+                // console.log('Auto-sync completed:', result)
 
                 // Show notification
                 if (result.success > 0) {

@@ -80,7 +80,7 @@ import { customType } from 'drizzle-orm/mysql-core';
 export default defineEventHandler(async (event) => {
   try {
     // await requireAuth(event);  // Comentado para público
-    console.log('GET /api/sales: Iniciando fetch...');
+    // console.log('GET /api/sales: Iniciando fetch...');
 
     const db = useDrizzle();
     if (!db) {
@@ -121,9 +121,9 @@ export default defineEventHandler(async (event) => {
           .where(eq(sale_items.sale_id, baseSale.id));
 
         if (items.length === 0) {
-          console.log(`No items found for sale ${baseSale.id}`);
+          // console.log(`No items found for sale ${baseSale.id}`);
         } else {
-          console.log(`Found ${items.length} items for sale ${baseSale.id}`);
+          // console.log(`Found ${items.length} items for sale ${baseSale.id}`);
         }
 
         return {
@@ -138,7 +138,7 @@ export default defineEventHandler(async (event) => {
       })
     );
 
-    console.log(`GET /api/sales: Retornando ${salesWithItems.length} ventas con items`);
+    // console.log(`GET /api/sales: Retornando ${salesWithItems.length} ventas con items`);
 
     return {
       success: true,

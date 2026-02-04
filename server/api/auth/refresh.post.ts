@@ -34,6 +34,7 @@ export default defineEventHandler(async (event: H3Event) => {
                 name: users.name,
                 email: users.email,
                 role: users.role,
+                points: users.points,
             })
             .from(users)
             .where(eq(users.id, decoded.userId))
@@ -67,6 +68,7 @@ export default defineEventHandler(async (event: H3Event) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                points: user.points,
             }
         };
 

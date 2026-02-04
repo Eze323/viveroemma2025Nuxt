@@ -242,7 +242,7 @@ definePageMeta({
 });
 
 const configStore = useConfigStore(); // <-- Instancia el store
-console.log('Configuración de Dashboard Simple en Configuración:', configStore.simpleDashboard);
+// console.log('Configuración de Dashboard Simple en Configuración:', configStore.simpleDashboard);
 
 // General settings state
 const generalSettings = reactive({
@@ -269,7 +269,7 @@ const emailSettings = reactive({
 const saveGeneralSettings = async () => {
   try {
     // Here you would typically make an API call to save the settings
-    console.log('Saving general settings:', generalSettings);
+    // console.log('Saving general settings:', generalSettings);
     // Show success message
     alert('Configuración guardada exitosamente');
   } catch (error) {
@@ -281,7 +281,7 @@ const saveGeneralSettings = async () => {
 const saveEmailSettings = async () => {
   try {
     // Here you would typically make an API call to save the email settings
-    console.log('Saving email settings:', emailSettings);
+    // console.log('Saving email settings:', emailSettings);
     // Show success message
     alert('Configuración de email guardada exitosamente');
   } catch (error) {

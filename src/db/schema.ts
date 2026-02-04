@@ -10,7 +10,8 @@ export const users = mysqlTable(
     name: varchar('name', { length: 255 }).notNull().unique(),
     email: varchar('email', { length: 255 }).notNull().unique(),
     password: varchar('password', { length: 255 }).notNull(),
-    role: mysqlEnum('role', ['admin','encargado','operario', 'user']).default('user'),
+    role: mysqlEnum('role', ['admin', 'encargado', 'operario', 'user']).default('user'),
+    points: int('points').notNull().default(0),
     createdAt: datetime('created_at').notNull().default(new Date()),
   }
 );
@@ -20,18 +21,18 @@ export const products = mysqlTable(
   'products',
   {
     id: int('id').primaryKey().autoincrement(),
-  name: varchar('name', { length: 255 }).notNull(),
-  category: varchar('category', { length: 50 }).notNull(),
-  description: varchar('description', { length: 500 }),
-  precio_compra: decimal('precio_compra', { precision: 10, scale: 2 }).notNull().default('0.00'),
-  precio_venta: decimal('precio_venta', { precision: 10, scale: 2 }).notNull(),
-  stock: int('stock').notNull(),
-  pot_size: varchar('pot_size', { length: 50 }),
-  image_url: varchar('image_url', { length: 255 }),
-  publicado: boolean('publicado').notNull().default(true),
-  sku: varchar('sku', { length: 50 }).unique(),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  updated_at: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    name: varchar('name', { length: 255 }).notNull(),
+    category: varchar('category', { length: 50 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    precio_compra: decimal('precio_compra', { precision: 10, scale: 2 }).notNull().default('0.00'),
+    precio_venta: decimal('precio_venta', { precision: 10, scale: 2 }).notNull(),
+    stock: int('stock').notNull(),
+    pot_size: varchar('pot_size', { length: 50 }),
+    image_url: varchar('image_url', { length: 255 }),
+    publicado: boolean('publicado').notNull().default(true),
+    sku: varchar('sku', { length: 50 }).unique(),
+    created_at: timestamp('created_at').notNull().defaultNow(),
+    updated_at: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
   }
 );
 

@@ -6,7 +6,7 @@ import type { Product, FormattedProduct } from '~/types/product';
 
 export async function formatProduct(product: Product): Promise<FormattedProduct> {
   try {
-    console.log('Formatting product:', product.id); // Log para depurar
+    // console.log('Formatting product:', product.id); // Log para depurar
 
     // Obtener el precio de venta desde plant_pot_prices
     const [potPrice] = await db
@@ -14,7 +14,7 @@ export async function formatProduct(product: Product): Promise<FormattedProduct>
       .from(plantPotPrices)
       .where(eq(plantPotPrices.product_id, product.id))
       .limit(1);
-    console.log('Pot price:', potPrice); // Log para depurar
+    // console.log('Pot price:', potPrice); // Log para depurar
 
     // Calcular el precio final
     const finalPrice = potPrice ? parseFloat(potPrice.price) : parseFloat(product.precio_venta.toString());

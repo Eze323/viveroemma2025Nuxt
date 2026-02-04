@@ -292,8 +292,8 @@ const handleSaleSubmit = async (saleData: any) => {
     
     if (modalMode.value === 'create' || modalMode.value === 'edit') {
       // DEBUG: Loggea el store antes del merge (quita después si querés)
-      console.log('Store items antes de merge:', store.items);
-      console.log('getPayload.value antes de spread:', store.getPayload.value);
+      // console.log('Store items antes de merge:', store.items);
+      // console.log('getPayload.value antes de spread:', store.getPayload.value);
       
       if (store.items.length === 0) {
         throw new Error('No hay items en el carrito – agrega productos primero.');
@@ -323,7 +323,7 @@ const handleSaleSubmit = async (saleData: any) => {
     }
     
     // DEBUG: Log final del payload (quita después)
-    console.log('Payload final enviado a /api/sales:', fullPayload);
+    // console.log('Payload final enviado a /api/sales:', fullPayload);
     
     if (modalMode.value === 'create') {
       const response = await api.createSale(fullPayload);

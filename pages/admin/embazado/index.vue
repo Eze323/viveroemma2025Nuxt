@@ -288,7 +288,7 @@ const getInitials = (name) => {
 // Handle form submission
 const handleSubmit = () => {
   // Here you would typically make an API call to save the record
-  console.log('Form submitted:', form);
+  // console.log('Form submitted:', form);
   
   // Reset form
   form.plantType = '';

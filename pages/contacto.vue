@@ -158,7 +158,7 @@ const form = reactive({
 // Form submission handler
 const handleSubmit = () => {
   // Here you would typically make an API call to handle the form submission
-  console.log('Form submitted:', form);
+  // console.log('Form submitted:', form);
   
   // Reset form
   form.name = '';

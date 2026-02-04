@@ -524,7 +524,7 @@ const fetchSales = async () => {
   try {
     const response = await api.getSales();
     allSales.value = response.data || []; // Ajustado para manejar la estructura del endpoint
-    console.log('Sales loaded:', allSales.value);
+    // console.log('Sales loaded:', allSales.value);
   } catch (err) {
     error.value = err.message || 'Error al cargar las ventas.';
     console.error('Error fetching sales:', err);
@@ -538,7 +538,7 @@ const fetchProducts = async () => {
   try {
     const response = await api.getProducts();
     availableProducts.value = Array.isArray(response) ? response : [];
-    console.log('Available products:', availableProducts.value);
+    // console.log('Available products:', availableProducts.value);
   } catch (err) {
     error.value = 'Error al cargar los productos.';
     console.error('Error fetching products:', err);

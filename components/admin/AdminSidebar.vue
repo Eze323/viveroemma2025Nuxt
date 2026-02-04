@@ -105,6 +105,7 @@ const menuItems = [
   { label: 'Ventas', to: '/admin/ventas', icon: 'heroicons:shopping-cart', roles: ['admin', 'encargado'] },
   { label: 'Clientes', to: '/admin/clientes', icon: 'heroicons:user-circle', roles: ['admin', 'encargado'] },
   { label: 'Categorías', to: '/admin/categorias', icon: 'heroicons:tag', roles: ['admin', 'encargado'] },
+  { label: 'Pedidos Canasteros', to: '/admin/pedidos-mayoristas', icon: 'heroicons:truck', roles: ['admin', 'encargado'] },
   { label: 'Proveedores', to: '/admin/proveedores', icon: 'heroicons:building-storefront', roles: ['admin', 'encargado'] },
 ];
 

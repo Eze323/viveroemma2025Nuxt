@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   // Importing modules
   modules: [
-    
+
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
@@ -12,7 +12,7 @@ export default defineNuxtConfig({
     'nuxt-icon',
     '@nuxtjs/google-fonts',
     '@nuxt/image',
-   //'@nuxt/content',
+    '@nuxt/content',
     'nuxt-openapi-docs-module'
   ],
   // content: {
