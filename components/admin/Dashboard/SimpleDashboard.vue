@@ -5,6 +5,9 @@
       <div class="text-6xl sm:text-7xl font-black my-4">
         $ {{ totalHoy.toLocaleString() }}
       </div>
+      <div v-if="productsToday" class="text-xl font-bold opacity-90 mb-4 bg-white/20 inline-block px-4 py-1 rounded-full">
+        {{ productsToday }} plantas hoy
+      </div>
       <p class="text-lg italic opacity-90">"Igual que en el cuaderno, pero más fácil"</p>
     </div>
 
@@ -24,6 +27,56 @@
       </NuxtLink>
     </div>
 
+    <!-- Rankings Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Top Sellers Ranking -->
+      <div v-if="topSellers?.length" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <Icon name="heroicons:trophy" class="text-yellow-500" /> RANKING VENDEDORES
+        </h3>
+        <div class="divide-y divide-gray-100">
+          <div v-for="(seller, index) in topSellers" :key="seller.id" class="py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full text-xs font-bold text-gray-500">
+                {{ index + 1 }}
+              </span>
+              <div>
+                <p class="font-bold text-gray-900">{{ seller.name }}</p>
+                <p class="text-xs text-gray-500">{{ seller.products }} plantas - {{ seller.orders }} ventas</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-primary-600">$ {{ seller.sales.toLocaleString() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Customers Ranking -->
+      <div v-if="topCustomers?.length" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+          <Icon name="heroicons:users" class="text-blue-500" /> RANKING CLIENTES
+        </h3>
+        <div class="divide-y divide-gray-100">
+          <div v-for="(customer, index) in topCustomers" :key="customer.name" class="py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 flex items-center justify-center bg-blue-50 rounded-full text-xs font-bold text-blue-500">
+                {{ index + 1 }}
+              </span>
+              <div>
+                <p class="font-bold text-gray-900">{{ customer.name }}</p>
+                <p class="text-xs text-gray-500">{{ customer.products }} plantas en {{ customer.orders }} compras</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-green-600">$ {{ customer.sales.toLocaleString() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Sales -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
         <Icon name="heroicons:document-text" class="text-gray-400" /> ÚLTIMAS ANOTADAS
@@ -67,7 +120,19 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  productsToday: {
+    type: Number,
+    default: 0
+  },
   sales: {
+    type: Array,
+    default: () => []
+  },
+  topSellers: {
+    type: Array,
+    default: () => []
+  },
+  topCustomers: {
     type: Array,
     default: () => []
   }

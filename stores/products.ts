@@ -1,39 +1,5 @@
 import { defineStore } from 'pinia';
-/*// Tabla: products
-export const products = mysqlTable(
-  'products',
-  {
-    id: int('id').primaryKey().autoincrement(),
-  name: varchar('name', { length: 255 }).notNull(),
-  category: varchar('category', { length: 50 }).notNull(),
-  description: varchar('description', { length: 500 }),
-  precio_compra: decimal('precio_compra', { precision: 10, scale: 2 }).notNull().default('0.00'),
-  precio_venta: decimal('precio_venta', { precision: 10, scale: 2 }).notNull(),
-  stock: int('stock').notNull(),
-  pot_size: varchar('pot_size', { length: 50 }),
-  image_url: varchar('image_url', { length: 255 }),
-  publicado: boolean('publicado').notNull().default(true),
-  sku: varchar('sku', { length: 50 }).unique(),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  updated_at: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
-  }
-);*/
-
-interface Product {
-    id: number;
-    name: string;
-    category: string;
-    description: string;
-    precio_compra: number;
-    precio_venta: number;
-    stock: number;
-    pot_size: string;
-    image_url: string;
-    publicado: boolean;
-    sku: string;
-    created_at: string;
-    updated_at: string;
-}
+import type { Product } from '~/types/product';
 
 // API Response types
 interface ProductsSuccessResponse {

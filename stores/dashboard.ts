@@ -5,6 +5,8 @@ export interface DashboardStats {
     revenue: number
     orders: number
     products: number
+    revenueToday: number
+    productsToday: number
 }
 
 export interface SellerStat {
@@ -30,7 +32,7 @@ export interface RecentSale {
 }
 
 export const useDashboardStore = defineStore('dashboard', () => {
-    const stats = ref<DashboardStats>({ revenue: 0, orders: 0, products: 0 })
+    const stats = ref<DashboardStats>({ revenue: 0, orders: 0, products: 0, revenueToday: 0, productsToday: 0 })
     const topSellers = ref<SellerStat[]>([])
     const recentSales = ref<RecentSale[]>([])
     const loading = ref(false)

@@ -4,15 +4,19 @@ import type { Decimal } from "@prisma/client/runtime/library";
 export interface Product {
   id: number;
   name: string;
-  category: string | null;
-  description?: string; // Descripción opcional
-  precio_venta: number; // Precio de costo (string por Drizzle)
-  precio_compra: number; // Precio de venta (número por Drizzle)
-  publicado: boolean; // Indica si el producto está publicado
-  sku: string | null; // SKU del producto
+  category: string;
+  description: string | null;
+  precio_venta: number;
+  precio_compra: number;
+  precio_cantidad: number;
+  publicado: boolean;
+  sku: string | null;
   stock: number;
+  stock_minimo: number;
   image_url: string | null;
   pot_size: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface FormattedProduct {
@@ -22,10 +26,12 @@ export interface FormattedProduct {
   description: string; // Descripción del producto
   precio_compra: number; // Precio de costo
   precio_venta: number; // Precio de venta
+  precio_cantidad: number; // Precio por cantidad
   publicado: boolean; // Indica si el producto está publicado
   sku: string | null; // SKU del producto
   cost_price: number; // Precio de costo
   stock: number;
+  stock_minimo: number;
   image_url: string | null;
   pot_size: string | null;
 }

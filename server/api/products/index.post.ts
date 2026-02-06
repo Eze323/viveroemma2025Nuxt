@@ -60,9 +60,11 @@ export default defineEventHandler(async (event) => {
         description: body.description || null,
         precio_venta: Number(body.precio_venta).toFixed(2),
         precio_compra: body.precio_compra ? Number(body.precio_compra).toFixed(2) : '0.00',
+        precio_cantidad: Number(body.precio_cantidad).toFixed(2),
         publicado: body.publicado !== undefined ? body.publicado : true,
         sku: body.sku || null,
         stock: body.stock,
+        stock_minimo: Number(body.stock_minimo || '0'),
         pot_size: body.pot_size || 'Sin especificar',
         image_url: body.image_url || null,
         created_at: new Date(),
@@ -77,7 +79,12 @@ export default defineEventHandler(async (event) => {
         name: body.name,
         category: body.category,
         precio_venta: body.precio_venta,
+        precio_compra: body.precio_compra,
+        precio_cantidad: body.precio_cantidad,
         stock: body.stock,
+        stock_minimo: body.stock_minimo,
+        pot_size: body.pot_size,
+
       },
     }
   } catch (error) {

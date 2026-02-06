@@ -25,6 +25,7 @@
       <SimpleDashboard 
         v-if="configStore.simpleDashboard"
         :totalHoy="totalHoy" 
+        :productsToday="productsToday"
         :sales="recentSales"
       />
 
@@ -79,12 +80,8 @@ const chartData = {
   ]
 };
 
-// Compute daily total for SimpleDashboard (includes both admin sales and reseller orders)
-const totalHoy = computed(() => {
-    const today = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return dashboardStore.recentSales
-        .filter(s => s.date === today)
-        .reduce((sum, s) => sum + s.total, 0);
-});
+// Use store data for total sold today
+const totalHoy = computed(() => dashboardStore.stats.revenueToday);
+const productsToday = computed(() => dashboardStore.stats.productsToday);
 
 </script>
