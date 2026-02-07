@@ -90,7 +90,7 @@
                 v-if="venta.type === 'reseller'" 
                 class="px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 rounded-full"
               >
-                CANASTERO Fisura
+                CANASTERO
               </span>
               <span 
                 v-else-if="venta.type === 'admin'" 
