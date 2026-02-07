@@ -309,9 +309,12 @@
             <input v-model.number="editingProduct.precio_venta" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Mayorista($)</label>
+            <input v-model.number="editingProduct.precio_cantidad" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
+          </div>
+          <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
-            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2Has context menu
-            " required min="0" />
+            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
@@ -617,8 +620,7 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
 };
 
 const isValidUrl = (url: string) => {
-  // console.log('Validating URL:', url);
-  if (!url) return true;
+  if (!url || url === '/placeholder.png') return true;
   try {
     new URL(url);
     return true;
@@ -626,7 +628,6 @@ const isValidUrl = (url: string) => {
     return false;
   }
 };
-
 const createProduct = async () => {
   if (!validateProduct(newProduct)) return;
   
@@ -660,28 +661,44 @@ const updateProduct = async () => {
   if (!validateProduct(editingProduct)) return;
   
   try {
-    const productData: Partial<Product> = {
+    // Solo enviamos lo que la tabla necesita, nada de objetos raros
+    const payload = {
       name: editingProduct.name,
       category: editingProduct.category,
-      description: editingProduct.description || null,
-      precio_compra: Number(editingProduct.precio_compra || 0),
+      description: editingProduct.description,
+      precio_compra: Number(editingProduct.precio_compra),
       precio_venta: Number(editingProduct.precio_venta),
       precio_cantidad: Number(editingProduct.precio_cantidad || 0),
-      publicado: editingProduct.publicado || false,
-      sku: editingProduct.sku || null,
       stock: Number(editingProduct.stock),
       stock_minimo: Number(editingProduct.stock_minimo || 0),
-      pot_size: editingProduct.pot_size || null,
-      image_url: editingProduct.image_url || '/placeholder.png',
+      pot_size: editingProduct.pot_size,
+      image_url: editingProduct.image_url,
+      publicado: Boolean(editingProduct.publicado),
     };
-    await api.updateProduct(editingProduct.id!, productData);
+
+    const productId = editingProduct.id;
+    if (!productId) {
+        showNotification('Error: No se encontró el ID del producto', 'error');
+        return;
+    }
+
+    // Usamos el ID directamente en la URL
+    await api.updateProduct(productId, payload);
+    
     closeEditModal();
-    showNotification('Producto actualizado exitosamente!');
-    // Reload products from store to get the updated list
+    showNotification('Producto actualizado correctamente');
+    await productStore.fetchProducts(); // Recargar la lista
+    //actualizar lista de productos cuando termino hacer click en aceptar
     productStore.forceReload();
+    
+    
+
+    
+    
   } catch (err: any) {
-    console.error('Error updating product:', err);
-    showNotification(err.message || 'Error al actualizar el producto.', 'error');
+    console.error('Error al actualizar:', err);
+    // Esto te mostrará el error real del servidor en la notificación
+    showNotification(err.data?.message || 'Error interno del servidor', 'error');
   }
 };
 

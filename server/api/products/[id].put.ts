@@ -202,12 +202,57 @@
 // // });
 
 // server/api/sales/[id].put.ts
-import { actualizarSale } from '~~/server/services/salesService';
+// import { actualizarSale } from '~~/server/services/salesService';
+
+// export default defineEventHandler(async (event) => {
+//   const id = Number(event.context.params?.id);
+//   const body = await readBody(event);
+
+//   // Llama directamente al servicio que ya arreglamos antes
+//   return await actualizarSale(id, body);
+// });
+
+// server/api/products/[id].put.ts
+// server/api/products/[id].put.ts
+import { useDrizzle } from '~/server/utils/drizzle';
+import { products } from '~/server/db/schema';
+import { eq } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
-  const id = Number(event.context.params?.id);
-  const body = await readBody(event);
+  try {
+    const db = useDrizzle();
+    const id = getRouterParam(event, 'id');
+    const body = await readBody(event);
 
-  // Llama directamente al servicio que ya arreglamos antes
-  return await actualizarSale(id, body);
+    if (!id) throw new Error('ID no proporcionado');
+
+    // Mapeo manual: del body (snake_case) al esquema (camelCase)
+    // Y conversión de Boolean a Number para MariaDB
+    const updateData = {
+      name: body.name,
+      category: body.category,
+      description: body.description || null,
+      precioCompra: String(body.precio_compra || "0"),
+      precioVenta: String(body.precio_venta || "0"),
+      precioCantidad: String(body.precio_cantidad || "0"),
+      stock: Number(body.stock) || 0,
+      stockMinimo: Number(body.stock_minimo) || 0,
+      potSize: body.pot_size || null,
+      imageUrl: body.image_url || null,
+      // EL FIX CLAVE: Convertir boolean a 0 o 1
+      publicado: body.publicado ? 1 : 0,
+    };
+
+    const result = await db.update(products)
+      .set(updateData)
+      .where(eq(products.id, parseInt(id)));
+
+    return { success: true, result };
+  } catch (error: any) {
+    console.error("Error en el servidor:", error);
+    throw createError({
+      statusCode: 500,
+      message: error.message
+    });
+  }
 });
