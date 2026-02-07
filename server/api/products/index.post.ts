@@ -50,6 +50,28 @@ export default defineEventHandler(async (event) => {
         })
       }
     }
+    //generar sku
+    const autoGenerateSKU = () => {
+      if (!body.name || !body.category) return;
+
+      const cat = body.category.substring(0, 3).toUpperCase();
+      const name = body.name.trim().substring(0, 3).toUpperCase();
+
+      // Limpiamos el tamaño de maceta (ej: "7 Lts" -> "7L")
+      const size = body.pot_size
+        ? body.pot_size.replace(/\s/g, '').substring(0, 2).toUpperCase()
+        : 'XX';
+
+      // Generamos un número aleatorio de 3 cifras o usamos el timestamp
+      // Para algo más pro, podrías consultar a la DB el último ID, 
+      // pero un número aleatorio de 3 dígitos es muy seguro para empezar.
+      const random = Math.floor(Math.random() * 900) + 100;
+
+      return `${cat}${name}-${size}-${random}`;
+    };
+    if (!body.sku) {
+      body.sku = autoGenerateSKU()
+    }
 
     // Insert product
     const [product] = await db
