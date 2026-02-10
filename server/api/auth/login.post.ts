@@ -52,7 +52,13 @@ export default defineEventHandler(async (event: H3Event) => {
         statusMessage: 'Credenciales inválidas',
       });
     }
-
+    // NUEVO: Bloqueo de seguridad
+    if (user.role === 'suspendido') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Tu cuenta ha sido inhabilitada. Contacta al administrador.',
+      });
+    }
     // Verificar contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
