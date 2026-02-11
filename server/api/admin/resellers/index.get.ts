@@ -1,7 +1,7 @@
-// server/api/admin/resellers/ranking.get.ts
-import { db } from '~/server/utils/drizzle'; // Asegúrate de importar tu instancia de db
+// server/api/admin/resellers.get.ts
+import { db } from '~/server/utils/drizzle';
 import { users } from '~/server/db/schema';
-import { eq, or, desc } from 'drizzle-orm';
+import { desc, or, eq } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
     try {
@@ -13,22 +13,20 @@ export default defineEventHandler(async (event) => {
             points: users.points
         })
             .from(users)
-            // Buscamos tanto a los activos como a los suspendidos para la tabla
             .where(
                 or(
                     eq(users.role, 'reseller'),
-                    eq(users.role, 'canastero'),
-                    eq(users.role, 'suspendido')
+                    eq(users.role, 'suspendido'),
+                    eq(users.role, 'canastero') // Por si acaso usaste este nombre
                 )
             )
             .orderBy(desc(users.points));
 
-        console.log(results);
-        return results; // Nuxt lo enviará como un JSON Array []
-    } catch (error) {
+        return results; // Esto DEBE devolver un array
+    } catch (error: any) {
         throw createError({
             statusCode: 500,
-            statusMessage: 'Error al obtener canasteros'
+            statusMessage: error.message
         });
     }
 });

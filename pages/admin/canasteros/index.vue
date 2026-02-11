@@ -90,9 +90,14 @@ const resellers = ref([]);
 const updating = ref(null);
 
 const fetchResellers = async () => {
-  // Aquí llamamos a los usuarios con rol 'reseller' o 'suspendido'
-  const data = await $fetch('/api/admin/resellers');
-  resellers.value = data;
+  try {
+    const data = await $fetch('/api/admin/resellers');
+    // Forzamos que sea un array por seguridad
+    resellers.value = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error("Error al traer canasteros:", err);
+    resellers.value = []; // Si falla, queda vacío y no rompe el .filter
+  }
 };
 
 // Top 3 para el ranking
