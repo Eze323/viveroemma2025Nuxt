@@ -1,1 +1,2 @@
-build command: nuxi build --no-prerender 
+[build] 
+command = "nuxi build --no-prerender"
