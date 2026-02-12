@@ -119,4 +119,8 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/auth.ts'
   ],
+  nitro: {
+    preset: 'netlify',
+
+  }
 })
