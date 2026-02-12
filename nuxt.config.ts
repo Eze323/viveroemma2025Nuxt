@@ -121,10 +121,6 @@ export default defineNuxtConfig({
   ],
   nitro: {
     preset: 'netlifly',
-    prerender: {
-      crawlLinks: true,
-      routes: ['/', '/about', '/contact', '/products', '/products/:id', '/products/:id/:slug', '/reseller', '/reseller/:id', '/reseller/:id/:slug', '/reseller/orders', '/reseller/orders/:id', '/reseller/orders/:id/:slug', '/reseller/orders/:id/:slug/:status', '/reseller/orders/:id/:slug/:status/:action', '/reseller/orders/:id/:slug/:status/:action/:action']
-    }
 
   }
-})  
+})
