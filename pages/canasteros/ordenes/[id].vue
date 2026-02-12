@@ -11,15 +11,13 @@
     <div v-else-if="!order" class="text-center py-12">No se encontró el pedido.</div>
 
     <div v-else class="px-4">
-      <!-- Status Banner -->
-      <div :class="['p-4 rounded-lg mb-6 text-center', getStatusClass(order.status)]">
+      <div :class="['p-4 rounded-lg mb-6 text-center border', getStatusClass(order.status)]">
         <h2 class="font-bold text-lg mb-1">{{ formatStatus(order.status) }}</h2>
         <p class="text-sm opacity-90" v-if="order.status === 'pending_payment'">
             Realiza la transferencia para procesar tu pedido.
         </p>
       </div>
 
-      <!-- Payment Info (Only if pending) -->
       <div v-if="order.status === 'pending_payment'" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
         <h3 class="font-bold text-gray-900 mb-4 flex items-center">
             <Icon name="heroicons:banknotes" class="w-5 h-5 mr-2 text-primary" />
@@ -33,8 +31,7 @@
         </div>
       </div>
 
-      <!-- Upload Proof -->
-      <div v-if="order.status === 'pending_payment'" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div v-if="order.status === 'pending_payment' || order.paymentProofUrl" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
         <h3 class="font-bold text-gray-900 mb-4">Comprobante de Pago</h3>
         
         <div v-if="!uploading && !order.paymentProofUrl">
@@ -52,15 +49,19 @@
             />
         </div>
         <div v-else-if="uploading" class="text-center py-4">
-            <p class="text-primary animate-pulse">Subiendo comprobante...</p>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-2"></div>
+            <p class="text-primary font-medium">Subiendo comprobante...</p>
         </div>
          <div v-else class="text-center py-4">
-            <p class="text-green-600 font-medium mb-2">Comprobante subido correctamente</p>
-            <img :src="order.paymentProofUrl" class="w-full max-h-48 object-contain rounded border border-gray-200" />
+            <p class="text-green-600 font-medium mb-2 flex items-center justify-center gap-1">
+                <Icon name="heroicons:check-badge" class="w-5 h-5" />
+                Comprobante enviado
+            </p>
+            <img :src="order.paymentProofUrl" class="w-full max-h-48 object-contain rounded border border-gray-200 bg-gray-50" />
         </div>
       </div>
-
-       <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4">
+    
+      <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-4">
          <h3 class="font-bold text-gray-900 mb-4">Items del Pedido</h3>
          <div class="overflow-x-auto">
              <table class="w-full text-sm text-left">
@@ -87,21 +88,30 @@
          </div>
        </div>
 
-       <!-- Order Summary -->
        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
           <h3 class="font-bold text-gray-900 mb-4">Resumen</h3>
           <div class="flex justify-between mb-2">
-            <span class="text-gray-600">Total</span>
-            <span class="font-bold text-gray-900">${{ order.total }}</span>
+            <span class="text-gray-600">Total del Pedido</span>
+            <span class="font-bold text-gray-900 text-lg">${{ order.total }}</span>
           </div>
        </div>
     </div>
+
+    <NotificationModal 
+      :is-open="modal.show"
+      :message="modal.message"
+      :type="modal.type"
+      @close="modal.show = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+
+// Estado del Modal
+const modal = ref({ show: false, message: '', type: 'success' });
 
 definePageMeta({
   middleware: ['auth'],
@@ -119,8 +129,6 @@ const fetchOrder = async () => {
         const { data, success } = await $fetch(`/api/reseller/orders/${route.params.id}`);
         if(success) {
             order.value = data;
-        } else {
-            console.error('Failed to load order');
         }
     } catch (e) {
         console.error(e);
@@ -133,9 +141,12 @@ const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if(!file) return;
 
-    // Validate type
     if (!file.type.startsWith('image/')) {
-        alert('Por favor seleccione una imagen válida.');
+        modal.value = {
+            show: true,
+            message: 'Por favor seleccione una imagen válida (JPG, PNG).',
+            type: 'error'
+        };
         return;
     }
 
@@ -144,20 +155,18 @@ const handleFileUpload = async (event) => {
     formData.append('image', file);
 
     try {
-        // Upload to ImgBB
+        // 1. Subir a ImgBB
         const { data: uploadData, error: uploadError } = await useFetch('/api/upload/imgbb', {
             method: 'POST',
             body: formData,
         });
 
-        if (uploadError.value) {
-            throw new Error(uploadError.value.statusMessage || 'Error al subir imagen');
-        }
+        if (uploadError.value) throw new Error('Error al subir la imagen al servidor');
 
         const imageUrl = uploadData.value?.url;
 
         if (imageUrl) {
-            // Save proof URL to order
+            // 2. Guardar en nuestra DB y disparar notificación interna al Admin
             const { success, error: saveError } = await $fetch('/api/reseller/upload-proof', {
                 method: 'POST',
                 body: {
@@ -168,29 +177,40 @@ const handleFileUpload = async (event) => {
 
             if (success) {
                 order.value.paymentProofUrl = imageUrl;
-                order.value.status = 'paid'; // Optimistic update
-                alert('Comprobante subido exitosamente. Esperando aprobación.');
+                order.value.status = 'paid'; // Cambio de estado optimista
+                
+                // MOSTRAR TU MODAL DE ÉXITO
+                modal.value = {
+                    show: true,
+                    message: 'Comprobante subido exitosamente. El administrador verificará el pago a la brevedad.',
+                    type: 'success'
+                };
             } else {
-                throw new Error(saveError || 'Error al guardar el comprobante');
+                throw new Error(saveError || 'No se pudo vincular el comprobante al pedido');
             }
         }
     } catch (e) {
         console.error('Error uploading proof:', e);
-        alert('Ocurrió un error al subir el comprobante. Intente nuevamente.');
+        // MOSTRAR TU MODAL DE ERROR
+        modal.value = {
+            show: true,
+            message: 'Ocurrió un error al subir el comprobante. Por favor, intenta de nuevo o contacta al vivero.',
+            type: 'error'
+        };
     } finally {
         uploading.value = false;
-        // Reset input if needed
-        event.target.value = '';
+        event.target.value = ''; // Limpiar el input
     }
 }
 
+// Helpers de estilo (se mantienen igual)
 const getStatusClass = (status) => {
     switch(status) {
-        case 'pending_payment': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'paid': return 'bg-blue-100 text-blue-800 border-blue-200';
-        case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-        case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'pending_payment': return 'bg-yellow-50 text-yellow-800 border-yellow-200';
+        case 'paid': return 'bg-blue-50 text-blue-800 border-blue-200';
+        case 'completed': return 'bg-green-50 text-green-800 border-green-200';
+        case 'cancelled': return 'bg-red-50 text-red-800 border-red-200';
+        default: return 'bg-gray-50 text-gray-800 border-gray-200';
     }
 }
 
@@ -198,13 +218,11 @@ const formatStatus = (status) => {
     const map = {
         'pending_payment': 'Pendiente de Pago',
         'paid': 'Verificando Pago',
-        'completed': 'Pedido Completado',
-        'cancelled': 'Cancelado'
+        'completed': 'Pedido Aprobado',
+        'cancelled': 'Pedido Cancelado'
     };
     return map[status] || status;
 }
 
-onMounted(() => {
-    fetchOrder();
-});
+onMounted(fetchOrder);
 </script>

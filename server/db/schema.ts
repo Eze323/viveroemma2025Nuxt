@@ -308,3 +308,18 @@ export const users = mysqlTable("users", {
 	(table) => [
 		unique("users_email_unique").on(table.email),
 	]);
+
+
+
+export const notifications = mysqlTable("notifications", {
+	id: int().autoincrement().notNull().primaryKey(),
+	userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+	title: varchar({ length: 255 }).notNull(),
+	message: text().notNull(),
+	type: varchar({ length: 50 }).default('info'), // 'sale', 'stock', 'system'
+	isRead: tinyint("is_read").default(0).notNull(),
+	link: varchar({ length: 255 }).default('NULL'),
+	createdAt: timestamp("created_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+	index("notifications_user_id_index").on(table.userId),
+]);

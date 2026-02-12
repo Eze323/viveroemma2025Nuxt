@@ -32,13 +32,15 @@
       </button>
       
       <!-- Notifications -->
-      <button class="relative p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200 group">
+      <!-- <button class="relative p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200 group">
         <Icon name="heroicons:bell" class="w-5 h-5" />
         <span class="absolute top-1.5 right-1.5 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium group-hover:scale-110 transition-transform">
           3
         </span>
-      </button>
-      
+      </button> -->
+      <div class="flex items-center gap-4">
+      <NotificationBell />
+      </div>
       <!-- User menu dropdown -->
       <div class="relative">
         <button 

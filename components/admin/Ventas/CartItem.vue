@@ -173,8 +173,8 @@ const decreaseQuantity = () => {
 }
 
 .quantity-button {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,8 +220,8 @@ const decreaseQuantity = () => {
 }
 
 .action-button {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -290,8 +290,8 @@ const decreaseQuantity = () => {
   
   .quantity-button,
   .action-button {
-    width: 48px;
-    height: 48px;
+    width: 30px;
+    height: 30px;
   }
 }
 
