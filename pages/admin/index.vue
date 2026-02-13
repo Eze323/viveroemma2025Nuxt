@@ -3,7 +3,7 @@
     <div class="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto flex justify-between items-center">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Vivero Emma</h1>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Vivero Emma</h2>
           <p class="mt-1 text-sm text-gray-600">Bienvenido de vuelta, {{ authStore.user?.name || 'Usuario' }}</p>
           <p class="text-xs text-gray-500 italic">{{ configStore.simpleDashboard ? 'Modo Pizarra Activo' : 'Panel de Control' }}</p>
         </div>
