@@ -1,6 +1,6 @@
 // server/api/sales/[id].get.ts
 import { createError, defineEventHandler, H3Event } from 'h3';
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import jwt from 'jsonwebtoken';
 
 if (!process.env.JWT_SECRET) {
@@ -10,6 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
+    const db = useDrizzle();
     // Validar token JWT
     const authHeader = event.node.req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

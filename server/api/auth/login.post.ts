@@ -1,5 +1,5 @@
 // // server/api/auth/login.post.ts
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { users } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
@@ -22,6 +22,7 @@ export default defineEventHandler(async (event: H3Event) => {
   try {
     // Leer y tipar el cuerpo de la solicitud
     const body = await readBody<LoginBody>(event);
+    const db = useDrizzle();
     const { email, password } = body;
 
     // Validar entrada

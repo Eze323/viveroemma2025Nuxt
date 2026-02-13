@@ -1,10 +1,12 @@
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { users, customers } from '~/server/db/schema';
 import bcrypt from 'bcrypt';
 
 export default defineEventHandler(async (event) => {
     // Solo el admin debería poder registrar canasteros (puedes añadir middleware aquí)
     const body = await readBody(event);
+    const db = useDrizzle();
     const { name, email, password, phone } = body;
 
     try {

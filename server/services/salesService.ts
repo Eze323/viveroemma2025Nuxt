@@ -1,9 +1,10 @@
 // server/services/salesService.ts
 import { sales, saleItems, products } from '../db/schema';
 // salesService.ts
-import { db } from '../utils/drizzle';
+import { useDrizzle } from '../utils/drizzle';
 import { eq, and, desc, count, gte, lte, sql } from 'drizzle-orm';
 
+const db = useDrizzle();
 interface SaleQueryParams {
     page?: number;
     limit?: number;

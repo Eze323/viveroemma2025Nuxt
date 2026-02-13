@@ -1,10 +1,12 @@
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { resellerOrders as orders, users, notifications } from '~/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id');
     const body = await readBody(event); // { userId, reason }
+
+    const db = useDrizzle();
 
     await db.transaction(async (tx) => {
         // Volvemos el pedido a 'pending_payment' para que el canastero suba otro comprobante

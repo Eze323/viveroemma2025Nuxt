@@ -1,10 +1,12 @@
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { resellerOrders as orders, users, notifications } from '~/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id');
     const body = await readBody(event); // { userId, points }
+
+    const db = useDrizzle();
 
     return await db.transaction(async (tx) => {
         // 1. Marcar pedido como completado

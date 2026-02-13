@@ -1,9 +1,8 @@
-// server/api/admin/resellers/ranking.get.ts
-import { db } from '~/server/utils/drizzle'; // Asegúrate de importar tu instancia de db
-import { users } from '~/server/db/schema';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { eq, or, desc } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
+    const db = useDrizzle();
     try {
         const results = await db.select({
             id: users.id,

@@ -49,12 +49,13 @@ export const useDrizzle = () => {
     globalState._mysqlPool = mysql.createPool({
       uri: process.env.DATABASE_URL,
       // Límites estrictos para evitar saturar el servidor (especialmente Hostinger)
-      connectionLimit: 5,
-      maxIdle: 2,
+      connectionLimit: 1,
+      maxIdle: 1,
       idleTimeout: 15000,
       queueLimit: 0,
       enableKeepAlive: true,
       keepAliveInitialDelay: 0,
+      connectTimeout: 10000,
     });
   }
 
@@ -68,7 +69,7 @@ export const useDrizzle = () => {
 
 // Exportamos las tablas para usarlas fácilmente
 export const tables = schema;
-export const db = useDrizzle();
+// removed export const db = useDrizzle(); to prevent global connection
 
 // Tipos inferidos (se mantienen igual)
 export type Product = typeof schema.products.$inferSelect;

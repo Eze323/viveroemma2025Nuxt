@@ -1,9 +1,10 @@
 import { defineEventHandler, getRouterParam } from 'h3';
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { resellerOrders, resellerOrderItems, products } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
+    const db = useDrizzle();
     const idStr = getRouterParam(event, 'id');
     const id = parseInt(idStr as string);
 

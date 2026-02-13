@@ -1,10 +1,11 @@
 // server/api/admin/resellers.get.ts
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { users } from '~/server/db/schema';
 import { desc, or, eq } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
     try {
+        const db = useDrizzle();
         const results = await db.select({
             id: users.id,
             name: users.name,

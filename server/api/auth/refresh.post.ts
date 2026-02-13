@@ -1,4 +1,4 @@
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { users } from '~/src/db/schema';
 import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
@@ -10,6 +10,7 @@ if (!process.env.JWT_SECRET) {
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export default defineEventHandler(async (event: H3Event) => {
+    const db = useDrizzle();
     const refreshToken = getCookie(event, 'refresh_token');
 
     if (!refreshToken) {

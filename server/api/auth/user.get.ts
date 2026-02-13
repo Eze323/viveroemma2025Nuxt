@@ -1,5 +1,5 @@
 // server/api/auth/user.get.ts
-import { db } from '~/server/utils/drizzle';
+import { useDrizzle } from '~/server/utils/drizzle';
 import { users } from '~/src/db/schema';
 import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
@@ -12,6 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
+    const db = useDrizzle();
     const authHeader = getHeader(event, 'Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw createError({
