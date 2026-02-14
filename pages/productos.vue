@@ -114,11 +114,11 @@
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col border border-gray-100">
             <div class="relative overflow-hidden w-full h-64">
               <NuxtImg
-                :src="product.image_url" 
+                :src="product.image" 
                 :alt="product.name"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 loading="lazy"
-                :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
+                placeholder="blur: 2, q: 50, h: 10"
               />
             </div>
             <div class="p-4 flex flex-col flex-1">
