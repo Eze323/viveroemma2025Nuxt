@@ -193,7 +193,7 @@ const cartTotal = computed(() => {
 });
 
 const sendWhatsApp = () => {
-  const phone = "54967075529"; // REEMPLAZA CON TU WHATSAPP (código de país + número)
+  const phone = "5491151165807"; // REEMPLAZA CON TU WHATSAPP (código de país + número)
   let text = "¡Hola Vivero Emma! 🌱 Quiero consultar presupuesto por:\n\n";
   
   cart.value.forEach(item => {
