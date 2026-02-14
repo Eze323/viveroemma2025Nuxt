@@ -54,15 +54,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div v-for="product in products" :key="product.id" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div class="aspect-w-1 aspect-h-1 relative overflow-hidden">
+            <div class="relative overflow-hidden w-full h-64 md:h-72">
               <NuxtImg
                 :src="product.image" 
                 :alt="product.name"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 loading="lazy"
-                  
-              sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
-              :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
+                sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
+                :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
               />
               <div v-if="product.discount" 
                 class="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-sm font-medium">
@@ -168,17 +167,12 @@ const filters = reactive({
 
 const newsletterEmail = ref('');
 
-// Categories
-const categories = [
-  'Plantas de interior',
-  'Plantas de exterior',
-  'Flores',
-  'Árboles',
-  'Semillas',
-  'Herramientas',
-  'Macetas',
-  'Sustratos'
-];
+// Categories computed dynamically from available products
+const categories = computed(() => {
+  if (!productsData.value?.data) return [];
+  const uniqueCategories = new Set(productsData.value.data.map(p => p.category));
+  return Array.from(uniqueCategories).sort();
+});
 
 // Featured categories
 const featuredCategories = [
@@ -200,38 +194,58 @@ const featuredCategories = [
 ];
 
 // Products data
-const products = ref([
-  {
-    id: 1,
-    name: 'Monstera Deliciosa',
-    category: 'Plantas de interior',
-    price: '13.000',
-    image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg'
-  },
-  {
-    id: 2,
-    name: 'Sansevieria',
-    category: 'Plantas de interior',
-    price: '8.500',
-    oldPrice: '11.800',
-    discount: 15,
-    image: 'https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg'
-  },
-  {
-    id: 3,
-    name: 'Kit de Jardinería',
-    category: 'Herramientas',
-    price: '20.800',
-    image: 'https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg'
-  },
-  {
-    id: 4,
-    name: 'Rosas Rojas',
-    category: 'Flores',
-    price: '4.200',
-    image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg'
+const { data: productsData, status, error } = await useFetch('/api/products/public');
+
+const products = computed(() => {
+  if (!productsData.value?.data) return [];
+  
+  let result = productsData.value.data.map(product => ({
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    price: Number(product.precio_venta),
+    oldPrice: null, 
+    discount: null, 
+    image: product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen' 
+  }));
+
+  // Filtering
+  if (filters.search) {
+    const searchLower = filters.search.toLowerCase();
+    result = result.filter(p => p.name.toLowerCase().includes(searchLower));
   }
-]);
+
+  if (filters.category) {
+    result = result.filter(p => p.category === filters.category);
+  }
+
+  if (filters.price) {
+    if (filters.price === '5000+') {
+       result = result.filter(p => p.price >= 5000);
+    } else {
+       const [min, max] = filters.price.split('-').map(Number);
+       if (!isNaN(min) && !isNaN(max)) {
+         result = result.filter(p => p.price >= min && p.price <= max);
+       }
+    }
+  }
+
+  // Sorting
+  switch (filters.sort) {
+    case 'price-asc':
+      result.sort((a, b) => a.price - b.price);
+      break;
+    case 'price-desc':
+      result.sort((a, b) => b.price - a.price);
+      break;
+    case 'newest':
+      result.sort((a, b) => b.id - a.id); // Assuming higher ID is newer
+      break;
+    // 'popular' could be default or based on sales if available
+  }
+
+  return result;
+});
 
 // Newsletter subscription
 const subscribeNewsletter = () => {
