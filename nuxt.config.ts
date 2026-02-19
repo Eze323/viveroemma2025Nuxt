@@ -119,10 +119,10 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/auth.ts'
   ],
-  nitro: {
-    preset: 'static',
-    compressPublicAssets: true,
+  // nitro: {
+  //   preset: 'static',
+  //   compressPublicAssets: true,
 
 
-  }
+  // }
 })
