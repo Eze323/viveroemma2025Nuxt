@@ -119,10 +119,10 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/auth.ts'
   ],
-  nitro: {
-    preset: 'netlify',
-    compressPublicAssets: true,
+  // nitro: {
+  //   preset: 'netlify',
+  //   compressPublicAssets: true,
 
 
-  }
+  // }
 })

@@ -114,7 +114,7 @@
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col border border-gray-100">
             <div class="relative overflow-hidden w-full h-64">
               <NuxtImg
-                :src="product.image" 
+                :src="encodeURI(product.image)" 
                 :alt="product.name"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 loading="lazy"
