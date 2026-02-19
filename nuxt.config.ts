@@ -120,7 +120,7 @@ export default defineNuxtConfig({
     '~/plugins/auth.ts'
   ],
   nitro: {
-    preset: 'static',
+    preset: 'netlify',
     compressPublicAssets: true,
 
 
