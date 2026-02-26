@@ -1,12 +1,9 @@
 [build] 
 command = "nuxi build"
-publish = ".output/public"
+
 
 [functions]
 directory = ".output/server"
 
-[[redirects]]
-for = "/*"
-to = "/.netlify/functions/index"
-status = 200
+
     
