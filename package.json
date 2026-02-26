@@ -32,6 +32,7 @@
     "nuxt": "^3.16.2",
     "nuxt-auth-sanctum": "^0.6.6",
     "nuxt-openapi-docs-module": "^5.3.1",
+    "nuxt-security": "^2.5.1",
     "pinia": "^2.1.7",
     "vue-chartjs": "^5.3.0"
   },

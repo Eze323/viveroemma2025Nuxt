@@ -4,7 +4,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   // Importing modules
   modules: [
-
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
@@ -13,8 +12,27 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxt/image',
     '@nuxt/content',
-    'nuxt-openapi-docs-module'
+    'nuxt-openapi-docs-module',
+    'nuxt-security'
   ],
+  security: {
+    headers: {
+      crossOriginResourcePolicy: 'same-origin',
+      crossOriginOpenerPolicy: 'same-origin',
+      contentSecurityPolicy: {},
+      strictTransportSecurity: { maxAge: 31536000, preload: true }
+    },
+    rateLimiter: {
+    }
+  },
+  routeRules: {
+    "/*": { prerender: true },
+    "/productos": { swr: 3600 },
+    "/productos/**": { swr: 3600 },
+    "/admin/**": { ssr: true, cache: false },
+    "/api/**": { cors: true, security: { rateLimiter: true } }
+  },
+
   // content: {
 
   //   database: {
