@@ -27,10 +27,11 @@ export default defineNuxtConfig({
   },
   routeRules: {
     "/*": { prerender: true },
+    "/**": { prerender: true },
     "/productos": { swr: 3600 },
     "/productos/**": { swr: 3600 },
-    "/admin/**": { ssr: true, cache: false },
-    "/api/**": { cors: true, security: { rateLimiter: true } }
+    "/admin/**": { cache: false },
+    "/api/**": { cors: true }
   },
 
   // content: {

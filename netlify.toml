@@ -1,10 +1,12 @@
 [build] 
-command = "nuxi build --no-prerender"
+command = "nuxi build"
 publish = ".output/public"
-functions = ".output/server"
 
-[[headers]]
+[functions]
+directory = ".output/server"
+
+[[redirects]]
 for = "/*"
-[headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+to = "/.netlify/functions/index"
+status = 200
     
