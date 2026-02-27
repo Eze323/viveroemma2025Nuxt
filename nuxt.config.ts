@@ -20,12 +20,22 @@ export default defineNuxtConfig({
       crossOriginResourcePolicy: 'cross-origin',
       crossOriginOpenerPolicy: 'same-origin',
       contentSecurityPolicy: {
-        'img-src': ["'self'", "data:", "https://i.ibb.co", "https://images.pexels.com", "https://via.placeholder.com", "https://*.ibb.co"],
+        'img-src': [
+          "'self'",
+          "data:",
+          "https://i.ibb.co",
+          "https://*.pexels.com",
+          "https://*.ibb.co",
+          "https://www.grupoalagalia.es",
+          "https://images.unsplash.com",
+
+          "https://via.placeholder.com",
+          "https://*.ibb.co"],
       },
       strictTransportSecurity: { maxAge: 31536000, preload: true }
     },
     rateLimiter: {
-    }
+    },
   },
   routeRules: {
     "/productos": { swr: 3600 },
