@@ -67,7 +67,7 @@ export default defineNuxtConfig({
     //provider: 'netlify',
     formats: ['webp', 'jpg'],
     //dir: 'assets/images',
-    domains: ['images.pexels.com', 'i.ibb.co', 'ibb.co'],
+    domains: ['images.pexels.com', 'i.ibb.co', 'ibb.co', 'www.grupoalagalia.es', 'images.unsplash.com', 'pexels.com', 'unsplash.com'],
   },
   // Google Fonts configuration
   googleFonts: {
