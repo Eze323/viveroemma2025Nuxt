@@ -43,6 +43,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/bun": "^1.2.16",
     "@types/jsonwebtoken": "^9.0.10",
+    "@vite-pwa/nuxt": "^1.1.1",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.17",
     "drizzle-kit": "^0.31.8",

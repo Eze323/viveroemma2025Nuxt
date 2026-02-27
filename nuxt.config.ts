@@ -13,7 +13,8 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/content',
     'nuxt-openapi-docs-module',
-    'nuxt-security'
+    'nuxt-security',
+    '@vite-pwa/nuxt'
   ],
   security: {
     headers: {
@@ -83,7 +84,6 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }, // iOS
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' }, // 16x16
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }, // 32x32
-        { rel: 'manifest', href: '/site.webmanifest' } // Manifiesto web
       ]
     },
     // pageTransition: { name: 'layout', mode: 'out-in' },
@@ -138,6 +138,48 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/auth.ts'
   ],
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Vivero Emma',
+      short_name: 'Vivero Emma',
+      description: 'El mejor vivero de Cuartel V, Moreno. Plantas y flores para tu hogar.',
+      theme_color: '#166534', // green-800
+      background_color: '#ffffff',
+      icons: [
+        {
+          src: '/android-chrome-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: '/android-chrome-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        },
+        {
+          src: '/android-chrome-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+    },
+    client: {
+      installPrompt: true,
+      periodicSyncForUpdates: 3600
+    },
+    devOptions: {
+      enabled: true,
+      suppressWarnings: true,
+      navigateFallbackAllowlist: [/^\/$/],
+      type: 'module'
+    }
+  },
   nitro: {
     preset: 'netlify',
     compressPublicAssets: true,
