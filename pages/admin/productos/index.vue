@@ -271,6 +271,23 @@
             </div>
             <div v-if="uploading" class="text-xs text-blue-500 mt-1">Subiendo imagen...</div>
           </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Publicado</label>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="newProduct.publicado"
+                class="sr-only peer"
+                aria-label="Toggle producto publicado"
+              />
+              <div
+                class="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:bg-success"
+              ></div>
+              <span
+                class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-200 ease-in-out peer-checked:translate-x-5"
+              ></span>
+            </label>
+          </div>
         </div>
         <div class="mt-4 flex flex-col gap-2">
           <button type="submit" class="btn btn-primary text-xs px-2 py-1" :disabled="loading">Guardar Producto</button>
@@ -427,7 +444,7 @@ const newProduct = reactive({
   precio_venta: 0,
   precio_compra: 0,
   precio_cantidad: 0,
-  publicado: false,
+  publicado: true,
   sku: null as string | null,
   stock: 0,
   stock_minimo: 0,

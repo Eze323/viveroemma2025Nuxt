@@ -17,17 +17,17 @@ export default defineNuxtConfig({
   ],
   security: {
     headers: {
-      crossOriginResourcePolicy: 'same-origin',
+      crossOriginResourcePolicy: 'cross-origin',
       crossOriginOpenerPolicy: 'same-origin',
-      contentSecurityPolicy: {},
+      contentSecurityPolicy: {
+        'img-src': ["'self'", "data:", "https://i.ibb.co", "https://images.pexels.com", "https://via.placeholder.com", "https://*.ibb.co"],
+      },
       strictTransportSecurity: { maxAge: 31536000, preload: true }
     },
     rateLimiter: {
     }
   },
   routeRules: {
-    "/*": { prerender: true },
-    "/**": { prerender: true },
     "/productos": { swr: 3600 },
     "/productos/**": { swr: 3600 },
     "/admin/**": { cache: false },
@@ -57,7 +57,7 @@ export default defineNuxtConfig({
     //provider: 'netlify',
     formats: ['webp', 'jpg'],
     //dir: 'assets/images',
-    domains: ['images.pexels.com'],
+    domains: ['images.pexels.com', 'i.ibb.co', 'ibb.co'],
   },
   // Google Fonts configuration
   googleFonts: {

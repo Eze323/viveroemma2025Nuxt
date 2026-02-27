@@ -1,4 +1,3 @@
-import type { Decimal } from "@prisma/client/runtime/library";
 
 // types/product.ts
 export interface Product {
