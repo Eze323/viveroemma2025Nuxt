@@ -100,14 +100,15 @@ const roleName = computed(() => {
 
 // Menu items for navigation
 const menuItems = [
-  { label: 'Dashboard', to: '/admin', icon: 'heroicons:home', roles: ['admin', 'encargado', 'empleado'] },
-  { label: 'Productos', to: '/admin/productos', icon: 'heroicons:shopping-bag', roles: ['admin', 'encargado'] },
-  { label: 'Ventas', to: '/admin/ventas', icon: 'heroicons:shopping-cart', roles: ['admin', 'encargado'] },
-  { label: 'Clientes', to: '/admin/clientes', icon: 'heroicons:user-circle', roles: ['admin', 'encargado'] },
+  { label: 'Dashboard', to: '/admin', icon: 'heroicons:home', roles: ['admin', 'encargado', 'operario', 'vendedor', 'reseller', 'canastero'] },
+  { label: 'Productos', to: '/admin/productos', icon: 'heroicons:shopping-bag', roles: ['admin', 'encargado', 'vendedor'] },
+  { label: 'Ventas', to: '/admin/ventas', icon: 'heroicons:shopping-cart', roles: ['admin', 'encargado', 'vendedor'] },
+  { label: 'Clientes', to: '/admin/clientes', icon: 'heroicons:user-circle', roles: ['admin', 'encargado', 'vendedor'] },
   { label: 'Categorías', to: '/admin/categorias', icon: 'heroicons:tag', roles: ['admin', 'encargado'] },
   { label: 'Canasteros', to: '/admin/canasteros', icon: 'heroicons:truck', roles: ['admin', 'encargado'] },
-  { label: 'Pedidos Canasteros', to: '/admin/pedidos-mayoristas', icon: 'heroicons:truck', roles: ['admin', 'encargado'] },
+  { label: 'Pedidos Canasteros', to: '/admin/pedidos-mayoristas', icon: 'heroicons:truck', roles: ['admin', 'encargado', 'reseller', 'canastero'] },
   { label: 'Proveedores', to: '/admin/proveedores', icon: 'heroicons:building-storefront', roles: ['admin', 'encargado'] },
+  { label: 'Usuarios', to: '/admin/usuarios', icon: 'heroicons:users', roles: ['admin'] },
 ];
 
 // Filter menu items based on user role

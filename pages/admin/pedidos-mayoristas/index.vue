@@ -44,12 +44,14 @@
                     <a v-if="order.paymentProofUrl" :href="order.paymentProofUrl" target="_blank" class="flex-1 sm:flex-none text-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                         Ver Comprobante
                     </a>
-                     <button @click="handleReject(order)" class="flex-1 sm:flex-none px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                        Rechazar
-                    </button>
-                    <button @click="handleApprove(order)" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm shadow-green-200 transition-all active:scale-95">
-                        Aprobar
-                    </button>
+                    <template v-if="isAdminOrEncargado">
+                      <button @click="handleReject(order)" class="flex-1 sm:flex-none px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                          Rechazar
+                      </button>
+                      <button @click="handleApprove(order)" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm shadow-green-200 transition-all active:scale-95">
+                          Aprobar
+                      </button>
+                    </template>
                 </div>
                  <div v-if="order.status === 'pending_payment'" class="flex items-center text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
                     <Icon name="heroicons:clock" class="w-4 h-4 mr-2 animate-pulse" />
@@ -74,6 +76,10 @@
 <script setup>
 import NotificationModal from '~/components/NotificationModal.vue';
 import { ref, computed, onMounted } from 'vue';
+import { useAuthStore } from '~/stores/auth';
+
+const authStore = useAuthStore();
+const isAdminOrEncargado = computed(() => ['admin', 'encargado'].includes(authStore.user?.role));
 
 const modal = ref({ show: false, message: '', type: 'success' });
 

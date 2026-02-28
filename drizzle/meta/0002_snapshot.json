@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "bded56c8-8106-45bc-8004-663d3dc5d50a",
+  "id": "3e0c4393-7fa7-460e-8554-90acad0e8e60",
   "prevId": "83b10de0-5ea1-440f-972b-ebe54e6bc961",
   "tables": {
     "cache": {
@@ -957,14 +957,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "product_suppliers_id": {
-          "name": "product_suppliers_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "product_suppliers_product_id_supplier_id_unique": {
           "name": "product_suppliers_product_id_supplier_id_unique",
@@ -1970,7 +1963,7 @@
           "name": "password",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "role": {
@@ -1988,6 +1981,21 @@
           "notNull": true,
           "autoincrement": false,
           "default": 0
+        },
+        "firebase_uid": {
+          "name": "firebase_uid",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('pending','active','suspended')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'pending'"
         },
         "remember_token": {
           "name": "remember_token",
@@ -2022,6 +2030,12 @@
           "name": "users_email_unique",
           "columns": [
             "email"
+          ]
+        },
+        "users_firebase_uid_unique": {
+          "name": "users_firebase_uid_unique",
+          "columns": [
+            "firebase_uid"
           ]
         }
       },

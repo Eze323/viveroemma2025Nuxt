@@ -1,13 +1,17 @@
 import { useDrizzle } from '~/server/utils/drizzle';
 import { resellerOrders, users } from '~/server/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, and } from 'drizzle-orm';
+import { requireAuth } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
     try {
-        // await requireAdmin(event);
+        const userCtx = await requireAuth(event);
         const db = useDrizzle();
 
-        const orders = await db
+        const isAdminOrEncargado = userCtx.role === 'admin' || userCtx.role === 'encargado';
+
+        // Base Query
+        let query = db
             .select({
                 id: resellerOrders.id,
                 userId: resellerOrders.userId,
@@ -18,19 +22,29 @@ export default defineEventHandler(async (event) => {
                 createdAt: resellerOrders.createdAt
             })
             .from(resellerOrders)
-            .leftJoin(users, eq(resellerOrders.userId, users.id))
-            .orderBy(desc(resellerOrders.createdAt));
+            .leftJoin(users, eq(resellerOrders.userId, users.id));
+
+        // Filtro por usuario si es canastero o reseller
+        if (!isAdminOrEncargado) {
+            query = query.where(eq(resellerOrders.userId, userCtx.id));
+        }
+
+        const orders = await query.orderBy(desc(resellerOrders.createdAt));
 
         return {
             success: true,
             data: orders
         };
 
-    } catch (error) {
-        console.error('Error fetching admin orders:', error);
-        return {
-            success: false,
-            error: 'Failed to fetch'
-        };
+    } catch (error: any) {
+        console.error('Error fetching admin reseller orders:', error);
+
+        const statusCode = error.statusCode || 500;
+        const statusMessage = error.statusMessage || 'Error al cargar los pedidos';
+
+        throw createError({
+            statusCode,
+            statusMessage,
+        });
     }
 });

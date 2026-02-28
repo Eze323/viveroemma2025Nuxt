@@ -33,28 +33,47 @@
 //     }
 // });
 import { useDrizzle } from '~/server/utils/drizzle';
-import { resellerOrders, users } from '~/server/db/schema'; // Importamos users también
-import { eq, desc } from 'drizzle-orm';
+import { resellerOrders, users } from '~/server/db/schema';
+import { eq, desc, and } from 'drizzle-orm';
+import { requireAuth } from '~/server/utils/auth';
 
 export default defineEventHandler(async (event) => {
     try {
+        const userCtx = await requireAuth(event);
+        const queryParams = getQuery(event);
         const db = useDrizzle();
 
-        // En el panel de Admin, queremos ver TODOS los pedidos
-        // Hacemos un Left Join con la tabla users para traer el nombre del canastero
-        const orders = await db
+        const isAdminOrEncargado = userCtx.role === 'admin' || userCtx.role === 'encargado';
+
+        // Determinar el ID del usuario a filtrar
+        let targetUserId = userCtx.id;
+
+        if (isAdminOrEncargado) {
+            // Un admin puede ver los de cualquier usuario si pasa el ID, 
+            // o ver TODOS si no pasa nada.
+            targetUserId = queryParams.userId ? Number(queryParams.userId) : null;
+        }
+
+        // Base Query
+        let query = db
             .select({
                 id: resellerOrders.id,
                 userId: resellerOrders.userId,
-                userName: users.name, // Traemos el nombre desde la tabla users
+                userName: users.name,
                 total: resellerOrders.total,
                 status: resellerOrders.status,
                 paymentProofUrl: resellerOrders.paymentProofUrl,
                 createdAt: resellerOrders.createdAt,
             })
             .from(resellerOrders)
-            .leftJoin(users, eq(resellerOrders.userId, users.id)) // Unimos por ID de usuario
-            .orderBy(desc(resellerOrders.createdAt));
+            .leftJoin(users, eq(resellerOrders.userId, users.id));
+
+        // Filtro por usuario
+        if (targetUserId) {
+            query = query.where(eq(resellerOrders.userId, targetUserId));
+        }
+
+        const orders = await query.orderBy(desc(resellerOrders.createdAt));
 
         return {
             success: true,
@@ -62,10 +81,14 @@ export default defineEventHandler(async (event) => {
         };
 
     } catch (error: any) {
-        console.error('Error fetching admin orders:', error);
-        return {
-            success: false,
-            error: 'Error al cargar los pedidos: ' + error.message
-        };
+        console.error('Error fetching orders:', error);
+
+        const statusCode = error.statusCode || 500;
+        const statusMessage = error.statusMessage || 'Error al cargar los pedidos';
+
+        throw createError({
+            statusCode,
+            statusMessage,
+        });
     }
 });

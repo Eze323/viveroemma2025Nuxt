@@ -122,6 +122,35 @@
               </button>
             </div>
           </form> 
+
+          <div class="mt-6">
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300"></div>
+              </div>
+              <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-white text-gray-500"> O también puedes </span>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <NuxtLink
+                to="/auth/login-firebase"
+                class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all"
+              >
+                Usar Google / Firebase
+              </NuxtLink>
+            </div>
+          </div>
+
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+              ¿No tienes una cuenta? 
+              <NuxtLink to="/auth/register" class="font-medium text-primary hover:text-primary-dark underline">
+                Regístrate aquí
+              </NuxtLink>
+            </p>
+          </div>
         </div>
       </div>
     </div>

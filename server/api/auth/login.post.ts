@@ -42,6 +42,7 @@ export default defineEventHandler(async (event: H3Event) => {
         password: users.password,
         role: users.role,
         points: users.points,
+        status: users.status,
       })
       .from(users)
       .where(eq(users.email, email))
@@ -53,8 +54,15 @@ export default defineEventHandler(async (event: H3Event) => {
         statusMessage: 'Credenciales inválidas',
       });
     }
-    // NUEVO: Bloqueo de seguridad
-    if (user.role === 'suspendido') {
+    // NUEVO: Bloqueo de seguridad basado en el estado de la cuenta
+    if (user.status === 'pending') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Tu cuenta está pendiente de aprobación por el administrador.',
+      });
+    }
+
+    if (user.status === 'suspended') {
       throw createError({
         statusCode: 403,
         statusMessage: 'Tu cuenta ha sido inhabilitada. Contacta al administrador.',

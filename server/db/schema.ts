@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, varchar, mediumtext, int, unique, timestamp, index, text, longtext, date, decimal, foreignKey, time, tinyint } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, varchar, mediumtext, int, unique, timestamp, index, text, longtext, date, decimal, foreignKey, time, tinyint, mysqlEnum } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 //import { mysqlTable, mysqlSchema, varchar, mediumtext, int, unique, timestamp, index, text, longtext, date, decimal, foreignKey, time, tinyint } from "drizzle-orm/mysql-core";
 import type { AnyMySqlColumn } from "drizzle-orm/mysql-core";
@@ -272,6 +272,8 @@ export const suppliers = mysqlTable("suppliers", {
 	phone: varchar({ length: 255 }).default('NULL'),
 	address: varchar({ length: 255 }).default('NULL'),
 	companyName: varchar("company_name", { length: 255 }).default('NULL'),
+	contact: varchar({ length: 255 }).default('NULL'),
+	notes: text().default('NULL'),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('NULL'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).default('NULL'),
 });
@@ -298,15 +300,18 @@ export const users = mysqlTable("users", {
 	name: varchar({ length: 255 }).notNull(),
 	email: varchar({ length: 255 }).notNull(),
 	emailVerifiedAt: timestamp("email_verified_at", { mode: 'string' }).default('NULL'),
-	password: varchar({ length: 255 }).notNull(),
+	password: varchar({ length: 255 }), // Nullable para usuarios de Firebase
 	role: varchar({ length: 255 }).default('\'operario\'').notNull(),
 	points: int().default(0).notNull(),
+	firebaseUid: varchar("firebase_uid", { length: 128 }),
+	status: mysqlEnum('status', ['pending', 'active', 'suspended']).default('pending'),
 	rememberToken: varchar("remember_token", { length: 100 }).default('NULL'),
 	createdAt: timestamp("created_at", { mode: 'string' }).default('NULL'),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).default('NULL'),
 },
 	(table) => [
 		unique("users_email_unique").on(table.email),
+		unique("users_firebase_uid_unique").on(table.firebaseUid),
 	]);
 
 
@@ -322,4 +327,19 @@ export const notifications = mysqlTable("notifications", {
 	createdAt: timestamp("created_at", { mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
 	index("notifications_user_id_index").on(table.userId),
+]);
+
+export const productSuppliers = mysqlTable("product_suppliers", {
+	id: int().autoincrement().notNull(),
+	productId: int("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+	supplierId: int("supplier_id").notNull().references(() => suppliers.id, { onDelete: "cascade" }),
+	costPrice: decimal("cost_price", { precision: 10, scale: 2 }).notNull(),
+	quantity: int().default(0).notNull(),
+	minOrderQty: int("min_order_qty").default(0),
+	lastPurchaseDate: timestamp("last_purchase_date", { mode: 'string' }).default('NULL'),
+	notes: text().default('NULL'),
+}, (table) => [
+	unique("product_suppliers_product_id_supplier_id_unique").on(table.productId, table.supplierId),
+	index("product_suppliers_product_id_index").on(table.productId),
+	index("product_suppliers_supplier_id_index").on(table.supplierId),
 ]);

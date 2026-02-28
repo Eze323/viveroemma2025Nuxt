@@ -1,6 +1,6 @@
 // schema/index.ts
 import { mysqlTable, int, varchar, decimal, boolean, timestamp, serial, mysqlEnum, datetime, date, time, index } from 'drizzle-orm/mysql-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 // Tabla: users
 export const users = mysqlTable(
@@ -9,10 +9,13 @@ export const users = mysqlTable(
     id: serial('id').primaryKey(),
     name: varchar('name', { length: 255 }).notNull().unique(),
     email: varchar('email', { length: 255 }).notNull().unique(),
-    password: varchar('password', { length: 255 }).notNull(),
-    role: mysqlEnum('role', ['admin', 'encargado', 'operario', 'user']).default('user'),
+    password: varchar('password', { length: 255 }), // Nullable para usuarios de Firebase
+    role: mysqlEnum('role', ['admin', 'encargado', 'operario', 'user', 'reseller', 'canastero']).default('user'),
     points: int('points').notNull().default(0),
-    createdAt: datetime('created_at').notNull().default(new Date()),
+    firebaseUid: varchar('firebase_uid', { length: 128 }).unique(),
+    status: mysqlEnum('status', ['pending', 'active', 'suspended']).default('pending'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
   }
 );
 

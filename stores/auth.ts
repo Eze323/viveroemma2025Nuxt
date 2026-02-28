@@ -5,7 +5,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'encargado' | 'empleado';
+  role: 'admin' | 'encargado' | 'operario' | 'user' | 'vendedor' | 'reseller' | 'canastero';
   points: number;
 }
 
@@ -29,14 +29,30 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state): boolean => !!state.token,
     isAdmin: (state): boolean => state.user?.role === 'admin',
     isEncargado: (state): boolean => state.user?.role === 'encargado',
-    isEmpleado: (state): boolean => state.user?.role === 'empleado',
+    isCanastero: (state): boolean => state.user?.role === 'canastero' || state.user?.role === 'reseller',
   },
 
   actions: {
+    setUser(user: User) {
+      this.user = user;
+    },
+
+    setToken(token: string) {
+      this.token = token;
+      const tokenCookie = useCookie('token');
+      tokenCookie.value = token;
+    },
+
+    async loginSuccess(user: User, token: string) {
+      this.user = user;
+      this.token = token;
+      const tokenCookie = useCookie('token');
+      tokenCookie.value = token;
+    },
+
     async login(email: string, password: string) {
       this.loading = true;
       this.error = null;
-      const tokenCookie = useCookie('token');
 
       try {
         const response = await $fetch('/api/auth/login', {
@@ -45,10 +61,7 @@ export const useAuthStore = defineStore('auth', {
         });
 
         const { user, token } = response as { user: User; token: string };
-
-        this.token = token;
-        this.user = user;
-        tokenCookie.value = token;
+        await this.loginSuccess(user, token);
 
         return response;
       } catch (error: any) {

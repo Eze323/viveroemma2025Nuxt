@@ -4,16 +4,23 @@
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1769477559387,
+      "version": "6",
+      "when": 1706325000000,
       "tag": "0000_famous_princess_powerful",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "5",
-      "when": 1770858970017,
+      "version": "6",
+      "when": 1706325100000,
       "tag": "0001_tidy_joshua_kane",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1772251153863,
+      "tag": "0002_flippant_chimera",
       "breakpoints": true
     }
   ]
