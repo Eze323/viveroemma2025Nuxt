@@ -13,8 +13,11 @@
             <a href="#" class="text-white hover:text-accent transition-colors">
               <Icon name="mdi:instagram" class="w-5 h-5" />
             </a> -->
-            <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" class="text-white hover:text-accent transition-colors">
-              <Icon name="mdi:whatsapp" class="w-5 h-5" />
+            <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" 
+               class="text-white hover:text-accent transition-colors"
+               aria-label="Contactar por WhatsApp"
+            >
+               <Icon name="mdi:whatsapp" class="w-5 h-5" />
             </a>
           </div>
         </div>
@@ -76,10 +79,10 @@
       
       <!-- Bottom Footer -->
       <div class="border-t border-gray-700 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
-        <p class="text-gray-400 text-sm mb-4 md:mb-0">
+        <p class="text-gray-300 text-sm mb-4 md:mb-0">
           &copy; {{ new Date().getFullYear() }} Vivero Emma. Todos los derechos reservados.
         </p>
-        <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
+        <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
           <a href="#" class="hover:text-white transition-colors">Términos de servicio</a>
           <a href="#" class="hover:text-white transition-colors">Política de privacidad</a>
         </div>

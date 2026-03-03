@@ -13,6 +13,7 @@
     <!-- Services grid -->
     <section class="py-12">
       <div class="container-custom">
+        <h2 class="sr-only">Nuestra variedad de servicios</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div v-for="service in services" :key="service.id" 
             class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">

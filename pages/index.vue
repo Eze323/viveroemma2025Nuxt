@@ -120,7 +120,7 @@
                 </div>
               </div>
               <div>
-                <h4 class="text-lg font-bold text-gray-900">{{ testimonial.name }}</h4>
+                <h3 class="text-lg font-bold text-gray-900">{{ testimonial.name }}</h3>
                 <div class="flex text-yellow-400">
                   <Icon v-for="star in 5" :key="star" 
                     :name="star <= testimonial.rating ? 'heroicons:star-solid' : 'heroicons:star'" 
@@ -148,7 +148,7 @@
               <div class="flex items-start">
                 <Icon name="heroicons:map-pin" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
-                  <h4 class="font-bold text-gray-900">Dirección</h4>
+                  <h3 class="font-bold text-gray-900">Dirección</h3>
                   <p class="text-gray-600">Cnel. Emeterio de Escalada 10565, B1744 Cuartel V, Provincia de Buenos Aires</p>
                 </div>
               </div>
@@ -156,7 +156,7 @@
               <div class="flex items-start">
                 <Icon name="heroicons:clock" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
-                  <h4 class="font-bold text-gray-900">Horarios</h4>
+                  <h3 class="font-bold text-gray-900">Horarios</h3>
                   <p class="text-gray-600">Lunes a Sábado: 7:20 - 18:00</p>
                   <p class="text-gray-600">Domingos: 8:00 - 12:00</p>
                 </div>
@@ -165,12 +165,12 @@
               <div class="flex items-start">
                 <Icon name="heroicons:phone" class="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                 <div class="ml-4">
-                  <h4 class="font-bold text-gray-900">Teléfono (Romy) - (José)</h4>
+                  <h3 class="font-bold text-gray-900">Teléfono (Romy) - (José)</h3>
                   <p class="text-gray-600">(+54) 11-5116-5807</p> 
                    <p class="text-gray-600">(+54) 11-5181-6570</p>
                    <p class="text-gray-600">
                    <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n">
-                     <button>Chatea con nosotros en WhatsApp</button>
+                     <span class="inline-flex items-center text-primary font-medium hover:underline">Chatea con nosotros en WhatsApp</span>
                     </a>
                   </p>
                   </div>

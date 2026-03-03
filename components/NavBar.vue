@@ -18,7 +18,11 @@
       </nav>
       
       <!-- Mobile Navigation Button -->
-      <button @click="isMenuOpen = !isMenuOpen" class="md:hidden text-gray-700 focus:outline-none">
+      <button 
+        @click="isMenuOpen = !isMenuOpen" 
+        class="md:hidden text-gray-700 focus:outline-none"
+        :aria-label="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
+      >
         <Icon v-if="!isMenuOpen" name="heroicons:bars-3" class="w-6 h-6" />
         <Icon v-else name="heroicons:x-mark" class="w-6 h-6" />
       </button>

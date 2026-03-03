@@ -17,10 +17,10 @@
       <div class="absolute inset-y-0 right-0 max-w-full flex">
         <div class="w-screen max-w-md bg-white shadow-xl flex flex-col translate-x-0 transition-transform">
           <div class="p-6 border-b flex justify-between items-center bg-gray-50">
-            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <div class="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Icon name="heroicons:clipboard-document-list" class="text-green-600" />
               Tu Lista de Pedido
-            </h2>
+            </div>
             <button @click="isCartOpen = false" class="text-gray-500 hover:text-black">
               <Icon name="heroicons:x-mark" class="w-6 h-6" />
             </button>

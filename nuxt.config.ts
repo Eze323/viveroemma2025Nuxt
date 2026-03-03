@@ -73,6 +73,7 @@ export default defineNuxtConfig({
   // App configuration with meta tags
   app: {
     head: {
+      htmlAttrs: { lang: 'es' },
       title: 'Vivero Emma - Plantas y Jardinería',
       meta: [
         { charset: 'utf-8' },
