@@ -47,7 +47,9 @@ export const useAuthStore = defineStore('auth', {
       this.user = user;
       this.token = token;
       const tokenCookie = useCookie('token');
+      const sessionHint = useCookie('session_hint');
       tokenCookie.value = token;
+      sessionHint.value = 'true';
     },
 
     async login(email: string, password: string) {
@@ -75,6 +77,7 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       this.loading = true;
       const tokenCookie = useCookie('token');
+      const sessionHint = useCookie('session_hint');
       try {
         await $fetch('/api/auth/logout', { method: 'POST' });
       } catch (error) {
@@ -82,11 +85,14 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.resetState();
         tokenCookie.value = null;
+        sessionHint.value = null;
       }
     },
 
     async refreshSession() {
+      const sessionHint = useCookie('session_hint');
       const tokenCookie = useCookie('token');
+
       try {
         const response = await $fetch('/api/auth/refresh', { method: 'POST' });
         const { user, token } = response as { user: User; token: string };
@@ -94,11 +100,13 @@ export const useAuthStore = defineStore('auth', {
         this.token = token;
         this.user = user;
         tokenCookie.value = token;
+        sessionHint.value = 'true';
 
         return true;
       } catch (error) {
         this.resetState();
         tokenCookie.value = null;
+        sessionHint.value = null;
         return false;
       }
     },
@@ -125,15 +133,16 @@ export const useAuthStore = defineStore('auth', {
 
     async init() {
       const tokenCookie = useCookie('token');
+      const sessionHint = useCookie('session_hint');
 
       if (tokenCookie.value) {
         this.token = tokenCookie.value;
         try {
           await this.fetchUser();
         } catch (e) {
-          await this.refreshSession();
+          if (sessionHint.value) await this.refreshSession();
         }
-      } else {
+      } else if (sessionHint.value) {
         await this.refreshSession();
       }
     },

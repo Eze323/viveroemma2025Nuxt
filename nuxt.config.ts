@@ -19,20 +19,26 @@ export default defineNuxtConfig({
   security: {
     headers: {
       crossOriginResourcePolicy: 'cross-origin',
-      crossOriginOpenerPolicy: 'same-origin',
+      crossOriginOpenerPolicy: 'same-origin-allow-popups',
+      crossOriginEmbedderPolicy: 'unsafe-none',
       contentSecurityPolicy: {
-        'img-src': false,
+        'img-src': ["'self'", "data:", "https:", "http:", "*.pexels.com", "*.ibb.co", "*.unsplash.com"],
+        'connect-src': ["'self'", "https:", "http:", "viveroemma-f75d9.firebaseapp.com", "*.googleapis.com", "*.gstatic.com"],
+        'frame-src': ["'self'", "viveroemma-f75d9.firebaseapp.com", "*.firebaseapp.com", "*.google.com"],
+        'script-src': ["'self'", "'unsafe-inline'", "https:", "*.googleapis.com", "*.gstatic.com", "*.google.com"],
+        'style-src': ["'self'", "'unsafe-inline'", "https:", "fonts.googleapis.com"],
+        'font-src': ["'self'", "https:", "fonts.gstatic.com"],
       },
       strictTransportSecurity: { maxAge: 31536000, preload: true }
     },
-    rateLimiter: {
-    },
+    rateLimiter: false,
   },
   routeRules: {
     "/productos": { swr: 3600 },
     "/productos/**": { swr: 3600 },
     "/admin/**": { cache: false },
-    "/api/**": { cors: true }
+    "/api/**": { cors: true },
+    "/api/auth/refresh": { security: { rateLimiter: false } }
   },
 
   // content: {
@@ -55,10 +61,10 @@ export default defineNuxtConfig({
 
   //image
   image: {
-    //provider: 'netlify',
+    provider: 'netlify',
     formats: ['webp', 'jpg'],
     //dir: 'assets/images',
-    domains: ['images.pexels.com', 'i.ibb.co', 'ibb.co', 'www.grupoalagalia.es', 'images.unsplash.com', 'pexels.com', 'unsplash.com'],
+    domains: ['images.pexels.com', 'i.ibb.co', 'ibb.co', 'www.grupoalagalia.es', 'images.unsplash.com', 'pexels.com', 'unsplash.com', 'viveroemma.netlify.app', 'github.com'],
   },
   // Google Fonts configuration
   googleFonts: {
