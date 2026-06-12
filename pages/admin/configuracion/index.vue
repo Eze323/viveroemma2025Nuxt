@@ -98,14 +98,6 @@
                 </div>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-  <span class="text-sm font-medium">Modo Papel:</span>
-  <input 
-    type="checkbox" 
-    v-model="configStore.simpleDashboard" 
-    class="w-10 h-5 bg-gray-200 rounded-full appearance-none checked:bg-primary-600 relative cursor-pointer transition-colors"
-  >
-</div>
 
             <div class="flex justify-end">
               <button type="submit" class="btn btn-primary">
@@ -179,7 +171,7 @@
 
             <div class="flex justify-end">
               <button type="submit" class="btn btn-primary">
-                Guardar configuración en taka taka
+                Guardar configuración
               </button>
             </div>
           </form>
@@ -236,13 +228,10 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-import { useConfigStore } from '~/stores/config'; // <-- Importa el nuevo store
+
 definePageMeta({
   layout: 'admin'
 });
-
-const configStore = useConfigStore(); // <-- Instancia el store
-// console.log('Configuración de Dashboard Simple en Configuración:', configStore.simpleDashboard);
 
 // General settings state
 const generalSettings = reactive({
@@ -269,7 +258,7 @@ const emailSettings = reactive({
 const saveGeneralSettings = async () => {
   try {
     // Here you would typically make an API call to save the settings
-    // console.log('Saving general settings:', generalSettings);
+    console.log('Saving general settings:', generalSettings);
     // Show success message
     alert('Configuración guardada exitosamente');
   } catch (error) {
@@ -281,7 +270,7 @@ const saveGeneralSettings = async () => {
 const saveEmailSettings = async () => {
   try {
     // Here you would typically make an API call to save the email settings
-    // console.log('Saving email settings:', emailSettings);
+    console.log('Saving email settings:', emailSettings);
     // Show success message
     alert('Configuración de email guardada exitosamente');
   } catch (error) {

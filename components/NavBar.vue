@@ -15,14 +15,15 @@
           class="text-gray-700 hover:text-primary font-medium text-sm transition duration-300">
           {{ item.name }}
         </NuxtLink>
+        <NuxtLink 
+          to="/auth/login" 
+          class="btn btn-primary text-sm">
+          Iniciar Sesión
+        </NuxtLink>
       </nav>
       
       <!-- Mobile Navigation Button -->
-      <button 
-        @click="isMenuOpen = !isMenuOpen" 
-        class="md:hidden text-gray-700 focus:outline-none"
-        :aria-label="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
-      >
+      <button @click="isMenuOpen = !isMenuOpen" class="md:hidden text-gray-700 focus:outline-none">
         <Icon v-if="!isMenuOpen" name="heroicons:bars-3" class="w-6 h-6" />
         <Icon v-else name="heroicons:x-mark" class="w-6 h-6" />
       </button>
@@ -36,6 +37,12 @@
           class="block py-2 text-gray-700 hover:text-primary font-medium"
           @click="isMenuOpen = false">
           {{ item.name }}
+        </NuxtLink>
+        <NuxtLink 
+          to="/auth/login" 
+          class="block py-2 text-primary font-medium mt-4"
+          @click="isMenuOpen = false">
+          Iniciar Sesión
         </NuxtLink>
       </div>
     </div>

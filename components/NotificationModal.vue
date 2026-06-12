@@ -14,7 +14,7 @@
   
         <!-- Título -->
         <h2 class="text-xl font-bold text-center text-gray-900 mb-2">
-          {{ title || (type === 'success' ? '¡Éxito!' : 'Error') }}
+          {{ type === 'success' ? '¡Operación exitosa!' : 'Error' }}
         </h2>
   
         <!-- Mensaje -->
@@ -37,7 +37,6 @@
   import { ref } from 'vue';
   
   const props = defineProps({
-    title: { type: String, default: '' },
     isOpen: { type: Boolean, default: false },
     message: { type: String, default: '' },
     type: { type: String, default: 'success', validator: (value) => ['success', 'error'].includes(value) },

@@ -10,26 +10,14 @@ export interface VentaItem {
   cantidad: number
   precioUnitario: number
   subtotal?: number
-  image?: string  // Agregado para mostrar imagen en carrito
+  image?: string  // Para mostrar imagen en el carrito
+  product?: {     // Relación anidada para compatibilidad con Laravel
+    name: string
+  }
 }
 
-export interface SaleRecord {
-  id: number
-  clientName: string
-  email: string
-  date: string
-  time: string
-  amount: number
-  items: any[]
-  status: string
-}
-
-// console.log('useVentasStore')
 export const useVentasStore = defineStore('ventas', () => {
   const items = ref<VentaItem[]>([])
-  const salesHistory = ref<SaleRecord[]>([])
-  const historyLoading = ref(false)
-  const historyError = ref<string | null>(null)
   const ivaRate = ref(0.21)
   const syncQueue = useSyncQueueStore()
 
@@ -45,7 +33,7 @@ export const useVentasStore = defineStore('ventas', () => {
       items.value[existingIndex].subtotal =
         items.value[existingIndex].cantidad * items.value[existingIndex].precioUnitario
     } else {
-      // Si no existe, agregar nuevo
+      // Si no existe, agregar nuevo completo con sus mapeos
       const item: VentaItem = {
         ...nuevoItem,
         cantidad: nuevoItem.cantidad || 1,
@@ -68,7 +56,6 @@ export const useVentasStore = defineStore('ventas', () => {
 
   /**
    * Reemplaza un item por otro, manteniendo la cantidad actual
-   * Útil para cambiar por producto más barato
    */
   const reemplazarItem = (idActual: number, nuevoProducto: Omit<VentaItem, 'subtotal'>) => {
     const index = items.value.findIndex(i => i.id === idActual)
@@ -111,7 +98,7 @@ export const useVentasStore = defineStore('ventas', () => {
   const guardarVenta = async (saleData: any): Promise<{ success: boolean; offline?: boolean; error?: string }> => {
     const { isOnline } = useNetworkStatus()
 
-    // Preparar payload
+    // Preparar payload normalizado
     const payload = {
       ...saleData,
       items: getPayload.value.items,
@@ -122,7 +109,7 @@ export const useVentasStore = defineStore('ventas', () => {
 
     if (!isOnline.value) {
       // Modo offline: guardar en cola
-      // console.log('Sin conexión - guardando venta en cola de sincronización')
+      console.log('Sin conexión - guardando venta en cola de sincronización')
 
       syncQueue.addOperation({
         type: 'sale',
@@ -136,18 +123,16 @@ export const useVentasStore = defineStore('ventas', () => {
       }
     }
 
-    // Modo online: intentar guardar directamente
-    // (esto se maneja en el componente que llama a esta función)
     return {
       success: true,
       offline: false,
     }
   }
 
-  // Computed properties para cálculos automáticos
+  // Computed properties para cálculos automáticos obligados a número
   const subtotal = computed(() =>
     items.value.reduce((sum, item) =>
-      sum + (item.subtotal || item.precioUnitario * item.cantidad), 0
+      sum + (item.subtotal || (Number(item.precioUnitario) * Number(item.cantidad))), 0
     )
   )
 
@@ -156,7 +141,7 @@ export const useVentasStore = defineStore('ventas', () => {
   const totalFinal = computed(() => subtotal.value + ivaTotal.value)
 
   /**
-   * Genera el payload para enviar al backend
+   * Genera el payload limpio para enviar al backend de Laravel
    */
   const getPayload = computed(() => ({
     items: items.value.map(i => ({
@@ -177,7 +162,7 @@ export const useVentasStore = defineStore('ventas', () => {
     // Actions
     agregarItem,
     actualizarCantidad,
-    reemplazarItem,  // Nueva función
+    reemplazarItem,
     removerItem,
     limpiarItems,
     setIvaRate,
@@ -187,27 +172,6 @@ export const useVentasStore = defineStore('ventas', () => {
     subtotal,
     ivaTotal,
     totalFinal,
-    getPayload,
-
-    // History
-    salesHistory,
-    historyLoading,
-    historyError,
-    fetchSalesHistory: async () => {
-      historyLoading.value = true
-      historyError.value = null
-      try {
-        const { data, success, error } = await $fetch<{ data: SaleRecord[], success: boolean, error?: string }>('/api/sales')
-        if (success && data) {
-          salesHistory.value = data
-        } else {
-          historyError.value = error || 'Error fetching sales'
-        }
-      } catch (e) {
-        historyError.value = 'Error de conexión'
-      } finally {
-        historyLoading.value = false
-      }
-    }
+    getPayload
   }
 })

@@ -88,7 +88,7 @@ interface Product {
   name: string
   precio_venta: number | string
   stock: number
-  image_url?: string | null
+  image_url?: string
 }
 
 const emit = defineEmits<{

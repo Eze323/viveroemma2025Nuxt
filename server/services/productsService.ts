@@ -1,70 +1,61 @@
 
-//import { products } from "@prisma/client";
+import { products } from "@prisma/client";
 
-//import { PrismaClient } from "@prisma/client";
-
-import { useDrizzle } from "../utils/drizzle"; // O como se llame tu archivo de conexión
-import { products, sales, saleItems } from "../db/schema";
-import { eq } from "drizzle-orm";
-import { type InferSelectModel } from 'drizzle-orm';
-
-const db = useDrizzle();
-type Product = InferSelectModel<typeof products>;
-
-export const buscaTodos = async () => {
-    return await db.select().from(products);
-};
-
-// Asegúrate de que TODAS tengan el "export const"
-//export const buscarPorId = async (id: number) => { ... };
-//export const crear = async (data: any) => { ... };
+import { PrismaClient } from "@prisma/client";
 
 
-// const prisma = new PrismaClient();
-//const prisma: any = {}; // Prisma disabled for debugging
+const prisma = new PrismaClient();
 
 
 
 
-export const buscarTodos = async (): Promise<Product[]> => {
-
-    return await db.select().from(products);
+export const buscarTodos = async (): Promise<products[]> => {
+    
+    return await prisma.products.findMany();
 
 }
 
 //BuscaPorId
-export const buscarPorId = async (id: number): Promise<Product | null> => {
-
-    return await db.select().from(products).where(eq(products.id, id));
+export const buscarPorId = async (id:number): Promise<products | null> => {
+    
+    return await prisma.products.findFirst({
+        where: { id},
+    })
 };
 
 //Crea
-export const crear = async (producto: Product): Promise<Product | undefined> => {
+export const crear = async (producto:products): Promise<products | undefined> => {
+    
+    const productoCreado = await prisma.products.create({
+        data: producto
+    })
 
-    const productoCreado = await db.insert(products).values(producto);
-
-    if (productoCreado) {
+    if(productoCreado){
         return productoCreado
     }
 
     return undefined;
-
+    
 }
 
-export const editar = async (product: Product): Promise<boolean> => {
-    const productoEditado = await db.update(products).set(product).where(eq(products.id, product.id));
+export const editar = async (product: products): Promise<boolean> =>{
+    const productoEditado = await prisma.products.update({
+        where: {id: product.id},
+        data:product
+    })
 
     return !!productoEditado;
 }
 
 
 //Eliminar
-export const eliminar = async (id: number): Promise<boolean> => {
-    const productoEliminado = await db.delete(products).where(eq(products.id, id));
+export const eliminar = async (id: number): Promise<boolean>  => {
+    const productoEliminado = await prisma.products.delete({
+        where:{id:id},
 
-    return !!productoEliminado;
+    })
+
+    return productoEliminado !== null;
 }
-
-
 
 

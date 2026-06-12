@@ -169,17 +169,6 @@
                     Alertas de stock bajo
                   </span>
                 </label>
-                <label class="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    v-model="configStore.simpleDashboard" 
-                    class="rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <span class="ml-2 text-sm text-gray-600">
-                    Activar Modo Papel (Dashboard Simple)
-                  </span>
-                </label>
-                  
               </div>
             </div>
 
@@ -237,10 +226,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useRouter } from 'vue-router';
-import { useConfigStore } from '~/stores/config'; // <-- Importa el nuevo store
 
-const configStore = useConfigStore(); // <-- Instancia el store
-// console.log('Configuración de Dashboard Simple en Configuración:', configStore.simpleDashboard);
 definePageMeta({
   layout: 'admin'
 });
@@ -299,7 +285,7 @@ const getRoleName = (role) => {
 const updateProfile = async () => {
   try {
     // Here you would typically make an API call to update the profile
-    // console.log('Updating profile:', form);
+    console.log('Updating profile:', form);
     alert('Perfil actualizado exitosamente');
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -314,7 +300,7 @@ const updatePassword = async () => {
       return;
     }
     // Here you would typically make an API call to update the password
-    // console.log('Updating password');
+    console.log('Updating password');
     
     // Reset form
     passwordForm.current = '';
@@ -338,7 +324,7 @@ const logout = async () => {
 const confirmDeleteAccount = () => {
   if (confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
     // Here you would typically make an API call to delete the account
-    // console.log('Deleting account');
+    console.log('Deleting account');
     alert('Cuenta eliminada exitosamente');
     logout();
   }

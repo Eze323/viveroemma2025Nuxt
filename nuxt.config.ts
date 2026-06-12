@@ -12,46 +12,19 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxt/image',
     '@nuxt/content',
-    'nuxt-openapi-docs-module',
-    'nuxt-security',
-    '@vite-pwa/nuxt'
+    'nuxt-openapi-docs-module'
   ],
-  security: {
-    headers: {
-      crossOriginResourcePolicy: 'cross-origin',
-      crossOriginOpenerPolicy: 'same-origin-allow-popups',
-      crossOriginEmbedderPolicy: 'unsafe-none',
-      contentSecurityPolicy: {
-        'img-src': ["'self'", "data:", "https:", "http:", "*.pexels.com", "*.ibb.co", "*.unsplash.com"],
-        'connect-src': ["'self'", "https:", "http:", "viveroemma-f75d9.firebaseapp.com", "*.googleapis.com", "*.gstatic.com"],
-        'frame-src': ["'self'", "viveroemma-f75d9.firebaseapp.com", "*.firebaseapp.com", "*.google.com"],
-        'script-src': ["'self'", "'unsafe-inline'", "https:", "*.googleapis.com", "*.gstatic.com", "*.google.com"],
-        'style-src': ["'self'", "'unsafe-inline'", "https:", "fonts.googleapis.com"],
-        'font-src': ["'self'", "https:", "fonts.gstatic.com"],
-      },
-      strictTransportSecurity: { maxAge: 31536000, preload: true }
+  content: {
+
+    database: {
+      type: 'sqlite',
+      filename: 'vivero_emma.sqlite',
     },
-    rateLimiter: false,
+    watch: {
+      port: 4000,
+      showURL: true,
+    }
   },
-  routeRules: {
-    "/productos": { swr: 3600 },
-    "/productos/**": { swr: 3600 },
-    "/admin/**": { cache: false },
-    "/api/**": { cors: true },
-    "/api/auth/refresh": { security: { rateLimiter: false } }
-  },
-
-  // content: {
-
-  //   database: {
-  //     type: 'sqlite',
-  //     filename: 'vivero_emma.sqlite',
-  //   },
-  //   watch: {
-  //     port: 4000,
-  //     showURL: true,
-  //   }
-  // },
   openApiDocs: {
     folder: './docs',
     name: 'Vivero Emma API Documentation',
@@ -61,10 +34,10 @@ export default defineNuxtConfig({
 
   //image
   image: {
-    provider: 'netlify',
+    //provider: 'netlify',
     formats: ['webp', 'jpg'],
     //dir: 'assets/images',
-    domains: ['images.pexels.com', 'i.ibb.co', 'ibb.co', 'www.grupoalagalia.es', 'images.unsplash.com', 'pexels.com', 'unsplash.com', 'viveroemma.netlify.app', 'github.com'],
+    domains: ['images.pexels.com'],
   },
   // Google Fonts configuration
   googleFonts: {
@@ -79,7 +52,6 @@ export default defineNuxtConfig({
   // App configuration with meta tags
   app: {
     head: {
-      htmlAttrs: { lang: 'es' },
       title: 'Vivero Emma - Plantas y Jardinería',
       meta: [
         { charset: 'utf-8' },
@@ -91,6 +63,7 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }, // iOS
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' }, // 16x16
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }, // 32x32
+        { rel: 'manifest', href: '/site.webmanifest' } // Manifiesto web
       ]
     },
     // pageTransition: { name: 'layout', mode: 'out-in' },
@@ -128,23 +101,18 @@ export default defineNuxtConfig({
     dbBaseURL: process.env.DATABASE_URL,
     jwtSecret: process.env.JWT_SECRET, // Added JWT Secret here for security
     imgbbApiKey: process.env.IMGBB_API_KEY,
-    // Secret Firebase keys (Server side)
-    firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
-    firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
 
     public: {
-      apiBaseUrl: process.env.API_BASE_URL,
-      // Public Firebase config (Client side)
-      firebaseApiKey: process.env.FIREBASE_API_KEY,
-      firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
-      firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-      firebaseAppId: process.env.FIREBASE_APP_ID,
+      apiBaseUrl: process.env.API_BASE_URL || 'http://127.0.0.1:8000/api',
+      // Only public variables here
     },
   },
 
+  routeRules: {
+    '/api/**': {
+      proxy: process.env.API_BASE_URL ? `${process.env.API_BASE_URL}/**` : 'http://127.0.0.1:8000/api/**'
+    }
+  },
 
   components: [
     { path: '~/components', pathPrefix: false }, // Scans ~/components and subdirectories
@@ -154,53 +122,5 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   plugins: [
     '~/plugins/auth.ts'
-  ],
-  pwa: {
-    registerType: 'autoUpdate',
-    manifest: {
-      name: 'Vivero Emma',
-      short_name: 'Vivero Emma',
-      description: 'El mejor vivero de Cuartel V, Moreno. Plantas y flores para tu hogar.',
-      theme_color: '#166534', // green-800
-      background_color: '#ffffff',
-      icons: [
-        {
-          src: '/android-chrome-192x192.png',
-          sizes: '192x192',
-          type: 'image/png'
-        },
-        {
-          src: '/android-chrome-512x512.png',
-          sizes: '512x512',
-          type: 'image/png'
-        },
-        {
-          src: '/android-chrome-512x512.png',
-          sizes: '512x512',
-          type: 'image/png',
-          purpose: 'any maskable'
-        }
-      ]
-    },
-    workbox: {
-      navigateFallback: '/',
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
-    },
-    client: {
-      installPrompt: true,
-      periodicSyncForUpdates: 3600
-    },
-    devOptions: {
-      enabled: true,
-      suppressWarnings: true,
-      navigateFallbackAllowlist: [/^\/$/],
-      type: 'module'
-    }
-  },
-  nitro: {
-    preset: 'netlify',
-    compressPublicAssets: true,
-
-
-  }
+  ]
 })

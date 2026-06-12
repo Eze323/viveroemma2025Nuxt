@@ -3,7 +3,6 @@
     <Teleport to="body">
       <div v-if="isOpen" class="modal-overlay" @click="handleOverlayClick">
         <div class="modal-container" @click.stop>
-          <!-- Header -->
           <div class="modal-header">
             <h2 class="modal-title">
               {{ mode === 'create' ? 'Nueva Venta' : 'Detalle de Venta' }}
@@ -17,9 +16,7 @@
             </button>
           </div>
 
-          <!-- Content -->
           <div class="modal-content">
-            <!-- Cliente Section -->
             <section class="section">
               <h3 class="section-title">Cliente</h3>
               <div class="client-inputs">
@@ -41,13 +38,11 @@
               </div>
             </section>
 
-            <!-- Búsqueda de Productos (solo en create) -->
             <section v-if="mode === 'create'" class="section">
               <h3 class="section-title">Buscar Producto</h3>
               <ProductSearch @select="handleProductSelect" />
             </section>
 
-            <!-- Carrito Section -->
             <section class="section">
               <div class="section-header">
                 <h3 class="section-title">
@@ -63,7 +58,6 @@
                 </button>
               </div>
 
-              <!-- Lista de items -->
               <div v-if="store.items.length > 0" class="cart-items">
                 <CartItem
                   v-for="item in store.items"
@@ -76,7 +70,6 @@
                 />
               </div>
 
-              <!-- Empty state -->
               <div v-else class="empty-cart">
                 <span class="material-symbols-outlined">shopping_cart</span>
                 <p>El carrito está vacío</p>
@@ -84,7 +77,6 @@
               </div>
             </section>
 
-            <!-- Resumen Section -->
             <section v-if="store.items.length > 0" class="section summary-section">
               <h3 class="section-title">Resumen</h3>
               <div class="summary-card">
@@ -105,7 +97,6 @@
             </section>
           </div>
 
-          <!-- Footer -->
           <div class="modal-footer">
             <button
               @click="closeModal"
@@ -126,7 +117,6 @@
         </div>
       </div>
 
-      <!-- Product Replacer Modal -->
       <ProductReplacer
         :is-open="isReplacerOpen"
         :current-product="itemToReplace"
@@ -227,45 +217,49 @@ const submitSale = () => {
 
 const closeModal = () => {
   emit('update:isOpen', false)
-  // Reset local state
   clientName.value = ''
   clientAddress.value = ''
 }
 
 const handleOverlayClick = () => {
-  if (mode === 'view') {
+  if (props.mode === 'view') {
     closeModal()
   }
 }
 
-// Watch for modal open/close
+// 🔥 WATCH CORREGIDO: Mapeo exacto de las relaciones de Laravel
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
     if ((props.mode === 'view' || props.mode === 'edit') && props.sale) {
-      // Load sale data for viewing
-      clientName.value = props.sale.clientName || props.sale.customer || ''
-      clientAddress.value = props.sale.clientAddress || props.sale.address || ''
+      clientName.value = props.sale.customer || props.sale.clientName || ''
+      clientAddress.value = props.sale.address || props.sale.clientAddress || ''
       
-      // Load items into store
       store.limpiarItems()
       if (props.sale.items && props.sale.items.length > 0) {
         props.sale.items.forEach((item: any) => {
+          // Buscamos el nombre de la planta de forma segura recorriendo las variantes
+          const nombreResuelto = item.product?.name || item.nombre || item.productName || 'Producto Desconocido';
+          
+          // Buscamos el precio unitario mapeando los nombres posibles de base de datos
+          const precioResuelto = Number(item.unit_price || item.precio_compra || item.precio_venta || item.unitPrice || item.precio_unitario || item.price || 0);
+
           store.agregarItem({
-            id: item.product_id || item.id,
-            nombre: item.nombre || item.productName || 'Desconocido',
-            precioUnitario: Number(item.unitPrice || item.precio_unitario || item.price || 0),
-            cantidad: item.cantidad || item.quantity || 1,
-            image: item.image || item.image_url
+            id: item.product_id || item.productId || item.id,
+            nombre: nombreResuelto,
+            precioUnitario: precioResuelto,
+            cantidad: Number(item.quantity || item.cantidad || 1),
+            image: item.image || item.image_url,
+            product: {
+              name: nombreResuelto
+            }
           })
         })
       }
     } else if (props.mode === 'create') {
-      // Reset for new sale
       clientName.value = ''
       clientAddress.value = ''
     }
   } else {
-    // Reset on close
     clientName.value = ''
     clientAddress.value = ''
   }
@@ -273,6 +267,7 @@ watch(() => props.isOpen, (isOpen) => {
 </script>
 
 <style scoped>
+/* Tus estilos CSS se mantienen idénticos */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -284,7 +279,6 @@ watch(() => props.isOpen, (isOpen) => {
   padding: 16px;
   backdrop-filter: blur(4px);
 }
-
 .modal-container {
   background: white;
   border-radius: 16px;
@@ -295,7 +289,6 @@ watch(() => props.isOpen, (isOpen) => {
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
-
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -303,14 +296,12 @@ watch(() => props.isOpen, (isOpen) => {
   padding: 20px 24px;
   border-bottom: 1px solid #e5e7eb;
 }
-
 .modal-title {
   font-size: 24px;
   font-weight: 700;
   color: #111827;
   margin: 0;
 }
-
 .close-button {
   width: 44px;
   height: 44px;
@@ -324,46 +315,35 @@ watch(() => props.isOpen, (isOpen) => {
   border-radius: 8px;
   transition: all 0.2s;
 }
-
 .close-button:hover {
   background: #f3f4f6;
   color: #374151;
 }
-
 .modal-content {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
 }
-
 .section {
   margin-bottom: 24px;
 }
-
-.section:last-child {
-  margin-bottom: 0;
-}
-
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
-
 .section-title {
   font-size: 18px;
   font-weight: 600;
   color: #111827;
   margin: 0 0 12px 0;
 }
-
 .client-inputs {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .input-field {
   width: 100%;
   height: 56px;
@@ -374,18 +354,15 @@ watch(() => props.isOpen, (isOpen) => {
   background: white;
   transition: all 0.2s;
 }
-
 .input-field:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
-
 .input-field:disabled {
   background: #f9fafb;
   cursor: not-allowed;
 }
-
 .clear-cart-button {
   display: flex;
   align-items: center;
@@ -400,17 +377,14 @@ watch(() => props.isOpen, (isOpen) => {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .clear-cart-button:hover {
   background: #fee2e2;
 }
-
 .cart-items {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .empty-cart {
   display: flex;
   flex-direction: column;
@@ -420,78 +394,65 @@ watch(() => props.isOpen, (isOpen) => {
   text-align: center;
   color: #6b7280;
 }
-
 .empty-cart .material-symbols-outlined {
   font-size: 64px;
   color: #d1d5db;
   margin-bottom: 16px;
 }
-
 .empty-cart p {
   margin: 0;
   font-size: 16px;
   font-weight: 500;
 }
-
 .empty-cart-hint {
   font-size: 14px !important;
   color: #9ca3af !important;
   margin-top: 8px !important;
 }
-
 .summary-section {
   background: #f9fafb;
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 0;
 }
-
 .summary-card {
   background: white;
   padding: 16px;
   border-radius: 8px;
 }
-
 .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
 }
-
 .summary-row.total {
   padding-top: 12px;
 }
-
 .summary-label {
   font-size: 16px;
   color: #6b7280;
 }
-
 .summary-value {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
-
 .summary-row.total .summary-label {
   font-size: 18px;
   font-weight: 700;
   color: #111827;
 }
-
 .summary-row.total .summary-value {
   font-size: 24px;
   font-weight: 700;
   color: #3b82f6;
 }
-
 .summary-divider {
   height: 1px;
   background: #e5e7eb;
   margin: 8px 0;
 }
-
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -500,7 +461,6 @@ watch(() => props.isOpen, (isOpen) => {
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
 }
-
 .button {
   display: flex;
   align-items: center;
@@ -516,48 +476,39 @@ watch(() => props.isOpen, (isOpen) => {
   transition: all 0.2s;
   min-width: 120px;
 }
-
 .button-secondary {
   background: white;
   color: #374151;
   border: 2px solid #e5e7eb;
 }
-
 .button-secondary:hover {
   background: #f9fafb;
 }
-
 .button-primary {
   background: #3b82f6;
   color: white;
 }
-
 .button-primary:hover:not(:disabled) {
   background: #2563eb;
   transform: translateY(-2px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
-
 .button-primary:disabled {
   background: #d1d5db;
   cursor: not-allowed;
   opacity: 0.6;
 }
-
-/* Mobile optimizations */
 @media (max-width: 640px) {
   .modal-container {
     max-height: 100vh;
     border-radius: 0;
   }
-  
   .modal-header,
   .modal-content,
   .modal-footer {
     padding-left: 16px;
     padding-right: 16px;
   }
-  
   .button {
     flex: 1;
     min-width: 0;

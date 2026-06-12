@@ -136,8 +136,8 @@
               <div 
                 class="stock-badge"
                 :class="{
-                  'in-stock': product.stock >= product.stock_minimo,
-                  'low-stock': product.stock > 0 && product.stock < product.stock_minimo,
+                  'in-stock': product.stock >= 10,
+                  'low-stock': product.stock > 0 && product.stock < 10,
                   'out-of-stock': product.stock === 0
                 }"
               >
@@ -176,18 +176,10 @@
                 <span class="detail-value text-gray-500">{{ formatCurrency(Number(product.precio_compra || 0)) }}</span>
               </div>
               <div class="detail-row">
-                <span class="detail-label">Precio Mayorista</span>
-                <span class="detail-value text-gray-500">{{ formatCurrency(Number(product.precio_cantidad || 0)) }}</span>
-              </div>
-              <div class="detail-row">
                 <span class="detail-label">Margen</span>
                 <span class="detail-value text-green-600">
                   {{ Math.round(((product.precio_venta - Number(product.precio_compra || 0)) / product.precio_venta) * 100) }}%
                 </span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Stock Minimo</span>
-                <span class="detail-value text-gray-500">{{ product.stock_minimo }}</span>
               </div>
             </div>
 
@@ -242,16 +234,8 @@
             <input v-model.number="newProduct.precio_venta" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Mayorista($)</label>
-            <input v-model.number="newProduct.precio_cantidad" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
-          </div>
-          <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
             <input v-model.number="newProduct.stock" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Stock Minimo</label>
-            <input v-model.number="newProduct.stock_minimo" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
@@ -270,23 +254,6 @@
               </button>
             </div>
             <div v-if="uploading" class="text-xs text-blue-500 mt-1">Subiendo imagen...</div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Publicado</label>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                v-model="newProduct.publicado"
-                class="sr-only peer"
-                aria-label="Toggle producto publicado"
-              />
-              <div
-                class="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:bg-success"
-              ></div>
-              <span
-                class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all duration-200 ease-in-out peer-checked:translate-x-5"
-              ></span>
-            </label>
           </div>
         </div>
         <div class="mt-4 flex flex-col gap-2">
@@ -326,12 +293,9 @@
             <input v-model.number="editingProduct.precio_venta" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Precio Mayorista($)</label>
-            <input v-model.number="editingProduct.precio_cantidad" type="number" step="0.01" class="input w-full text-sm py-1 px-2" required min="0" />
-          </div>
-          <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
-            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2" required min="0" />
+            <input v-model.number="editingProduct.stock" type="number" class="input w-full text-sm py-1 px-2Has context menu
+            " required min="0" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Tamaño de Maceta</label>
@@ -439,16 +403,14 @@ const notification = reactive({
 const isCreateModalOpen = ref(false);
 const newProduct = reactive({
   name: '',
-  category: '' as string,
+  category: null as Product['category'] | null,
   description: '',
   precio_venta: 0,
   precio_compra: 0,
-  precio_cantidad: 0,
-  publicado: true,
+  publicado: false,
   sku: null as string | null,
   stock: 0,
-  stock_minimo: 0,
-  pot_size: '',
+  pot_size: '' as string | 'Sin especificar',
   image_url: '/placeholder.png',
 });
 
@@ -456,16 +418,14 @@ const isEditModalOpen = ref(false);
 const editingProduct = reactive({
   id: null as number | null,
   name: '',
-  category: '' as string,
+  category: null as Product['category'] | null,
   description: '',
   precio_venta: 0,
   precio_compra: 0,
-  precio_cantidad: 0,
   publicado: false,
   sku: null as string | null,
   stock: 0,
-  stock_minimo: 0,
-  pot_size: '',
+  pot_size: '' as string | 'Sin especificar',
   image_url: '/placeholder.png',
 });
 
@@ -560,7 +520,7 @@ const openCreateModal = () => {
 
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  Object.assign(newProduct, { name: '', category: '', description: '', precio_venta: 0, precio_compra: 0, precio_cantidad: 0, stock: 0, stock_minimo: 0, pot_size: '', image_url: '/placeholder.png' });
+  Object.assign(newProduct, { name: '', category: null, description: '', precio_venta: 0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
 const openEditModal = (product: Product) => {
@@ -570,21 +530,19 @@ const openEditModal = (product: Product) => {
     category: product.category,
     description: product.description || '',
     precio_venta: product.precio_venta,
-    precio_compra: product.precio_compra || 0,
-    precio_cantidad: product.precio_cantidad || 0,
+    precio_compra: product.precio_compra || '0',
     publicado: product.publicado || false,
     sku: product.sku || null,
     stock: product.stock,
-    stock_minimo: product.stock_minimo || 0,
     pot_size: product.pot_size || '',
-    image_url: product.image_url || '/placeholder.png',
+    image_url: product.image_url || '',
   });
   isEditModalOpen.value = true;
 };
 
 const closeEditModal = () => {
   isEditModalOpen.value = false;
-  Object.assign(editingProduct, { id: null, name: '', category: '', description: '', precio_venta: 0, precio_compra: 0, precio_cantidad: 0, stock: 0, stock_minimo: 0, pot_size: '', image_url: '/placeholder.png' });
+  Object.assign(editingProduct, { id: null, name: '', category: null, description: '', precio_venta: 0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
 };
 
 const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -637,7 +595,8 @@ const validateProduct = (product: typeof newProduct | typeof editingProduct) => 
 };
 
 const isValidUrl = (url: string) => {
-  if (!url || url === '/placeholder.png') return true;
+  console.log('Validating URL:', url);
+  if (!url) return true;
   try {
     new URL(url);
     return true;
@@ -645,22 +604,21 @@ const isValidUrl = (url: string) => {
     return false;
   }
 };
+
 const createProduct = async () => {
   if (!validateProduct(newProduct)) return;
   
   try {
-    const productData: Partial<Product> = {
+    const productData = {
       name: newProduct.name,
-      category: newProduct.category,
+      category: newProduct.category ?? undefined,
       description: newProduct.description || null,
       precio_venta: Number(newProduct.precio_venta),
-      precio_compra: Number(newProduct.precio_compra || 0),
-      precio_cantidad: Number(newProduct.precio_cantidad || 0),
+      precio_compra: Number(newProduct.precio_compra || '0'),
       publicado: newProduct.publicado || false,
       sku: newProduct.sku || null,
       stock: Number(newProduct.stock),
-      stock_minimo: Number(newProduct.stock_minimo || 0),
-      pot_size: newProduct.pot_size || null,
+      pot_size: newProduct.pot_size || 'Sin especificar',
       image_url: newProduct.image_url || '/placeholder.png',
     };
     await api.createProduct(productData);
@@ -678,44 +636,26 @@ const updateProduct = async () => {
   if (!validateProduct(editingProduct)) return;
   
   try {
-    // Solo enviamos lo que la tabla necesita, nada de objetos raros
-    const payload = {
+    const productData = {
       name: editingProduct.name,
       category: editingProduct.category,
-      description: editingProduct.description,
-      precio_compra: Number(editingProduct.precio_compra),
+      description: editingProduct.description || null,
+      precio_compra: Number(editingProduct.precio_compra || '0'),
       precio_venta: Number(editingProduct.precio_venta),
-      precio_cantidad: Number(editingProduct.precio_cantidad || 0),
+      publicado: editingProduct.publicado || false,
+      sku: editingProduct.sku || null,
       stock: Number(editingProduct.stock),
-      stock_minimo: Number(editingProduct.stock_minimo || 0),
-      pot_size: editingProduct.pot_size,
-      image_url: editingProduct.image_url,
-      publicado: Boolean(editingProduct.publicado),
+      pot_size: editingProduct.pot_size || 'Sin especificar',
+      image_url: editingProduct.image_url || '/placeholder.png',
     };
-
-    const productId = editingProduct.id;
-    if (!productId) {
-        showNotification('Error: No se encontró el ID del producto', 'error');
-        return;
-    }
-
-    // Usamos el ID directamente en la URL
-    await api.updateProduct(productId, payload);
-    
+    await api.updateProduct(editingProduct.id!, productData);
     closeEditModal();
-    showNotification('Producto actualizado correctamente');
-    await productStore.fetchProducts(); // Recargar la lista
-    //actualizar lista de productos cuando termino hacer click en aceptar
+    showNotification('Producto actualizado exitosamente!');
+    // Reload products from store to get the updated list
     productStore.forceReload();
-    
-    
-
-    
-    
   } catch (err: any) {
-    console.error('Error al actualizar:', err);
-    // Esto te mostrará el error real del servidor en la notificación
-    showNotification(err.data?.message || 'Error interno del servidor', 'error');
+    console.error('Error updating product:', err);
+    showNotification(err.message || 'Error al actualizar el producto.', 'error');
   }
 };
 

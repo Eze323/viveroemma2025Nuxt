@@ -5,8 +5,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'encargado' | 'operario' | 'user' | 'vendedor' | 'reseller' | 'canastero';
-  points: number;
+  role: 'admin' | 'encargado' | 'empleado';
 }
 
 interface AuthState {
@@ -29,32 +28,14 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state): boolean => !!state.token,
     isAdmin: (state): boolean => state.user?.role === 'admin',
     isEncargado: (state): boolean => state.user?.role === 'encargado',
-    isCanastero: (state): boolean => state.user?.role === 'canastero' || state.user?.role === 'reseller',
+    isEmpleado: (state): boolean => state.user?.role === 'empleado',
   },
 
   actions: {
-    setUser(user: User) {
-      this.user = user;
-    },
-
-    setToken(token: string) {
-      this.token = token;
-      const tokenCookie = useCookie('token');
-      tokenCookie.value = token;
-    },
-
-    async loginSuccess(user: User, token: string) {
-      this.user = user;
-      this.token = token;
-      const tokenCookie = useCookie('token');
-      const sessionHint = useCookie('session_hint');
-      tokenCookie.value = token;
-      sessionHint.value = 'true';
-    },
-
     async login(email: string, password: string) {
       this.loading = true;
       this.error = null;
+      const tokenCookie = useCookie('token');
 
       try {
         const response = await $fetch('/api/auth/login', {
@@ -63,7 +44,10 @@ export const useAuthStore = defineStore('auth', {
         });
 
         const { user, token } = response as { user: User; token: string };
-        await this.loginSuccess(user, token);
+
+        this.token = token;
+        this.user = user;
+        tokenCookie.value = token;
 
         return response;
       } catch (error: any) {
@@ -77,7 +61,6 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       this.loading = true;
       const tokenCookie = useCookie('token');
-      const sessionHint = useCookie('session_hint');
       try {
         await $fetch('/api/auth/logout', { method: 'POST' });
       } catch (error) {
@@ -85,14 +68,11 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.resetState();
         tokenCookie.value = null;
-        sessionHint.value = null;
       }
     },
 
     async refreshSession() {
-      const sessionHint = useCookie('session_hint');
       const tokenCookie = useCookie('token');
-
       try {
         const response = await $fetch('/api/auth/refresh', { method: 'POST' });
         const { user, token } = response as { user: User; token: string };
@@ -100,13 +80,11 @@ export const useAuthStore = defineStore('auth', {
         this.token = token;
         this.user = user;
         tokenCookie.value = token;
-        sessionHint.value = 'true';
 
         return true;
       } catch (error) {
         this.resetState();
         tokenCookie.value = null;
-        sessionHint.value = null;
         return false;
       }
     },
@@ -133,16 +111,15 @@ export const useAuthStore = defineStore('auth', {
 
     async init() {
       const tokenCookie = useCookie('token');
-      const sessionHint = useCookie('session_hint');
 
       if (tokenCookie.value) {
         this.token = tokenCookie.value;
         try {
           await this.fetchUser();
         } catch (e) {
-          if (sessionHint.value) await this.refreshSession();
+          await this.refreshSession();
         }
-      } else if (sessionHint.value) {
+      } else {
         await this.refreshSession();
       }
     },

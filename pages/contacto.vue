@@ -73,12 +73,11 @@
                     <h4 class="font-bold text-gray-900">Teléfono</h4>
                     <p class="text-gray-600">(+54) 11-5116-5807</p>
                     <p class="text-gray-600">(+54) 11-5181-6570</p>
-                    <div class="mt-2 text-gray-600">
-                      <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n" class="inline-flex items-center text-primary font-medium hover:underline">
-                        <Icon name="mdi:whatsapp" class="w-5 h-5 mr-1" />
-                        Chatea con nosotros en WhatsApp
-                      </a>
-                    </div>
+                    <p class="text-gray-600">
+                   <a href="https://api.whatsapp.com/send?phone=51165807&text=Hola%20quiero%20m%C3%A1s%20informaci%C3%B3n">
+                     <button>Chatea con nosotros en WhatsApp</button>
+                    </a>
+                  </p>
                   </div>
                 </div>
                 
@@ -159,7 +158,7 @@ const form = reactive({
 // Form submission handler
 const handleSubmit = () => {
   // Here you would typically make an API call to handle the form submission
-  // console.log('Form submitted:', form);
+  console.log('Form submitted:', form);
   
   // Reset form
   form.name = '';

@@ -1,79 +1,36 @@
-// import { drizzle } from 'drizzle-orm/mysql2';
-// import mysql from 'mysql2/promise';
-// import * as schema from '../db/schema';
-// import * as relations from '../db/relations';
-
-// // Create a connection pool (better for performance)
-// const connectionPool = mysql.createPool(process.env.DATABASE_URL!);
-
-// export const db = drizzle(connectionPool, {
-//   schema: { ...schema, ...relations },
-//   mode: "default"
-// });
-
-// // Exportar tablas
-// export const tables = schema;
-
-// // Tipos inferidos
-// export type Product = typeof schema.products.$inferSelect;
-// export type PlantPotPrice = typeof schema.plantPotPrices.$inferSelect;
-// export type User = typeof schema.users.$inferSelect;
-// export type Sale = typeof schema.sales.$inferSelect;
-// export type SaleItem = typeof schema.saleItems.$inferSelect;
-
-// // Composable para endpoints
-// export function useDrizzle() {
-//   return db;
-// }
-
-import { drizzle, MySql2Database } from 'drizzle-orm/mysql2';
+// server/utils/db.ts
+import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
-import * as schema from '../db/schema';
-import * as relations from '../db/relations';
+import * as schema from '~/src/db/schema';
 
-// Definimos el tipo de nuestra base de datos para Typescript
-type DbClient = MySql2Database<typeof schema & typeof relations>;
-
-// Usamos una variable global para persistir la conexión entre recargas de Nuxt (HMR)
-// Usamos globalThis para mantener la conexión viva durante recargas en desarrollo (HMR)
-// Esto evita el error "Too many connections" y "ECONNRESET"
-const globalState = globalThis as unknown as {
-  _mysqlPool: mysql.Pool | undefined;
-  _drizzle: DbClient | undefined;
+// Configuración de la conexión a MySQL
+const connectionConfig = {
+  uri: process.env.DATABASE_URL , // Usar la URL de la base de datos
 };
 
-export const useDrizzle = () => {
-  if (globalState._drizzle) return globalState._drizzle;
 
-  if (!globalState._mysqlPool) {
-    globalState._mysqlPool = mysql.createPool({
-      uri: process.env.DATABASE_URL,
-      // Límites estrictos para evitar saturar el servidor (especialmente Hostinger)
-      connectionLimit: 1,
-      maxIdle: 1,
-      idleTimeout: 15000,
-      queueLimit: 0,
-      enableKeepAlive: true,
-      keepAliveInitialDelay: 0,
-      connectTimeout: 10000,
-    });
-  }
 
-  globalState._drizzle = drizzle(globalState._mysqlPool, {
-    schema: { ...schema, ...relations },
-    mode: "default"
-  });
+// Crear un pool de conexiones
+const pool = mysql.createPool({
+  ...connectionConfig,
+  connectionLimit: 10,
+});
 
-  return globalState._drizzle;
-};
+// Inicializar Drizzle
+export const db = drizzle(pool, { schema, mode: 'default' });
 
-// Exportamos las tablas para usarlas fácilmente
+// Exportar utilidades de Drizzle
+
+// Exportar tablas
 export const tables = schema;
-// removed export const db = useDrizzle(); to prevent global connection
 
-// Tipos inferidos (se mantienen igual)
+// Tipos inferidos
 export type Product = typeof schema.products.$inferSelect;
 export type PlantPotPrice = typeof schema.plantPotPrices.$inferSelect;
 export type User = typeof schema.users.$inferSelect;
 export type Sale = typeof schema.sales.$inferSelect;
-export type SaleItem = typeof schema.saleItems.$inferSelect;
+export type SaleItem = typeof schema.sale_items.$inferSelect;
+// Composable para endpoints
+export function useDrizzle() {
+  return db;
+}
