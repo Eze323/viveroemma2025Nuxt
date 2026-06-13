@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen">
-    <VitePwaManifest />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -14,9 +13,4 @@
   opacity: 0;
   filter: blur(1rem);
 } */
- html, body, #__nuxt {
-  height: 100dvh; 
-  margin:0;
-  overflow-x: hidden;
- }
 </style>

@@ -279,7 +279,7 @@ const openSaleModal = (mode: 'create' | 'edit' | 'view', sale: any = {}) => {
       sale.items.forEach((item: any) => {
         store.agregarItem({
           id: item.product_id || item.id,
-          nombre: item.productName || 'Planta',
+          nombre: item.product?.name || 'Planta',
           precioUnitario: item.unit_price,
           cantidad: item.quantity
         });

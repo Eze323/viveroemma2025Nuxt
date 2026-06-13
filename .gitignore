@@ -10,4 +10,5 @@ dist
 
 
 /src/generated/prisma
-bun.lock.bck
+
+/src/generated/prisma

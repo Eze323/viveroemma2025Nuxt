@@ -1,9 +1,0 @@
-[build] 
-command = "nuxi build"
-
-
-[functions]
-directory = ".output/server"
-
-
-    
