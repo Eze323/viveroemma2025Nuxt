@@ -32,12 +32,68 @@
       </button>
       
       <!-- Notifications -->
-      <button class="relative p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200 group">
-        <Icon name="heroicons:bell" class="w-5 h-5" />
-        <span class="absolute top-1.5 right-1.5 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium group-hover:scale-110 transition-transform">
-          3
-        </span>
-      </button>
+      <div class="relative">
+        <button
+          @click="toggleNotifications"
+          class="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200 group"
+          aria-label="Notificaciones"
+        >
+          <Icon name="heroicons:bell" class="w-5 h-5" />
+          <span
+            v-if="notificationsStore.unreadCount > 0"
+            class="absolute top-1.5 right-1.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform"
+          >
+            {{ notificationsStore.unreadCount > 99 ? '99+' : notificationsStore.unreadCount }}
+          </span>
+        </button>
+
+        <Transition
+          enter-active-class="transition ease-out duration-100"
+          enter-from-class="transform opacity-0 scale-95"
+          enter-to-class="transform opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75"
+          leave-from-class="transform opacity-100 scale-100"
+          leave-to-class="transform opacity-0 scale-95"
+        >
+          <div
+            v-if="isNotificationsOpen"
+            class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden"
+          >
+            <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+              <span class="text-sm font-semibold">Notificaciones</span>
+              <div class="flex items-center gap-2">
+                <button @click="markAllAsRead" class="text-xs text-gray-600 hover:text-gray-800">Marcar todas</button>
+                <button @click="clearAll" class="text-xs text-red-500 hover:text-red-600">Limpiar</button>
+              </div>
+            </div>
+
+            <div class="max-h-64 overflow-auto">
+              <template v-if="notificationsStore.notifications.length">
+                <button
+                  v-for="note in notificationsStore.notifications"
+                  :key="note.id"
+                  @click="openNotification(note)"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-50 flex gap-3 items-start"
+                >
+                  <div class="flex-shrink-0 w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-700">
+                    <Icon v-if="note.type === 'order'" name="heroicons:shopping-cart" class="w-4 h-4" />
+                    <Icon v-else-if="note.type === 'stock_warning'" name="heroicons:exclamation-triangle" class="w-4 h-4" />
+                    <Icon v-else name="heroicons:user" class="w-4 h-4" />
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <p :class="note.read ? 'text-sm text-gray-500' : 'text-sm font-medium text-gray-900'">{{ note.title }}</p>
+                      <span class="text-xs text-gray-400">{{ formatTime(note.createdAt) }}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 truncate">{{ note.message }}</p>
+                  </div>
+                </button>
+              </template>
+              <div v-else class="px-4 py-4 text-sm text-gray-500">Sin notificaciones</div>
+            </div>
+          </div>
+        </Transition>
+      </div>
       
       <!-- User menu dropdown -->
       <div class="relative">
@@ -111,6 +167,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useRoute } from 'vue-router';
+import { useNotificationsStore, seedNotifications } from '~/stores/notifications';
 
 const props = defineProps({
   isOpen: {
@@ -123,6 +180,8 @@ const emit = defineEmits(['toggle-sidebar', 'update:isOpen']);
 
 const authStore = useAuthStore();
 const route = useRoute();
+
+const notificationsStore = useNotificationsStore();
 
 const isUserMenuOpen = ref(false);
 
@@ -150,6 +209,8 @@ onMounted(() => {
     .map(word => word.charAt(0).toUpperCase())
     .slice(0, 2)
     .join('');
+  // seed mock notifications in case store is empty (dev/test)
+  if (notificationsStore.notifications.length === 0) seedNotifications(notificationsStore);
 });
 
 // Toggle sidebar
@@ -157,6 +218,39 @@ const toggleSidebar = () => {
   const newValue = !props.isOpen;
   emit('update:isOpen', newValue);
   emit('toggle-sidebar', newValue);
+};
+
+// Notifications toggle and actions
+const isNotificationsOpen = ref(false);
+const toggleNotifications = () => {
+  isNotificationsOpen.value = !isNotificationsOpen.value;
+};
+
+const openNotification = (note) => {
+  notificationsStore.markAsRead(note.id);
+  isNotificationsOpen.value = false;
+  // optionally navigate based on notification meta (example for orders)
+  if (note.type === 'order' && note.meta?.orderId) {
+    navigateTo(`/admin/ventas/${note.meta.orderId}`);
+  }
+};
+
+const markAllAsRead = () => {
+  notificationsStore.markAllAsRead();
+};
+
+const clearAll = () => {
+  notificationsStore.clearAll();
+};
+
+const formatTime = (iso) => {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return d.toLocaleDateString();
 };
 
 // Close dropdown when clicking outside

@@ -70,17 +70,20 @@ const props = defineProps({
 const timeOptions = ['Día', 'Semana', 'Mes', 'Año'];
 const selectedTime = ref('Semana');
 
-// Chart data based on selected time period
+// Chart data based on selected time period (safe defaults)
 const chartData = computed(() => {
   const timeKey = selectedTime.value.toLowerCase();
-  const data = props.data[timeKey];
-  
+  const dataForKey = (props.data && props.data[timeKey]) ? props.data[timeKey] : { labels: [], values: [] };
+
+  const labels = Array.isArray(dataForKey.labels) ? dataForKey.labels : [];
+  const values = Array.isArray(dataForKey.values) ? dataForKey.values : [];
+
   return {
-    labels: data.labels,
+    labels,
     datasets: [
       {
         label: 'Ventas',
-        data: data.values,
+        data: values,
         borderColor: '#2D6A4F',
         backgroundColor: (context) => {
           const ctx = context.chart.ctx;

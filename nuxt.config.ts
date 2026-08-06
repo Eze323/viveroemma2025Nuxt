@@ -103,14 +103,14 @@ export default defineNuxtConfig({
     imgbbApiKey: process.env.IMGBB_API_KEY,
 
     public: {
-      apiBaseUrl: process.env.API_BASE_URL || 'http://127.0.0.1:8000/api',
+      apiBaseUrl: process.env.API_BASE_URL || 'https://inventario-fabrica-backend.onrender.com/api',
       // Only public variables here
     },
   },
 
   routeRules: {
     '/api/**': {
-      proxy: process.env.API_BASE_URL ? `${process.env.API_BASE_URL}/**` : 'http://127.0.0.1:8000/api/**'
+      proxy: process.env.API_BASE_URL ? `${process.env.API_BASE_URL}/**` : 'https://inventario-fabrica-backend.onrender.com/api/**'
     }
   },
 
