@@ -29,6 +29,7 @@
     "nuxt-auth-sanctum": "^0.6.6",
     "nuxt-openapi-docs-module": "^5.3.1",
     "pinia": "^2.1.7",
+    "thinking-orbs": "^0.2.0",
     "vue-chartjs": "^5.3.0"
   },
   "devDependencies": {

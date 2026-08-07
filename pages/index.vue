@@ -22,16 +22,23 @@
         </div>
         <div class="lg:w-1/2 relative animate-fade-in" style="animation-delay: 0.3s;">
           <div class="hero-image-container rounded-lg shadow-2xl relative z-10">
-            <NuxtImg 
-              src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-              alt="Vivero Emma - Plantas" 
-              loading="eager"
-              fetchpriority="high"
-              preload
-              :placeholder="img(`placeholder.png`, { w: 900, f: 'png', blur: 2, q: 50 })"
-            />
-          </div>
-          <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-accent rounded-full z-0"></div>
+            <div class="relative overflow-hidden">
+              <NuxtImg 
+                src="https://images.pexels.com/photos/31779762/pexels-photo-31779762/free-photo-of-cestas-colgantes-de-flores-vibrantes-en-invernadero.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                alt="Vivero Emma - Plantas" 
+                loading="eager"
+                fetchpriority="high"
+                preload
+                class="w-full h-full object-cover"
+                :placeholder="img(`placeholder.png`, { w: 900, f: 'png', blur: 2, q: 50 })"
+                @load="heroImageLoaded = true"
+                @error="heroImageLoaded = false"
+              />
+              <div v-if="!heroImageLoaded" class="absolute inset-0 flex items-center justify-center bg-white/80">
+                <ThinkingOrbsLoader label="Cargando imagen..." />
+              </div>
+            </div>
+          </div>          <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-accent rounded-full z-0"></div>
           <div class="absolute -top-6 -left-6 w-16 h-16 bg-secondary rounded-full z-0"></div>
         </div>
       </div>
@@ -76,21 +83,35 @@
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="(product, index) in products" :key="index" 
-            class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div class="product-image-container">
+          <div v-for="product in products" :key="product.name"
+            class="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+            <div class="product-image-container relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-gray-100 via-white to-gray-50">
               <NuxtImg
-                :src="product.image" 
-                :alt="product.name" 
-                class="hover:scale-105 transition-transform duration-300" 
+                :src="product.image"
+                :alt="product.name"
+                class="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+                :class="{ 'opacity-0 scale-105': !isProductImageLoaded(product.name) }"
                 loading="lazy"
+                decoding="async"
+                sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 25vw"
                 :placeholder="img(`placeholder.png`, { w: 200, f: 'png', blur: 2, q: 50 })"
+                @load="markProductImageLoaded(product.name)"
+                @error="markProductImageLoaded(product.name)"
               />
+              <div v-if="!isProductImageLoaded(product.name)" class="absolute inset-0 flex items-center justify-center bg-gray-50/90 backdrop-blur-[2px]">
+                <ThinkingOrbsLoader size="sm" label="Preparando imagen..." />
+              </div>
+              <div class="absolute left-3 top-3 rounded-full border border-white/80 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
+                {{ getStockLabel(product.stock) }}
+              </div>
             </div>
-            <div class="p-6">
+            <div class="p-5">
+              <div class="mb-3 flex items-center justify-between gap-2">
+                <span class="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">{{ product.category }}</span>
+                <span class="text-xs font-medium text-gray-500">{{ product.stock }} und.</span>
+              </div>
               <h3 class="text-lg font-bold text-gray-900">{{ product.name }}</h3>
-              <p class="text-gray-500 text-sm mb-4">{{ product.category }}</p>
-              <div class="flex justify-between items-center">
+              <div class="mt-4 flex items-center justify-between gap-3">
                 <span class="text-xl font-bold text-primary">${{ product.price }}</span>
                 <button class="btn btn-outline text-sm">Agregar</button>
               </div>
@@ -249,6 +270,17 @@
 <script setup>
 const img = useImage()
 const showMap = ref(false)
+const heroImageLoaded = ref(false)
+const productImageStates = ref({})
+const markProductImageLoaded = (productName) => {
+  productImageStates.value[productName] = true
+}
+const isProductImageLoaded = (productName) => Boolean(productImageStates.value[productName])
+const getStockLabel = (stock) => {
+  if (stock <= 0) return 'Sin stock'
+  if (stock < 10) return 'Últimas unidades'
+  return 'En stock'
+}
 const {data: home } = await useAsyncData('home', () => 
   queryCollection('content').path('/').first()
 );
@@ -297,24 +329,28 @@ const products = [
     name: 'Ficus Lyrata',
     category: 'Plantas de interior',
     price: '20.000',
+    stock: 12,
     image: 'https://images.pexels.com/photos/6044736/pexels-photo-6044736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     name: 'Monstera Deliciosa',
     category: 'Plantas de interior',
     price: '13.000',
+    stock: 5,
     image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     name: 'Pino Enano',
     category: 'Árboles',
     price: '5.900',
+    stock: 0,
     image: 'https://www.grupoalgalia.es/wp-content/uploads/pino-enano-descubre-todo-sobre-esta-maravillosa-especie.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   },
   {
     name: 'Rosas Rojas',
     category: 'Flores',
     price: '4.200',
+    stock: 8,
     image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
   }
 ];

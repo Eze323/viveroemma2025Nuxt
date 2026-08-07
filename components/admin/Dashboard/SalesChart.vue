@@ -62,7 +62,7 @@ const props = defineProps({
   },
   data: {
     type: Object,
-    required: true
+    default: () => ({})
   }
 });
 
@@ -73,10 +73,13 @@ const selectedTime = ref('Semana');
 // Chart data based on selected time period (safe defaults)
 const chartData = computed(() => {
   const timeKey = selectedTime.value.toLowerCase();
-  const dataForKey = (props.data && props.data[timeKey]) ? props.data[timeKey] : { labels: [], values: [] };
+  const safeData = props.data && typeof props.data === 'object' ? props.data : {};
+  const dataForKey = safeData[timeKey] && typeof safeData[timeKey] === 'object'
+    ? safeData[timeKey]
+    : { labels: [], values: [] };
 
-  const labels = Array.isArray(dataForKey.labels) ? dataForKey.labels : [];
-  const values = Array.isArray(dataForKey.values) ? dataForKey.values : [];
+  const labels = Array.isArray(dataForKey?.labels) ? dataForKey.labels : [];
+  const values = Array.isArray(dataForKey?.values) ? dataForKey.values : [];
 
   return {
     labels,

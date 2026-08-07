@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div v-if="authStore.loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+      <div class="rounded-2xl border border-gray-200 bg-white/95 px-8 py-8 shadow-2xl">
+        <ThinkingOrbsLoader size="lg" label="Verificando credenciales..." />
+      </div>
+    </div>
+
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="text-center px-4">
         <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">

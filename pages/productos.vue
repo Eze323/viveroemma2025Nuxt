@@ -51,51 +51,67 @@
     <!-- Products grid -->
     <section class="py-12">
       <div class="container-custom">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="product in products" :key="product.id" 
-            class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-            <div class="aspect-w-1 aspect-h-1 relative overflow-hidden">
-              <NuxtImg
-                :src="product.image" 
-                :alt="product.name"
-                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-                  
-              sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
-              :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
-              />
-              <div v-if="product.discount" 
-                class="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-sm font-medium">
-                -{{ product.discount }}%
-              </div>
-            </div>
-            <div class="p-4">
-              <div class="mb-2">
-                <span class="text-sm text-gray-500">{{ product.category }}</span>
-                <h3 class="text-lg font-bold text-gray-900">{{ product.name }}</h3>
-              </div>
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="text-xl font-bold text-primary">${{ product.price }}</span>
-                  <span v-if="product.oldPrice" class="text-sm text-gray-500 line-through ml-2">
-                    ${{ product.oldPrice }}
-                  </span>
-                </div>
-                <button class="btn btn-primary text-sm">
-                  Agregar
-                </button>
-              </div>
-            </div>
-          </div>
+        <div v-if="isCatalogLoading" class="flex min-h-[24rem] items-center justify-center rounded-2xl border border-gray-100 bg-white/80">
+          <ThinkingOrbsLoader label="Preparando catálogo..." />
         </div>
 
-        <!-- Empty state -->
-        <div v-if="products.length === 0" class="text-center py-12">
-          <div class="text-gray-400 mb-4">
-            <Icon name="heroicons:shopping-bag" class="w-16 h-16 mx-auto" />
+        <div v-else>
+          <div v-if="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div v-for="product in products" :key="product.id"
+              class="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <div class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 via-white to-gray-50">
+                <NuxtImg
+                  :src="product.image"
+                  :alt="product.name"
+                  class="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+                  :class="{ 'opacity-0 scale-105': !isProductImageLoaded(product.id) }"
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
+                  :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
+                  @load="markProductImageLoaded(product.id)"
+                  @error="markProductImageLoaded(product.id)"
+                />
+                <div v-if="product.discount"
+                  class="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-sm font-medium">
+                  -{{ product.discount }}%
+                </div>
+                <div v-if="!isProductImageLoaded(product.id)" class="absolute inset-0 flex items-center justify-center bg-gray-50/90 backdrop-blur-[2px]">
+                  <ThinkingOrbsLoader size="sm" label="Cargando imagen..." />
+                </div>
+                <div class="absolute left-3 top-3 rounded-full border border-white/80 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
+                  {{ getStockLabel(product.stock) }}
+                </div>
+              </div>
+              <div class="p-4">
+                <div class="mb-3 flex items-center justify-between gap-2">
+                  <span class="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">{{ product.category }}</span>
+                  <span class="text-xs font-medium text-gray-500">{{ product.stock }} und.</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">{{ product.name }}</h3>
+                <div class="mt-4 flex items-center justify-between">
+                  <div>
+                    <span class="text-xl font-bold text-primary">${{ product.price }}</span>
+                    <span v-if="product.oldPrice" class="ml-2 text-sm text-gray-500 line-through">
+                      ${{ product.oldPrice }}
+                    </span>
+                  </div>
+                  <button class="btn btn-primary text-sm">
+                    Agregar
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron productos</h3>
-          <p class="text-gray-600">Intenta ajustar los filtros de búsqueda</p>
+ 
+          <!-- Empty state -->
+          <div v-else class="text-center py-12">
+            <div class="text-gray-400 mb-4">
+              <Icon name="heroicons:shopping-bag" class="w-16 h-16 mx-auto" />
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron productos</h3>
+            <p class="text-gray-600">Intenta ajustar los filtros de búsqueda</p>
+          </div>
         </div>
       </div>
     </section>
@@ -155,9 +171,8 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 const img = useImage()
-import placeHolderImg from '@/assets/images/placeholder.png'
 // Filters state
 const filters = reactive({
   search: '',
@@ -167,6 +182,26 @@ const filters = reactive({
 });
 
 const newsletterEmail = ref('');
+const isCatalogLoading = ref(true)
+const productImageStates = ref({})
+
+const markProductImageLoaded = (productId) => {
+  productImageStates.value[productId] = true
+}
+
+const isProductImageLoaded = (productId) => Boolean(productImageStates.value[productId])
+
+const getStockLabel = (stock) => {
+  if (stock <= 0) return 'Sin stock'
+  if (stock < 10) return 'Últimas unidades'
+  return 'En stock'
+}
+
+onMounted(() => {
+  window.setTimeout(() => {
+    isCatalogLoading.value = false
+  }, 900)
+})
 
 // Categories
 const categories = [
@@ -206,6 +241,7 @@ const products = ref([
     name: 'Monstera Deliciosa',
     category: 'Plantas de interior',
     price: '13.000',
+    stock: 12,
     image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg'
   },
   {
@@ -215,6 +251,7 @@ const products = ref([
     price: '8.500',
     oldPrice: '11.800',
     discount: 15,
+    stock: 5,
     image: 'https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg'
   },
   {
@@ -222,6 +259,7 @@ const products = ref([
     name: 'Kit de Jardinería',
     category: 'Herramientas',
     price: '20.800',
+    stock: 0,
     image: 'https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg'
   },
   {
@@ -229,6 +267,7 @@ const products = ref([
     name: 'Rosas Rojas',
     category: 'Flores',
     price: '4.200',
+    stock: 8,
     image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg'
   }
 ]);

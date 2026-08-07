@@ -96,9 +96,8 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-        <Icon name="heroicons:arrow-path" class="w-8 h-8 text-primary animate-spin mb-2" />
-        <p class="text-sm text-gray-500">Cargando inventario...</p>
+      <div v-if="loading" class="flex flex-col items-center justify-center py-16 rounded-2xl border border-gray-100 bg-white/90 shadow-sm">
+        <ThinkingOrbsLoader label="Cargando inventario..." />
       </div>
 
       <!-- Empty State -->
@@ -124,24 +123,29 @@
         >
           <div class="product-header">
             <!-- Image & Badge -->
-            <div class="product-image-container">
+            <div class="product-image-container relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 via-white to-gray-50">
               <img
                 loading="lazy"
+                decoding="async"
                 :src="product.image_url || '/placeholder.png'"
                 :alt="product.name"
-                class="product-image cursor-zoom-in"
-                @error="product.image_url = '/placeholder.png'"
+                class="product-image h-full w-full object-cover cursor-zoom-in transition-all duration-500"
+                :class="{ 'opacity-0 scale-105': !isProductImageLoaded(product.id) }"
+                @load="markProductImageLoaded(product.id)"
+                @error="handleProductImageError(product.id, product)"
                 @click.stop="openImageViewer(product.image_url || '/placeholder.png', product.name)"
               />
-              <div 
-                class="stock-badge"
-                :class="{
-                  'in-stock': product.stock >= 10,
-                  'low-stock': product.stock > 0 && product.stock < 10,
-                  'out-of-stock': product.stock === 0
-                }"
+              <div v-if="!isProductImageLoaded(product.id)" class="absolute inset-0 flex items-center justify-center bg-gray-50/90 backdrop-blur-[2px]">
+                <ThinkingOrbsLoader size="sm" label="Cargando imagen..." />
+              </div>
+              <div class="absolute left-3 top-3 rounded-full border border-white/80 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
+                {{ getStockLabel(product.stock) }}
+              </div>
+              <div
+                class="absolute bottom-3 right-3 rounded-full border px-2.5 py-1 text-[11px] font-semibold shadow-sm"
+                :class="getStockBadgeClasses(product.stock)"
               >
-                {{ product.stock }}
+                {{ product.stock }} und.
               </div>
             </div>
 
@@ -393,6 +397,7 @@ const filters = reactive({
 // Use store state instead of local state
 const loading = computed(() => productStore.isLoading);
 const error = computed(() => productStore.error);
+const productImageStates = ref<Record<string | number, boolean>>({});
 
 const notification = reactive({
   isOpen: false,
@@ -474,6 +479,29 @@ const filteredProducts = computed(() => {
       return 0;
     });
 });
+
+const markProductImageLoaded = (productId: string | number) => {
+  productImageStates.value[productId] = true;
+};
+
+const handleProductImageError = (productId: string | number, product: Product) => {
+  product.image_url = '/placeholder.png';
+  markProductImageLoaded(productId);
+};
+
+const isProductImageLoaded = (productId: string | number) => Boolean(productImageStates.value[productId]);
+
+const getStockLabel = (stock: number) => {
+  if (stock <= 0) return 'Sin stock';
+  if (stock < 10) return 'Últimas unidades';
+  return 'En stock';
+};
+
+const getStockBadgeClasses = (stock: number) => {
+  if (stock <= 0) return 'border-red-200 bg-red-50 text-red-700';
+  if (stock < 10) return 'border-amber-200 bg-amber-50 text-amber-700';
+  return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+};
 
 const loadProducts = async () => {
   try {

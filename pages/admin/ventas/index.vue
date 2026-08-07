@@ -57,9 +57,8 @@
     />
 
     <div class="px-4">
-      <div v-if="loading" class="text-center py-8">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-        <p class="text-gray-500 mt-4">Cargando ventas...</p>
+      <div v-if="loading" class="flex flex-col items-center justify-center py-16 rounded-2xl border border-gray-100 bg-white/90 shadow-sm">
+        <ThinkingOrbsLoader label="Cargando ventas..." />
       </div>
       <div v-else-if="error" class="text-center py-8">
         <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto">
