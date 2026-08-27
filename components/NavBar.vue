@@ -56,12 +56,12 @@
           </NuxtLink>
 
           <!-- Acceso extra a Demo Líquida -->
-          <NuxtLink 
+          <!-- <NuxtLink 
             to="/gooey-demo" 
             class="relative z-10 px-3 py-1.5 rounded-full text-xs font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 border border-teal-500/30 transition-all ml-2"
           >
             ✨ Viscosidad
-          </NuxtLink>
+          </NuxtLink>-->
         </nav>
 
         <!-- Botón Iniciar Sesión -->
