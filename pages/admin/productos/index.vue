@@ -138,11 +138,8 @@
               <div v-if="!isProductImageLoaded(product.id)" class="absolute inset-0 flex items-center justify-center bg-gray-50/90 backdrop-blur-[2px]">
                 <ThinkingOrbsLoader size="sm" label="Cargando imagen..." />
               </div>
-              <div class="absolute left-3 top-3 rounded-full border border-white/80 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
-                {{ getStockLabel(product.stock) }}
-              </div>
               <div
-                class="absolute bottom-3 right-3 rounded-full border px-2.5 py-1 text-[11px] font-semibold shadow-sm"
+                class="absolute top-2 right-2 rounded-full border px-2 py-0.5 text-[10px] font-bold shadow-md backdrop-blur-md"
                 :class="getStockBadgeClasses(product.stock)"
               >
                 {{ product.stock }} und.
@@ -498,9 +495,9 @@ const getStockLabel = (stock: number) => {
 };
 
 const getStockBadgeClasses = (stock: number) => {
-  if (stock <= 0) return 'border-red-200 bg-red-50 text-red-700';
-  if (stock < 10) return 'border-amber-200 bg-amber-50 text-amber-700';
-  return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+  if (stock <= 0) return 'border-red-400/50 bg-red-950/70 text-red-300 backdrop-blur-md';
+  if (stock < 10) return 'border-amber-400/50 bg-amber-950/70 text-amber-300 backdrop-blur-md';
+  return 'border-emerald-400/50 bg-slate-900/70 text-emerald-300 backdrop-blur-md';
 };
 
 const loadProducts = async () => {

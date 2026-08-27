@@ -1,41 +1,44 @@
 <template>
-  <div class="stat-card hover-lift group">
-    <div class="flex items-start justify-between">
-      <!-- Icon with gradient background -->
+  <div class="liquid-metric-card stat-card hover-lift group relative overflow-hidden bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer">
+    <!-- Destello líquido de resina -->
+    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+    <div class="flex items-start justify-between relative z-10">
+      <!-- Icon with gradient background & pulse -->
       <div 
-        class="p-3 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+        class="p-3 rounded-2xl flex items-center justify-center shadow-md transition-all duration-500 group-hover:scale-115 group-hover:rotate-6"
         :class="gradientClass"
       >
         <Icon :name="icon" class="w-6 h-6 text-white" />
       </div>
       
-      <!-- Trend indicator -->
+      <!-- Trend indicator estilo micro-gota -->
       <div 
         v-if="trend !== null"
-        class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium"
+        class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold shadow-inner border"
         :class="trendClass"
       >
         <Icon 
           :name="trend >= 0 ? 'heroicons:arrow-trending-up' : 'heroicons:arrow-trending-down'" 
-          class="w-3 h-3" 
+          class="w-3.5 h-3.5" 
         />
         <span>{{ Math.abs(trend) }}%</span>
       </div>
     </div>
     
     <!-- Value and title -->
-    <div class="mt-4">
-      <h3 class="text-sm font-medium text-gray-600 mb-1">{{ title }}</h3>
-      <div class="flex items-baseline gap-2">
-        <p class="text-3xl font-bold text-gray-900">
-          <span v-if="prefix">{{ prefix }}</span>
+    <div class="mt-4 relative z-10">
+      <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">{{ title }}</h3>
+      <div class="flex items-baseline gap-1">
+        <p class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span v-if="prefix" class="text-emerald-600 dark:text-emerald-400 font-bold mr-0.5">{{ prefix }}</span>
           <CountUp :end-value="numericValue" :duration="1500" />
-          <span v-if="suffix">{{ suffix }}</span>
+          <span v-if="suffix" class="text-xs font-bold text-slate-400 ml-1">{{ suffix }}</span>
         </p>
       </div>
       
       <!-- Comparison text -->
-      <p v-if="comparison" class="text-xs text-gray-500 mt-2">
+      <p v-if="comparison" class="text-xs font-medium text-slate-400 mt-2">
         {{ comparison }}
       </p>
     </div>
@@ -43,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
   title: {
@@ -81,37 +84,32 @@ const props = defineProps({
   }
 });
 
-// Extract numeric value for animation
 const numericValue = computed(() => {
   if (typeof props.value === 'number') return props.value;
-  // Remove non-numeric characters except decimal point
   const cleaned = String(props.value).replace(/[^0-9.]/g, '');
   return parseFloat(cleaned) || 0;
 });
 
-// Gradient class based on color
 const gradientClass = computed(() => {
   const gradients = {
-    primary: 'bg-gradient-primary',
-    success: 'bg-gradient-success',
-    warning: 'bg-gradient-warning',
-    info: 'bg-gradient-info',
-    error: 'bg-gradient-to-br from-red-500 to-red-600'
+    primary: 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30',
+    success: 'bg-gradient-to-br from-emerald-400 to-green-600 shadow-emerald-400/30',
+    warning: 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-400/30',
+    info: 'bg-gradient-to-br from-cyan-400 to-blue-600 shadow-cyan-400/30',
+    error: 'bg-gradient-to-br from-rose-500 to-red-600 shadow-rose-500/30'
   };
   return gradients[props.color] || gradients.primary;
 });
 
-// Trend styling
 const trendClass = computed(() => {
   if (props.trend === null) return '';
   return props.trend >= 0 
-    ? 'bg-green-50 text-green-700' 
-    : 'bg-red-50 text-red-700';
+    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
+    : 'bg-rose-500/10 text-rose-600 border-rose-500/20';
 });
 </script>
 
 <script>
-// CountUp component for animated numbers
 import { defineComponent, ref, watch, onMounted } from 'vue';
 
 const CountUp = defineComponent({
@@ -139,7 +137,6 @@ const CountUp = defineComponent({
         
         if (elapsed < props.duration) {
           const progress = elapsed / props.duration;
-          // Easing function for smooth animation
           const easeOutQuart = 1 - Math.pow(1 - progress, 4);
           displayValue.value = Math.floor(startValue + (props.endValue - startValue) * easeOutQuart);
           requestAnimationFrame(updateValue);
@@ -166,3 +163,14 @@ const CountUp = defineComponent({
 
 export { CountUp };
 </script>
+
+<style scoped>
+.liquid-metric-card {
+  transition: border-radius 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 300ms ease, box-shadow 300ms ease;
+}
+
+.liquid-metric-card:hover {
+  border-radius: 32px 16px 28px 20px;
+  transform: translateY(-4px);
+}
+</style>

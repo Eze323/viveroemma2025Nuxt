@@ -101,8 +101,8 @@
               <div v-if="!isProductImageLoaded(product.name)" class="absolute inset-0 flex items-center justify-center bg-gray-50/90 backdrop-blur-[2px]">
                 <ThinkingOrbsLoader size="sm" label="Preparando imagen..." />
               </div>
-              <div class="absolute left-3 top-3 rounded-full border border-white/80 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
-                {{ getStockLabel(product.stock) }}
+              <div class="absolute top-2 right-2 rounded-full border border-emerald-400/50 bg-slate-900/70 text-emerald-300 px-2 py-0.5 text-[10px] font-bold shadow-md backdrop-blur-md">
+                {{ product.stock }} und.
               </div>
             </div>
             <div class="p-5">

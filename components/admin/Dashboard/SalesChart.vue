@@ -22,7 +22,7 @@
     
     <!-- Chart Container -->
     <div class="h-64 sm:h-80">
-      <LineChart :chart-data="chartData" :options="chartOptions" />
+      <LineChart v-if="chartData && chartData.labels" :data="chartData" :options="chartOptions" />
     </div>
   </div>
 </template>
