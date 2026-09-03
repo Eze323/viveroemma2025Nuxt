@@ -1,17 +1,41 @@
 <template>
-  <div class="bg-white border-b border-gray-200 h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-20 shadow-sm">
-    <!-- Left Section: Mobile Menu + Page Title -->
+  <div class="relative bg-white/85 dark:bg-slate-950/85 backdrop-blur-xl border-b border-emerald-100/80 dark:border-emerald-950/80 h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-30 shadow-sm transition-all duration-300">
+    <!-- SVG Filter Defs para el Admin Navbar -->
+    <svg class="absolute w-0 h-0 overflow-hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="admin-gooey" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+          <feColorMatrix 
+            in="blur" 
+            mode="matrix" 
+            values="1 0 0 0 0  
+                    0 1 0 0 0  
+                    0 0 1 0 0  
+                    0 0 0 18 -8" 
+            result="gooey" 
+          />
+          <feComposite in="SourceGraphic" in2="gooey" operator="atop" />
+        </filter>
+      </defs>
+    </svg>
+
+    <!-- Left Section: Mobile Menu + Page Title con Pulso Bioluminoso -->
     <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
       <!-- Mobile sidebar trigger -->
       <button 
         @click="toggleSidebar" 
-        class="md:hidden p-2 -ml-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200"
+        class="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-xl transition-all duration-200"
       >
-        <Icon :name="isOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'" class="w-6 h-6" />
+        <Icon :name="isOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'" class="w-6 h-6 text-emerald-600" />
       </button>
       
-      <!-- Page title -->
-      <h1 class="text-lg sm:text-xl font-semibold text-gray-900 truncate">{{ pageTitle }}</h1>
+      <!-- Page title con indicador fluido -->
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0"></span>
+        <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate font-heading">
+          {{ pageTitle }}
+        </h1>
+      </div>
     </div>
     
     <!-- Right Section: Search, Notifications, User Menu -->
@@ -20,141 +44,149 @@
       <div class="hidden lg:block relative">
         <input 
           type="text" 
-          placeholder="Buscar..." 
-          class="pl-10 pr-4 py-2 w-64 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 text-sm"
+          placeholder="Buscar en el sistema..." 
+          class="pl-10 pr-4 py-2 w-64 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all duration-300 text-xs font-semibold"
         />
-        <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+        <Icon name="heroicons:magnifying-glass" class="absolute left-3.5 top-2.5 text-slate-400 w-4 h-4" />
       </div>
       
       <!-- Search button for mobile/tablet -->
-      <button class="lg:hidden p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200">
+      <button class="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-xl transition-all duration-200">
         <Icon name="heroicons:magnifying-glass" class="w-5 h-5" />
       </button>
       
-      <!-- Notifications -->
+      <!-- Notifications Dropdown Líquido -->
       <div class="relative">
         <button
           @click="toggleNotifications"
-          class="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-all duration-200 group"
+          class="p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-xl transition-all duration-200 relative group"
           aria-label="Notificaciones"
         >
-          <Icon name="heroicons:bell" class="w-5 h-5" />
+          <Icon name="heroicons:bell" class="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span
             v-if="notificationsStore.unreadCount > 0"
-            class="absolute top-1.5 right-1.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium group-hover:scale-110 transition-transform"
+            class="absolute -top-1 -right-1 bg-gradient-to-r from-rose-500 to-red-600 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-md shadow-rose-500/30 animate-pulse"
           >
             {{ notificationsStore.unreadCount > 99 ? '99+' : notificationsStore.unreadCount }}
           </span>
         </button>
 
+        <!-- Dropdown Notificaciones con Glassmorphism -->
         <Transition
-          enter-active-class="transition ease-out duration-100"
-          enter-from-class="transform opacity-0 scale-95"
-          enter-to-class="transform opacity-100 scale-100"
-          leave-active-class="transition ease-in duration-75"
-          leave-from-class="transform opacity-100 scale-100"
-          leave-to-class="transform opacity-0 scale-95"
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="transform opacity-0 scale-95 -translate-y-2"
+          enter-to-class="transform opacity-100 scale-100 translate-y-0"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="transform opacity-100 scale-100 translate-y-0"
+          leave-to-class="transform opacity-0 scale-95 -translate-y-2"
         >
           <div
             v-if="isNotificationsOpen"
-            class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden"
+            class="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-emerald-100 dark:border-emerald-950 z-50 overflow-hidden"
           >
-            <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-              <span class="text-sm font-semibold">Notificaciones</span>
+            <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
               <div class="flex items-center gap-2">
-                <button @click="markAllAsRead" class="text-xs text-gray-600 hover:text-gray-800">Marcar todas</button>
-                <button @click="clearAll" class="text-xs text-red-500 hover:text-red-600">Limpiar</button>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">Notificaciones</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button @click="markAllAsRead" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 transition-colors">Marcar leídas</button>
+                <button @click="clearAll" class="text-[11px] font-bold text-rose-500 hover:text-rose-600 transition-colors">Limpiar</button>
               </div>
             </div>
 
-            <div class="max-h-64 overflow-auto">
+            <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
               <template v-if="notificationsStore.notifications.length">
                 <button
                   v-for="note in notificationsStore.notifications"
                   :key="note.id"
                   @click="openNotification(note)"
-                  class="w-full text-left px-4 py-3 hover:bg-gray-50 flex gap-3 items-start"
+                  class="w-full text-left px-4 py-3.5 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/30 flex gap-3 items-start transition-colors duration-200"
                 >
-                  <div class="flex-shrink-0 w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-700">
+                  <div class="flex-shrink-0 w-9 h-9 rounded-2xl bg-emerald-500/10 dark:bg-emerald-400/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm font-bold shadow-inner">
                     <Icon v-if="note.type === 'order'" name="heroicons:shopping-cart" class="w-4 h-4" />
-                    <Icon v-else-if="note.type === 'stock_warning'" name="heroicons:exclamation-triangle" class="w-4 h-4" />
+                    <Icon v-else-if="note.type === 'stock_warning'" name="heroicons:exclamation-triangle" class="w-4 h-4 text-amber-500" />
                     <Icon v-else name="heroicons:user" class="w-4 h-4" />
                   </div>
-                  <div class="flex-1">
-                    <div class="flex items-center justify-between">
-                      <p :class="note.read ? 'text-sm text-gray-500' : 'text-sm font-medium text-gray-900'">{{ note.title }}</p>
-                      <span class="text-xs text-gray-400">{{ formatTime(note.createdAt) }}</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-1 mb-0.5">
+                      <p :class="note.read ? 'text-xs text-slate-500 dark:text-slate-400' : 'text-xs font-extrabold text-slate-900 dark:text-white'" class="truncate">
+                        {{ note.title }}
+                      </p>
+                      <span class="text-[10px] font-mono text-slate-400 flex-shrink-0">{{ formatTime(note.createdAt) }}</span>
                     </div>
-                    <p class="text-xs text-gray-500 truncate">{{ note.message }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ note.message }}</p>
                   </div>
                 </button>
               </template>
-              <div v-else class="px-4 py-4 text-sm text-gray-500">Sin notificaciones</div>
+              <div v-else class="px-5 py-6 text-center text-xs font-semibold text-slate-400">Sin notificaciones nuevas</div>
             </div>
           </div>
         </Transition>
       </div>
       
-      <!-- User menu dropdown -->
+      <!-- User menu dropdown Líquido -->
       <div class="relative">
         <button 
           @click="isUserMenuOpen = !isUserMenuOpen"
-          class="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-lg transition-all duration-200 group"
+          class="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-900/80 transition-all duration-300 group"
         >
-          <div v-if="userInitials" class="w-8 h-8 rounded-lg bg-gradient-primary text-white flex items-center justify-center font-semibold text-sm shadow-sm group-hover:shadow-md transition-shadow">
+          <div v-if="userInitials" class="w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-emerald-500/25 group-hover:scale-105 transition-transform">
             {{ userInitials }}
           </div>
-          <span class="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
+          <span class="hidden sm:block text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[120px] truncate">
             {{ authStore.user?.name || 'Usuario' }}
           </span>
-          <Icon name="heroicons:chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': isUserMenuOpen }" />
+          <Icon name="heroicons:chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-300" :class="{ 'rotate-180': isUserMenuOpen }" />
         </button>
         
-        <!-- Dropdown menu -->
+        <!-- User Dropdown Menu con Glassmorphism -->
         <Transition
-          enter-active-class="transition ease-out duration-100"
-          enter-from-class="transform opacity-0 scale-95"
-          enter-to-class="transform opacity-100 scale-100"
-          leave-active-class="transition ease-in duration-75"
-          leave-from-class="transform opacity-100 scale-100"
-          leave-to-class="transform opacity-0 scale-95"
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="transform opacity-0 scale-95 -translate-y-2"
+          enter-to-class="transform opacity-100 scale-100 translate-y-0"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="transform opacity-100 scale-100 translate-y-0"
+          leave-to-class="transform opacity-0 scale-95 -translate-y-2"
         >
           <div 
             v-if="isUserMenuOpen"
-            class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50"
+            class="absolute right-0 mt-3 w-60 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-emerald-100 dark:border-emerald-950 py-2 z-50 overflow-hidden"
           >
             <!-- User info -->
-            <div class="px-4 py-3 border-b border-gray-100">
-              <p class="text-sm font-semibold text-gray-900">{{ authStore.user?.name || 'Usuario' }}</p>
-              <p class="text-xs text-gray-500 truncate">{{ authStore.user?.email || '' }}</p>
+            <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+              <p class="text-xs font-extrabold text-slate-900 dark:text-white">{{ authStore.user?.name || 'Usuario' }}</p>
+              <p class="text-[11px] font-medium text-slate-400 truncate">{{ authStore.user?.email || '' }}</p>
             </div>
             
             <!-- Menu items -->
-            <NuxtLink 
-              to="/admin/perfil" 
-              class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              @click="isUserMenuOpen = false"
-            >
-              <Icon name="heroicons:user-circle" class="w-5 h-5 text-gray-400" />
-              Mi Perfil
-            </NuxtLink>
-            <NuxtLink 
-              to="/admin/configuracion" 
-              class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              @click="isUserMenuOpen = false"
-            >
-              <Icon name="heroicons:cog-6-tooth" class="w-5 h-5 text-gray-400" />
-              Configuración
-            </NuxtLink>
-            
-            <div class="border-t border-gray-100 mt-1 pt-1">
-              <button 
-                @click="logout" 
-                class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full transition-colors"
+            <div class="p-1 space-y-0.5">
+              <NuxtLink 
+                to="/admin/perfil" 
+                class="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-colors"
+                @click="isUserMenuOpen = false"
               >
-                <Icon name="heroicons:arrow-right-on-rectangle" class="w-5 h-5" />
-                Cerrar sesión
-              </button>
+                <Icon name="heroicons:user-circle" class="w-4 h-4 text-emerald-500" />
+                Mi Perfil
+              </NuxtLink>
+              <NuxtLink 
+                to="/admin/configuracion" 
+                class="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-colors"
+                @click="isUserMenuOpen = false"
+              >
+                <Icon name="heroicons:cog-6-tooth" class="w-4 h-4 text-teal-500" />
+                Configuración
+              </NuxtLink>
+              
+              <div class="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                <button 
+                  @click="logout" 
+                  class="flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 w-full transition-colors"
+                >
+                  <Icon name="heroicons:arrow-right-on-rectangle" class="w-4 h-4" />
+                  Cerrar sesión
+                </button>
+              </div>
             </div>
           </div>
         </Transition>
@@ -209,7 +241,6 @@ onMounted(() => {
     .map(word => word.charAt(0).toUpperCase())
     .slice(0, 2)
     .join('');
-  // seed mock notifications in case store is empty (dev/test)
   if (notificationsStore.notifications.length === 0) seedNotifications(notificationsStore);
 });
 
@@ -229,7 +260,6 @@ const toggleNotifications = () => {
 const openNotification = (note) => {
   notificationsStore.markAsRead(note.id);
   isNotificationsOpen.value = false;
-  // optionally navigate based on notification meta (example for orders)
   if (note.type === 'order' && note.meta?.orderId) {
     navigateTo(`/admin/ventas/${note.meta.orderId}`);
   }
