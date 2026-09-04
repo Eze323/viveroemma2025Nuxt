@@ -8,18 +8,23 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@vueuse/nuxt',
-    'nuxt-icon',
+    '@nuxt/icon',
+    
     '@nuxtjs/google-fonts',
     '@nuxt/image',
     '@nuxt/content',
     'nuxt-openapi-docs-module'
   ],
-  content: {
 
-    database: {
-      type: 'sqlite',
-      filename: 'vivero_emma.sqlite',
-    },
+  icon: {
+    provider: 'server',
+    fallbackToApi: false,
+    serverBundle: {
+      collections: ['heroicons', 'mdi'],
+      externalizeIconsJson: false
+    }
+  },
+  content: {
     watch: {
       port: 4000,
       showURL: true,

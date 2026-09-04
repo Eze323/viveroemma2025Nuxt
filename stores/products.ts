@@ -19,7 +19,7 @@ export const products = mysqlTable(
   }
 );*/
 
-interface Product {
+export interface Product {
     id: number;
     name: string;
     category: string;

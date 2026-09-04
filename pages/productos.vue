@@ -20,9 +20,9 @@
     </section>
 
     <!-- Filters Bar -->
-    <section class="py-6 border-b border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md sticky top-[61px] z-20 shadow-sm">
+    <section class="border-y border-slate-200 bg-white py-3 dark:border-slate-800 dark:bg-slate-900 sm:py-4">
       <div class="container-custom">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-4">
           <div>
             <input 
               type="text" 
@@ -66,74 +66,12 @@
 
         <div v-else>
           <div v-if="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
-            <div 
+            <ProductCard
               v-for="product in products" 
               :key="product.id"
-              class="liquid-card group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer"
-            >
-              <!-- Destello de resina líquida (Viscous Glass Shine) -->
-              <div class="liquid-shine absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"></div>
-
-              <div class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
-                <NuxtImg
-                  :src="product.image"
-                  :alt="product.name"
-                  class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  :class="{ 'opacity-0 scale-105': !isProductImageLoaded(product.id) }"
-                  loading="lazy"
-                  decoding="async"
-                  sizes="(max-width: 640px) 100vw, (min-width: 641px) 50vw, (min-width: 1024px) 33vw"
-                  :placeholder="img(`placeholder.png`, { h: 10, f: 'png', blur: 2, q: 50 })"
-                  @load="markProductImageLoaded(product.id)"
-                  @error="markProductImageLoaded(product.id)"
-                />
-                
-                <!-- Badge de Descuento Líquido Pulsante -->
-                <div v-if="product.discount"
-                  class="absolute top-3 right-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-2.5 py-1 rounded-full text-xs font-black shadow-lg shadow-emerald-500/30 animate-pulse z-10"
-                >
-                  -{{ product.discount }}% OFF
-                </div>
-                
-                <div v-if="!isProductImageLoaded(product.id)" class="absolute inset-0 flex items-center justify-center bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-[2px]">
-                  <ThinkingOrbsLoader size="sm" label="Cargando..." />
-                </div>
-
-                <!-- Stock Badge Mini Redondeado en Esquina Superior Derecha -->
-                <div class="absolute top-2 right-2 rounded-full border border-emerald-400/50 bg-slate-900/70 text-emerald-300 px-2 py-0.5 text-[10px] font-bold shadow-md backdrop-blur-md z-10">
-                  {{ product.stock }} und.
-                </div>
-              </div>
-
-              <!-- Contenido de la Tarjeta -->
-              <div class="p-5 relative z-10">
-                <div class="mb-2.5 flex items-center justify-between gap-2">
-                  <span class="rounded-full bg-emerald-500/10 dark:bg-emerald-400/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                    {{ product.category }}
-                  </span>
-                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ product.stock }} dispo.</span>
-                </div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
-                  {{ product.name }}
-                </h3>
-                
-                <div class="mt-4 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">${{ product.price }}</span>
-                    <span v-if="product.oldPrice" class="ml-2 text-xs text-slate-400 line-through">
-                      ${{ product.oldPrice }}
-                    </span>
-                  </div>
-                  
-                  <button class="liquid-button relative overflow-hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-full shadow-lg hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105 active:scale-95">
-                    <span class="relative z-10 flex items-center gap-1.5">
-                      <span>Agregar</span>
-                      <span>🛒</span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
+              :product="product"
+              @add="handleAddToCart"
+            />
           </div>
  
           <!-- Empty state -->
@@ -181,9 +119,12 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue';
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref } from 'vue';
+import type { ProductCardData } from '~/components/ProductCard.vue';
+import { useProductStore, type Product } from '~/stores/products';
 const img = useImage();
+const productStore = useProductStore();
 
 const filters = reactive({
   search: '',
@@ -193,25 +134,6 @@ const filters = reactive({
 });
 
 const isCatalogLoading = ref(true);
-const productImageStates = ref({});
-
-const markProductImageLoaded = (productId) => {
-  productImageStates.value[productId] = true;
-};
-
-const isProductImageLoaded = (productId) => Boolean(productImageStates.value[productId]);
-
-const getStockLabel = (stock) => {
-  if (stock <= 0) return 'Agotado';
-  if (stock < 10) return 'Últimos ejemplares';
-  return 'En stock';
-};
-
-onMounted(() => {
-  window.setTimeout(() => {
-    isCatalogLoading.value = false;
-  }, 700);
-});
 
 const categories = [
   'Plantas de interior',
@@ -242,42 +164,100 @@ const featuredCategories = [
   }
 ];
 
-const products = ref([
+const staticProducts: ProductCardData[] = [
   {
     id: 1,
-    name: 'Monstera Deliciosa',
+    commonName: 'Monstera Deliciosa',
+    scientificName: 'Monstera deliciosa',
     category: 'Plantas de interior',
-    price: '13.000',
-    stock: 12,
-    image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg'
+    price: 13000,
+    image: 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg',
+    imageAlt: 'Monstera deliciosa de interior',
+    watering: { level: 2, label: 'Riego medio' },
+    light: { icon: 'heroicons:sun', label: 'Semisombra' },
+    temperature: '18-27 °C'
   },
   {
     id: 2,
-    name: 'Sansevieria',
+    commonName: 'Sansevieria',
+    scientificName: 'Dracaena trifasciata',
     category: 'Plantas de interior',
-    price: '8.500',
-    oldPrice: '11.800',
-    discount: 15,
-    stock: 5,
-    image: 'https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg'
+    price: 8500,
+    image: 'https://images.pexels.com/photos/2123482/pexels-photo-2123482.jpeg',
+    imageAlt: 'Sansevieria en maceta',
+    watering: { level: 1, label: 'Riego bajo' },
+    light: { icon: 'heroicons:sun', label: 'Luz indirecta' },
+    temperature: '15-30 °C'
   },
   {
     id: 3,
-    name: 'Kit de Jardinería',
+    commonName: 'Kit de Jardinería',
+    scientificName: 'Accesorios para cultivo',
     category: 'Herramientas',
-    price: '20.800',
-    stock: 0,
-    image: 'https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg'
+    price: 20800,
+    image: 'https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg',
+    imageAlt: 'Herramientas de jardinería',
+    watering: { level: 1, label: 'Sin riego' },
+    light: { icon: 'heroicons:cloud', label: 'No aplica' },
+    temperature: 'Uso exterior'
   },
   {
     id: 4,
-    name: 'Rosas Rojas',
+    commonName: 'Rosas Rojas',
+    scientificName: 'Rosa spp.',
     category: 'Flores',
-    price: '4.200',
-    stock: 8,
-    image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg'
+    price: 4200,
+    image: 'https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg',
+    imageAlt: 'Rosas rojas en flor',
+    watering: { level: 3, label: 'Riego alto' },
+    light: { icon: 'heroicons:sun', label: 'Luz directa' },
+    temperature: '15-25 °C'
   }
-]);
+];
+
+const parsePrice = (value: number | string) => {
+  if (typeof value === 'number') return value;
+  return Number(value) || 0;
+};
+
+const mapDatabaseProduct = (product: Product): ProductCardData => ({
+  id: product.id,
+  commonName: product.name,
+  scientificName: product.name,
+  category: product.category || 'Plantas',
+  price: parsePrice(product.precio_venta),
+  image: product.image_url || 'https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg',
+  imageAlt: product.name,
+  watering: { level: 2, label: 'Riego medio' },
+  light: { icon: 'heroicons:sun', label: 'Semisombra' },
+  temperature: '18-27 °C'
+});
+
+const products = computed<ProductCardData[]>(() => {
+  const merged = new Map<string | number, ProductCardData>();
+
+  staticProducts.forEach((product) => merged.set(product.id, product));
+  productStore.getProducts
+    .filter((product) => product.publicado === true)
+    .map(mapDatabaseProduct)
+    .forEach((product) => merged.set(product.id, product));
+
+  return Array.from(merged.values());
+});
+
+const handleAddToCart = (product: ProductCardData) => {
+  console.info('Producto añadido al carrito:', product.id);
+};
+
+onMounted(async () => {
+  try {
+    await productStore.fetchProducts();
+  } catch (error) {
+    console.warn('No se pudieron cargar productos de la base de datos:', error);
+  } finally {
+    isCatalogLoading.value = false;
+  }
+});
 </script>
 
 <style scoped>
