@@ -74,9 +74,15 @@
         </div>
         
         <!-- Mobile Navigation Button -->
-        <button @click="isMenuOpen = !isMenuOpen" class="md:hidden text-slate-700 dark:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-          <Icon v-if="!isMenuOpen" name="heroicons:bars-3" class="w-6 h-6 text-emerald-600" />
-          <Icon v-else name="heroicons:x-mark" class="w-6 h-6 text-emerald-600" />
+        <button
+          type="button"
+          :aria-expanded="isMenuOpen"
+          :aria-label="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
+          @click="isMenuOpen = !isMenuOpen"
+          class="md:hidden text-slate-700 dark:text-slate-200 focus:outline-none p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          <XMarkIcon v-if="isMenuOpen" class="w-6 h-6 text-emerald-600" aria-hidden="true" />
+          <Bars3Icon v-else class="w-6 h-6 text-emerald-600" aria-hidden="true" />
         </button>
       </div>
       
@@ -124,6 +130,7 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
+import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
 
 const route = useRoute();
 const isMenuOpen = ref(false);
