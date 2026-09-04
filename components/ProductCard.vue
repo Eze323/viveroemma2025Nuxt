@@ -5,6 +5,7 @@
     <div class="relative aspect-square overflow-hidden bg-emerald-50">
       <NuxtImg
         :src="imageSource"
+        provider="none"
         :alt="displayedProduct.imageAlt || displayedProduct.commonName"
         class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         loading="lazy"
