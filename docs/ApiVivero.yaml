@@ -1,43 +1,516 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Vivero Emma API
-  description: API para interactuar con el contenido del Vivero Emma.
+  description: |
+    API REST oficial para la gestión de catálogo de plantas, ventas, categorías y autenticación en Vivero Emma.
   version: 1.0.0
+  contact:
+    name: Soporte Vivero Emma
+    email: contacto@viveroemma.com
+
+servers:
+  - url: /api
+    description: Servidor API local / Proxy de producción
 
 tags:
-  - name: content
-    description: Operaciones relacionadas con el contenido del vivero.
-  - name: plants
-    description: Operaciones relacionadas con las plantas del vivero.
-  - name: users
-    description: Operaciones relacionadas con los usuarios del vivero.
+  - name: Autenticación
+    description: Inicio de sesión, estado de usuario y credenciales JWT.
+  - name: Productos
+    description: Gestión de inventario de plantas, herramientas, sustratos y macetas.
+  - name: Ventas
+    description: Registro y consulta de ventas y presupuestos emitidos.
+  - name: Categorías
+    description: Clasificación de productos del vivero.
+  - name: Multimedia
+    description: Subida y almacenamiento de imágenes en ImgBB CDN.
 
 paths:
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Valida credenciales de usuario y retorna un token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+
+  /auth/user:
+    get:
+      tags:
+        - Autenticación
+      summary: Usuario autenticado actual
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Datos del usuario en sesión
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: No autorizado o token expirado
+
+  /auth/logout:
+    post:
+      tags:
+        - Autenticación
+      summary: Cerrar sesión
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Sesión cerrada con éxito
+
   /products:
-      post:
-        tags:
-          - content
-        summary: Crear un nuevo producto
-        requestBody:
-          required: true
+    get:
+      tags:
+        - Productos
+      summary: Listar productos
+      description: Obtiene los productos con filtros opcionales de búsqueda y categoría.
+      parameters:
+        - name: category
+          in: query
+          description: Filtrar por categoría (ej. Plantas de interior)
+          required: false
+          schema:
+            type: string
+        - name: search
+          in: query
+          description: Término de búsqueda por nombre
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de productos encontrados
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  name:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+    post:
+      tags:
+        - Productos
+      summary: Crear un nuevo producto
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Producto creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
                     type: string
-                    description: Nombre del producto
-                  description:
-                    type: string
-                    description: Descripción del producto
-                  price:
-                    type: number
-                    format: float
-                    description: Precio del producto
-        responses:
-          '201':
-            description: Producto creado exitosamente
-          '400':
-            description: Solicitud inválida
-  
+                  product:
+                    $ref: '#/components/schemas/Product'
+        '400':
+          description: Datos incompletos o inválidos
+        '401':
+          description: No autorizado
+
+  /products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID del producto
+        schema:
+          type: integer
+    get:
+      tags:
+        - Productos
+      summary: Obtener producto por ID
+      responses:
+        '200':
+          description: Detalle del producto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+
+    put:
+      tags:
+        - Productos
+      summary: Actualizar un producto existente
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Producto actualizado exitosamente
+        '401':
+          description: No autorizado
+        '404':
+          description: Producto no encontrado
+
+    delete:
+      tags:
+        - Productos
+      summary: Eliminar un producto
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Producto eliminado
+        '401':
+          description: No autorizado
+        '404':
+          description: Producto no encontrado
+
+  /sales:
+    get:
+      tags:
+        - Ventas
+      summary: Listar ventas registradas
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Listado de ventas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sale'
+
+    post:
+      tags:
+        - Ventas
+      summary: Registrar una nueva venta
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleInput'
+      responses:
+        '201':
+          description: Venta registrada exitosamente
+        '400':
+          description: Datos de venta inválidos
+
+  /sales/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID de la venta
+        schema:
+          type: integer
+    get:
+      tags:
+        - Ventas
+      summary: Obtener detalle de venta por ID
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Detalle de venta e ítems
+        '404':
+          description: Venta no encontrada
+    delete:
+      tags:
+        - Ventas
+      summary: Cancelar o eliminar una venta
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Venta eliminada con éxito
+
+  /categories:
+    get:
+      tags:
+        - Categorías
+      summary: Listar todas las categorías disponibles
+      responses:
+        '200':
+          description: Lista de nombres de categorías
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example:
+                  - "Plantas de interior"
+                  - "Plantas de exterior"
+                  - "Flores"
+                  - "Herramientas"
+                  - "Sustratos"
+
+  /upload/imgbb:
+    post:
+      tags:
+        - Multimedia
+      summary: Subir imagen a ImgBB CDN
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Archivo de imagen a subir
+      responses:
+        '200':
+          description: Imagen subida exitosamente con URL generada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        example: "https://i.ibb.co/example/monstera.jpg"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Ingrese su token JWT precedido por 'Bearer '
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@viveroemma.com
+        password:
+          type: string
+          format: password
+          example: "Password123!"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Romy"
+        email:
+          type: string
+          example: "admin@viveroemma.com"
+        role:
+          type: string
+          example: "admin"
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Monstera Deliciosa"
+        scientific_name:
+          type: string
+          example: "Monstera deliciosa Liebm."
+        category:
+          type: string
+          example: "Plantas de interior"
+        precio_venta:
+          type: number
+          example: 13000
+        precio_costo:
+          type: number
+          example: 8000
+        stock:
+          type: integer
+          example: 12
+        image_url:
+          type: string
+          example: "https://images.pexels.com/photos/3097770/pexels-photo-3097770.jpeg"
+        watering_level:
+          type: integer
+          example: 2
+        watering_label:
+          type: string
+          example: "Riego moderado"
+        light_type:
+          type: string
+          example: "partial"
+        temp_range:
+          type: string
+          example: "18° - 27° C"
+
+    ProductInput:
+      type: object
+      required:
+        - name
+        - category
+        - precio_venta
+      properties:
+        name:
+          type: string
+          example: "Monstera Deliciosa"
+        scientific_name:
+          type: string
+          example: "Monstera deliciosa"
+        category:
+          type: string
+          example: "Plantas de interior"
+        precio_venta:
+          type: number
+          example: 13000
+        precio_costo:
+          type: number
+          example: 8000
+        stock:
+          type: integer
+          example: 10
+        image_url:
+          type: string
+        watering_level:
+          type: integer
+          example: 2
+        watering_label:
+          type: string
+        light_type:
+          type: string
+        temp_range:
+          type: string
+
+    SaleItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+          example: 1
+        quantity:
+          type: integer
+          example: 2
+        unit_price:
+          type: number
+          example: 13000
+
+    Sale:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 101
+        customer:
+          type: string
+          example: "María Gómez"
+        seller:
+          type: string
+          example: "Romy"
+        date:
+          type: string
+          example: "2026-09-05"
+        status:
+          type: string
+          example: "Completada"
+        total:
+          type: number
+          example: 26000
+        sale_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleItem'
+
+    SaleInput:
+      type: object
+      required:
+        - customer
+        - seller
+        - date
+        - items
+      properties:
+        customer:
+          type: string
+          example: "María Gómez"
+        email:
+          type: string
+          example: "maria@example.com"
+        seller:
+          type: string
+          example: "Romy"
+        date:
+          type: string
+          example: "2026-09-05"
+        status:
+          type: string
+          example: "Pendiente"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleItem'

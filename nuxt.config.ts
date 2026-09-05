@@ -1,3 +1,6 @@
+// Condición para habilitar la documentación: activa en desarrollo o cuando ENABLE_DOCS='true'
+const isDocsEnabled = process.env.NODE_ENV !== 'production' || process.env.ENABLE_DOCS === 'true'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
@@ -13,7 +16,7 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxt/image',
     '@nuxt/content',
-    'nuxt-openapi-docs-module'
+    ...(isDocsEnabled ? ['nuxt-openapi-docs-module'] : [])
   ],
 
   icon: {
