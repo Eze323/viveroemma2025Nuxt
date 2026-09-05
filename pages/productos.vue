@@ -113,16 +113,204 @@
     >
       <div
         v-if="cartToast.show"
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-emerald-900/95 text-white px-5 py-3.5 shadow-2xl backdrop-blur-md border border-emerald-700/60"
+        class="fixed bottom-24 right-6 z-50 flex items-center gap-3 rounded-2xl bg-emerald-950/95 text-white px-5 py-3.5 shadow-2xl backdrop-blur-md border border-emerald-600/50"
         role="alert"
       >
         <Icon name="heroicons:check-circle" class="h-6 w-6 text-emerald-400 flex-shrink-0" />
         <div>
-          <p class="text-xs text-emerald-200 font-bold uppercase tracking-wider">Carrito actualizado</p>
+          <p class="text-[10px] text-emerald-300 font-black uppercase tracking-wider">Presupuesto actualizado</p>
           <p class="text-sm font-medium">{{ cartToast.message }}</p>
         </div>
+        <button 
+          type="button" 
+          @click="isCartOpen = true; cartToast.show = false" 
+          class="ml-2 px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 hover:text-white rounded-xl text-xs font-bold transition-colors border border-emerald-500/30 cursor-pointer"
+        >
+          Ver lista
+        </button>
       </div>
     </Transition>
+
+    <!-- Botón flotante para abrir el carrito / presupuesto -->
+    <button 
+      type="button"
+      @click="isCartOpen = true"
+      class="fixed bottom-6 right-6 z-40 bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2.5 border border-emerald-400/40 backdrop-blur-md group cursor-pointer"
+      aria-label="Abrir mi presupuesto"
+    >
+      <div class="relative">
+        <Icon name="heroicons:shopping-bag" class="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />
+        <span 
+          v-if="totalCartItems > 0" 
+          class="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-md animate-pulse"
+        >
+          {{ totalCartItems }}
+        </span>
+      </div>
+      <span class="hidden sm:inline font-bold text-sm tracking-wide">
+        Mi Presupuesto
+      </span>
+      <span v-if="totalCartItems > 0" class="hidden sm:inline text-xs font-semibold bg-emerald-700/60 px-2 py-0.5 rounded-full text-emerald-100">
+        ${{ cartTotal.toLocaleString('es-AR') }}
+      </span>
+    </button>
+
+    <!-- Panel lateral (Drawer) de Carrito / Presupuesto -->
+    <Teleport to="body">
+      <div v-if="isCartOpen" class="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+        <!-- Backdrop difuminado -->
+        <div 
+          class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" 
+          @click="isCartOpen = false"
+        ></div>
+
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+          <div class="w-screen max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col h-full text-slate-800 dark:text-slate-100 z-10">
+            <!-- Encabezado del Carrito -->
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/80 dark:bg-slate-800/50">
+              <div class="flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <Icon name="heroicons:clipboard-document-list" class="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-black text-slate-900 dark:text-white">Tu Presupuesto</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ totalCartItems }} {{ totalCartItems === 1 ? 'planta seleccionada' : 'plantas seleccionadas' }}
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                @click="isCartOpen = false" 
+                class="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                aria-label="Cerrar presupuesto"
+              >
+                <Icon name="heroicons:x-mark" class="w-6 h-6" />
+              </button>
+            </div>
+
+            <!-- Lista de productos en el carrito -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-4">
+              <!-- Estado vacío -->
+              <div v-if="cart.length === 0" class="text-center py-16 px-4 flex flex-col items-center">
+                <div class="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center mb-4">
+                  <Icon name="heroicons:shopping-bag" class="w-8 h-8" />
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1">Tu lista está vacía</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mb-6">
+                  Agregá las plantas que te interesen para armar tu lista y consultar stock por WhatsApp.
+                </p>
+                <button 
+                  type="button"
+                  @click="isCartOpen = false" 
+                  class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-md transition-colors cursor-pointer"
+                >
+                  Explorar catálogo
+                </button>
+              </div>
+
+              <!-- Items del carrito -->
+              <div v-else class="divide-y divide-slate-100 dark:divide-slate-800">
+                <div 
+                  v-for="(item, index) in cart" 
+                  :key="item.id" 
+                  class="py-4 first:pt-0 last:pb-0 flex items-center gap-3.5"
+                >
+                  <!-- Imagen miniatura -->
+                  <img 
+                    :src="item.image" 
+                    :alt="item.name" 
+                    class="w-16 h-16 rounded-2xl object-cover bg-slate-100 dark:bg-slate-800 flex-shrink-0 border border-slate-200/60 dark:border-slate-700/60 shadow-xs" 
+                  />
+
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                      {{ item.name }}
+                    </h4>
+                    <p v-if="item.scientificName" class="text-xs italic text-slate-500 dark:text-slate-400 truncate font-serif">
+                      {{ item.scientificName }}
+                    </p>
+                    <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      ${{ item.price.toLocaleString('es-AR') }} c/u
+                    </p>
+
+                    <!-- Controles de cantidad -->
+                    <div class="flex items-center gap-3 mt-2">
+                      <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/80 overflow-hidden">
+                        <button 
+                          type="button"
+                          @click="updateQuantity(index, -1)" 
+                          class="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition-colors cursor-pointer"
+                          aria-label="Disminuir cantidad"
+                        >
+                          -
+                        </button>
+                        <span class="px-2.5 text-xs font-black min-w-[24px] text-center text-slate-900 dark:text-white">
+                          {{ item.quantity }}
+                        </span>
+                        <button 
+                          type="button"
+                          @click="updateQuantity(index, 1)" 
+                          class="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition-colors cursor-pointer"
+                          aria-label="Aumentar cantidad"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span class="text-sm font-black text-slate-900 dark:text-white">
+                        ${{ (item.price * item.quantity).toLocaleString('es-AR') }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Botón borrar item -->
+                  <button 
+                    type="button"
+                    @click="removeFromCart(index)" 
+                    class="p-2 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                    title="Eliminar de la lista"
+                  >
+                    <Icon name="heroicons:trash" class="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer del Carrito / Acción de WhatsApp -->
+            <div v-if="cart.length > 0" class="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 space-y-3.5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Estimado:</span>
+                <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                  ${{ cartTotal.toLocaleString('es-AR') }}
+                </span>
+              </div>
+
+              <!-- Botón WhatsApp hacia Romy -->
+              <button 
+                type="button"
+                @click="sendWhatsApp"
+                class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 px-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 transition-all active:scale-98 cursor-pointer"
+              >
+                <Icon name="mdi:whatsapp" class="w-5 h-5" />
+                <span>Pedir presupuesto a Romy por WhatsApp</span>
+              </button>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 px-1">
+                <span>Consulta de stock sin compromiso</span>
+                <button 
+                  type="button"
+                  @click="clearCart" 
+                  class="text-rose-500 hover:underline hover:text-rose-600 cursor-pointer"
+                >
+                  Vaciar lista
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Categories Section con animaciones de resina -->
     <section class="py-14 bg-emerald-950/5 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
@@ -158,10 +346,84 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import type { PlantProduct } from '~/components/ProductCard.vue'
 
 const img = useImage()
+
+// --- TIPOS Y ESTADO DEL PRESUPUESTO / CARRITO ---
+export interface CartItem {
+  id: string | number
+  name: string
+  scientificName?: string
+  price: number
+  image: string
+  category: string
+  quantity: number
+}
+
+const CART_STORAGE_KEY = 'vivero_presupuesto'
+const cart = ref<CartItem[]>([])
+const isCartOpen = ref(false)
+
+// Guardar automáticamente cada vez que cambie el carrito en localStorage
+watch(
+  cart,
+  (newCart) => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newCart))
+    } catch (e) {
+      console.error('Error guardando presupuesto local:', e)
+    }
+  },
+  { deep: true }
+)
+
+const cartTotal = computed(() => {
+  return cart.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
+})
+
+const totalCartItems = computed(() => {
+  return cart.value.reduce((acc, item) => acc + item.quantity, 0)
+})
+
+const updateQuantity = (index: number, change: number) => {
+  const item = cart.value[index]
+  if (!item) return
+  const newQty = item.quantity + change
+  if (newQty > 0) {
+    item.quantity = newQty
+  } else {
+    removeFromCart(index)
+  }
+}
+
+const removeFromCart = (index: number) => {
+  cart.value.splice(index, 1)
+}
+
+const clearCart = () => {
+  cart.value = []
+}
+
+// Enviar mensaje con el listado a Romy por WhatsApp
+const sendWhatsApp = () => {
+  const phone = '5491151165807' // WhatsApp oficial de Romy en Vivero Emma
+  let text = '¡Hola Romy! 🌱 Estuve viendo el catálogo en la web de Vivero Emma y me interesan las siguientes plantas:\n\n'
+
+  cart.value.forEach(item => {
+    const subtotal = (item.price * item.quantity).toLocaleString('es-AR')
+    text += `✅ *${item.quantity}x ${item.name}* ($${subtotal})\n`
+  })
+
+  const totalFormatted = cartTotal.value.toLocaleString('es-AR')
+  text += `\n💰 *Total estimado: $${totalFormatted}*\n\n`
+  text += '¿Seguís teniendo en stock estas plantas y a este precio?\n'
+  text += '¡Muchas gracias!'
+
+  const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`
+  window.open(url, '_blank')
+}
 
 const filters = reactive({
   search: '',
@@ -182,8 +444,23 @@ const cartToast = reactive({
 let toastTimeout: ReturnType<typeof setTimeout> | null = null
 
 const handleAddToCart = (product: PlantProduct) => {
+  const existing = cart.value.find(item => String(item.id) === String(product.id))
+  if (existing) {
+    existing.quantity++
+  } else {
+    cart.value.push({
+      id: product.id,
+      name: product.commonName,
+      scientificName: product.scientificName,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+      quantity: 1
+    })
+  }
+
   if (toastTimeout) clearTimeout(toastTimeout)
-  cartToast.message = `"${product.commonName}" se agregó a tu pedido.`
+  cartToast.message = `"${product.commonName}" se agregó a tu presupuesto.`
   cartToast.show = true
   toastTimeout = setTimeout(() => {
     cartToast.show = false
@@ -334,6 +611,16 @@ const fetchDatabaseProducts = async () => {
 
 onMounted(() => {
   fetchDatabaseProducts()
+
+  // Cargar presupuesto guardado de la sesión anterior
+  try {
+    const saved = localStorage.getItem(CART_STORAGE_KEY)
+    if (saved) {
+      cart.value = JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('Error cargando presupuesto local:', e)
+  }
 })
 
 // 4. UNIÓN DE PRODUCTOS ESTÁTICOS + BASE DE DATOS
