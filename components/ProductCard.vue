@@ -1,169 +1,375 @@
 <template>
   <article
-    class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-emerald-600 focus-within:ring-offset-2"
+    class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 focus-within:ring-2 focus-within:ring-emerald-600 focus-within:ring-offset-2"
   >
-    <div class="relative aspect-square overflow-hidden bg-emerald-50">
+    <!-- 1. SECCIÓN DE IMAGEN -->
+    <div class="relative aspect-square w-full overflow-hidden bg-emerald-50/50 dark:bg-slate-800/50">
+      <!-- NuxtImg con carga diferida (lazy loading), zoom en hover y fallback automático -->
       <NuxtImg
-        :src="imageSource"
-        provider="none"
-        :alt="displayedProduct.imageAlt || displayedProduct.commonName"
-        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        :src="imageSrc"
+        :alt="productData.imageAlt || productData.commonName"
+        class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         loading="lazy"
         decoding="async"
-        sizes="sm:100vw md:50vw lg:33vw"
-        @error="usePlaceholder"
+        sizes="xs:100vw sm:50vw md:33vw lg:25vw"
+        @error="handleImageError"
       />
+
+      <!-- Badge Categoría / Origen flotante -->
       <span
-        class="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-800 shadow-sm backdrop-blur"
+        class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800 shadow-sm backdrop-blur-md dark:bg-slate-900/90 dark:text-emerald-300"
       >
-        {{ displayedProduct.category }}
+        {{ productData.category }}
       </span>
+
+      <!-- Badge de Descuento (si aplica) -->
+      <span
+        v-if="productData.discountPercent"
+        class="absolute right-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-md"
+      >
+        -{{ productData.discountPercent }}%
+      </span>
+
+      <!-- Botón de Favorito / Deseos -->
+      <button
+        type="button"
+        class="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-md backdrop-blur-md transition hover:bg-white hover:text-rose-500 active:scale-90 dark:bg-slate-900/90 dark:text-slate-300 dark:hover:text-rose-400"
+        :aria-label="isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+        @click.stop="toggleFavorite"
+      >
+        <Icon
+          :name="isFavorite ? 'heroicons:heart-solid' : 'heroicons:heart'"
+          class="h-5 w-5 transition-colors"
+          :class="{ 'text-rose-500 dark:text-rose-400': isFavorite }"
+        />
+      </button>
     </div>
 
+    <!-- 2. SECCIÓN DE INFORMACIÓN -->
     <div class="flex flex-1 flex-col p-5">
+      <!-- Encabezado y Nombres -->
       <div class="flex-1">
-        <h2 class="text-xl font-semibold leading-tight text-slate-900">
-          {{ displayedProduct.commonName }}
-        </h2>
-        <p class="mt-1 text-sm italic text-slate-500">
-          {{ displayedProduct.scientificName }}
+        <!-- Subtítulo de categoría sutil -->
+        <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+          {{ productData.category }}
         </p>
-        <p class="mt-4 text-2xl font-bold text-emerald-700">
-          {{ formatPrice(displayedProduct.price) }}
+
+        <!-- Nombre común (Título principal con fuerte jerarquía) -->
+        <h3 class="mt-1 text-lg font-bold text-slate-900 transition-colors group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
+          {{ productData.commonName }}
+        </h3>
+
+        <!-- Nombre científico (Texto secundario en cursiva) -->
+        <p class="mt-0.5 text-xs italic text-slate-500 dark:text-slate-400 font-serif">
+          {{ productData.scientificName }}
         </p>
+
+        <!-- Precio destacado con soporte para descuento -->
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl font-black tracking-tight text-emerald-700 dark:text-emerald-400">
+            {{ formattedPrice }}
+          </span>
+          <span
+            v-if="productData.originalPrice"
+            class="text-xs text-slate-400 line-through dark:text-slate-500"
+          >
+            {{ formatCurrency(productData.originalPrice) }}
+          </span>
+        </div>
       </div>
 
-      <div class="mt-5 grid grid-cols-3 divide-x divide-slate-200 border-y border-slate-100 py-4">
-        <div class="flex flex-col items-center gap-1.5 px-2 text-center">
-          <div class="flex gap-0.5 text-emerald-600" :aria-label="displayedProduct.watering.label">
-            <component
+      <!-- 3. SECCIÓN DE INDICADORES DE CUIDADOS (ICONOS LIMPIOS) -->
+      <!-- Usa iconos MDI y Heroicons con @nuxt/icon -->
+      <div
+        v-if="showCareGuides"
+        class="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-slate-50/80 p-2.5 border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800/80"
+        aria-label="Requisitos de cuidado de la planta"
+      >
+        <!-- Indicador de Riego (Gotas dinámicas: 1=Bajo, 2=Medio, 3=Abundante) -->
+        <div
+          class="flex flex-col items-center justify-center text-center"
+          :title="`Nivel de riego: ${productData.watering.label}`"
+        >
+          <div
+            class="flex items-center justify-center gap-0.5 text-sky-500"
+            :aria-label="`Riego: ${productData.watering.level} de 3 gotas`"
+          >
+            <Icon
               v-for="drop in 3"
               :key="drop"
-              :is="BeakerIcon"
-              class="h-5 w-5"
-              :class="drop <= displayedProduct.watering.level ? 'opacity-100' : 'opacity-20'"
+              name="mdi:water"
+              class="h-4 w-4 transition-opacity"
+              :class="drop <= productData.watering.level ? 'opacity-100' : 'opacity-25'"
               aria-hidden="true"
             />
           </div>
-          <span class="text-[11px] font-medium leading-tight text-slate-600">
-            {{ displayedProduct.watering.label }}
+          <span class="mt-1 text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-300 line-clamp-1">
+            {{ productData.watering.label }}
           </span>
         </div>
 
-        <div class="flex flex-col items-center gap-1.5 px-2 text-center">
-          <component
-            :is="lightIcon"
-            class="h-5 w-5 text-amber-500"
+        <!-- Indicador de Luz (Sol / Semisombra / Sombra) -->
+        <div
+          class="flex flex-col items-center justify-center border-x border-slate-200/80 px-1 text-center dark:border-slate-700/80"
+          :title="`Luz requerida: ${productData.light.label}`"
+        >
+          <Icon
+            :name="lightIcon"
+            class="h-4 w-4 text-amber-500"
             aria-hidden="true"
           />
-          <span class="text-[11px] font-medium leading-tight text-slate-600">
-            {{ displayedProduct.light.label }}
+          <span class="mt-1 text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-300 line-clamp-1">
+            {{ productData.light.label }}
           </span>
         </div>
 
-        <div class="flex flex-col items-center gap-1.5 px-2 text-center">
-          <FireIcon class="h-5 w-5 text-sky-600" aria-hidden="true" />
-          <span class="text-[11px] font-medium leading-tight text-slate-600">
-            {{ displayedProduct.temperature }}
+        <!-- Indicador de Temperatura (Termómetro) -->
+        <div
+          class="flex flex-col items-center justify-center text-center"
+          :title="`Rango de temperatura: ${productData.temperature}`"
+        >
+          <Icon
+            name="mdi:thermometer"
+            class="h-4 w-4 text-rose-500"
+            aria-hidden="true"
+          />
+          <span class="mt-1 text-[11px] font-medium leading-tight text-slate-600 dark:text-slate-300 line-clamp-1">
+            {{ productData.temperature }}
           </span>
         </div>
       </div>
 
-      <button
-        type="button"
-        class="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 active:scale-[0.98]"
-        @click="emit('add', displayedProduct)"
-      >
-        <PlusIcon class="h-5 w-5" aria-hidden="true" />
-        Añadir al carrito
-      </button>
+      <!-- 4. SECCIÓN DE ACCIÓN -->
+      <div class="mt-5 pt-1">
+        <button
+          type="button"
+          class="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-800 hover:shadow-md hover:shadow-emerald-700/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 active:scale-[0.98] dark:bg-emerald-600 dark:hover:bg-emerald-500"
+          @click="handleAddToCart"
+        >
+          <Icon name="mdi:cart-plus" class="h-5 w-5" aria-hidden="true" />
+          <span>{{ actionLabel }}</span>
+        </button>
+      </div>
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import {
-  BeakerIcon,
-  CloudIcon,
-  FireIcon,
-  PlusIcon,
-  SunIcon
-} from '@heroicons/vue/24/outline'
+import { ref, computed, watch } from 'vue'
 
-export interface ProductCardData {
-  id: number | string
-  category: string
-  commonName: string
-  scientificName: string
-  price: number
-  image: string
-  imageAlt?: string
+/**
+ * ============================================================================
+ * INTERFACES DE TIPOS
+ * Diseñadas para ser compatibles tanto con el modelo del frontend como con
+ * las columnas habituales de Supabase (snake_case o camelCase).
+ * ============================================================================
+ */
+
+export type LightType = 'direct' | 'partial' | 'shade'
+
+export interface PlantCareInfo {
   watering: {
+    /** Nivel de riego del 1 al 3 (1: Bajo, 2: Medio, 3: Abundante) */
     level: 1 | 2 | 3
     label: string
   }
   light: {
-    icon: string
+    type?: LightType
     label: string
+    /** Icono opcional si se desea sobreescribir */
+    icon?: string
   }
+  /** Rango o descripción de temperatura ideal (ej: "18° - 27° C") */
   temperature: string
 }
 
-interface Props {
-  product?: ProductCardData
-  currency?: string
-  locale?: string
+export interface PlantProduct {
+  id: string | number
+  category: string
+  commonName: string
+  scientificName: string
+  price: number
+  originalPrice?: number
+  discountPercent?: number
+  image: string
+  imageAlt?: string
+  stock?: number
+  watering: PlantCareInfo['watering']
+  light: PlantCareInfo['light']
+  temperature: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+/**
+ * Interfaz Props para el componente reutilizable
+ */
+export interface ProductCardProps {
+  /** Objeto de producto. Si no se pasa, utiliza los datos de muestra (mock) */
+  product?: Partial<PlantProduct> & {
+    // Soporte transparente para columnas habituales de Supabase
+    common_name?: string
+    scientific_name?: string
+    precio_venta?: number
+    image_url?: string
+    watering_level?: 1 | 2 | 3
+    watering_label?: string
+    light_type?: LightType
+    light_label?: string
+    temp_range?: string
+  }
+  /** Código de moneda ISO (default: 'ARS') */
+  currency?: string
+  /** Locale para el formateador de precio (default: 'es-AR') */
+  locale?: string
+  /** Mostrar u ocultar la barra de indicadores de cuidado */
+  showCareGuides?: boolean
+  /** Texto del botón de acción */
+  actionLabel?: string
+}
+
+const props = withDefaults(defineProps<ProductCardProps>(), {
   currency: 'ARS',
-  locale: 'es-AR'
+  locale: 'es-AR',
+  showCareGuides: true,
+  actionLabel: 'Añadir al carrito'
 })
 
+/**
+ * Emits tipados para eventos del componente
+ */
 const emit = defineEmits<{
-  add: [product: ProductCardData]
+  (e: 'add', product: PlantProduct): void
+  (e: 'toggle-favorite', productId: string | number, isFavorite: boolean): void
 }>()
 
-const mockProduct: ProductCardData = {
-  id: 'monstera-deliciosa',
+// Estado reactivo local para interacción de favoritos
+const isFavorite = ref(false)
+
+/**
+ * ============================================================================
+ * DATOS DE MUESTRA (MOCK DATA)
+ * Proporciona un producto realista de vivero para visualizar el componente
+ * de inmediato sin necesidad de backend.
+ * ============================================================================
+ */
+const mockPlantProduct: PlantProduct = {
+  id: 'monstera-deliciosa-01',
   category: 'Plantas de interior',
-  commonName: 'Monstera deliciosa',
-  scientificName: 'Monstera deliciosa',
+  commonName: 'Monstera Deliciosa',
+  scientificName: 'Monstera deliciosa Liebm.',
   price: 18500,
-  image: 'https://images.unsplash.com/photo-1614594576052-efb6c1e6f80b?auto=format&fit=crop&w=900&q=85',
-  imageAlt: 'Monstera deliciosa en una maceta clara',
+  originalPrice: 22000,
+  discountPercent: 15,
+  image: 'https://images.unsplash.com/photo-1614594576052-efb6c1e6f80b?auto=format&fit=crop&w=800&q=80',
+  imageAlt: 'Planta Monstera Deliciosa con hojas verdes fenestradas en maceta moderna',
+  stock: 8,
   watering: {
     level: 2,
     label: 'Riego medio'
   },
   light: {
-    icon: 'heroicons:sun',
+    type: 'partial',
     label: 'Semisombra'
   },
-  temperature: '18-27 °C'
+  temperature: '18° - 27° C'
 }
 
-const displayedProduct = computed(() => props.product ?? mockProduct)
-const lightIcon = computed(() => displayedProduct.value.light.icon === 'cloud' ? CloudIcon : SunIcon)
-const placeholderImage = '/placeholder.png'
-const imageSource = ref(displayedProduct.value.image || placeholderImage)
+/**
+ * Mapeo reactivo que normaliza las propiedades recibidas o recurre al Mock.
+ * Admite tanto notación camelCase como snake_case (típica de Supabase).
+ */
+const productData = computed<PlantProduct>(() => {
+  const p = props.product
 
-watch(
-  () => displayedProduct.value.image,
-  (image) => {
-    imageSource.value = image || placeholderImage
+  if (!p) {
+    return mockPlantProduct
   }
-)
 
-const usePlaceholder = () => {
-  imageSource.value = placeholderImage
-}
+  // Normalización con fallback
+  return {
+    id: p.id ?? mockPlantProduct.id,
+    category: p.category ?? mockPlantProduct.category,
+    commonName: p.commonName ?? p.common_name ?? mockPlantProduct.commonName,
+    scientificName: p.scientificName ?? p.scientific_name ?? mockPlantProduct.scientificName,
+    price: p.price ?? p.precio_venta ?? mockPlantProduct.price,
+    originalPrice: p.originalPrice,
+    discountPercent: p.discountPercent,
+    image: p.image ?? p.image_url ?? mockPlantProduct.image,
+    imageAlt: p.imageAlt ?? (p.commonName || p.common_name || mockPlantProduct.commonName),
+    stock: p.stock ?? mockPlantProduct.stock,
+    watering: {
+      level: p.watering?.level ?? p.watering_level ?? mockPlantProduct.watering.level,
+      label: p.watering?.label ?? p.watering_label ?? mockPlantProduct.watering.label
+    },
+    light: {
+      type: p.light?.type ?? p.light_type ?? mockPlantProduct.light.type,
+      label: p.light?.label ?? p.light_label ?? mockPlantProduct.light.label,
+      icon: p.light?.icon
+    },
+    temperature: p.temperature ?? p.temp_range ?? mockPlantProduct.temperature
+  }
+})
 
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat(props.locale, {
+/**
+ * Selector dinámico del icono de luz según el tipo o configuración
+ */
+const lightIcon = computed(() => {
+  if (productData.value.light.icon) {
+    return productData.value.light.icon
+  }
+
+  const type = productData.value.light.type
+  switch (type) {
+    case 'direct':
+      return 'mdi:weather-sunny'
+    case 'shade':
+      return 'mdi:weather-cloudy'
+    case 'partial':
+    default:
+      return 'mdi:weather-partly-cloudy'
+  }
+})
+
+/**
+ * Formateador de moneda configurable según locale y currency
+ */
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat(props.locale, {
     style: 'currency',
     currency: props.currency,
     maximumFractionDigits: 0
-  }).format(price)
+  }).format(amount)
+}
+
+const formattedPrice = computed(() => formatCurrency(productData.value.price))
+
+/**
+ * Manejador del botón "Añadir al carrito"
+ */
+const handleAddToCart = () => {
+  emit('add', productData.value)
+}
+
+/**
+ * Manejador de favoritos
+ */
+const toggleFavorite = () => {
+  isFavorite.value = !isFavorite.value
+  emit('toggle-favorite', productData.value.id, isFavorite.value)
+}
+
+const fallbackPlaceholder = '/placeholder.png'
+const imageSrc = ref(productData.value.image || fallbackPlaceholder)
+
+watch(
+  () => productData.value.image,
+  (newUrl) => {
+    imageSrc.value = newUrl || fallbackPlaceholder
+  }
+)
+
+const handleImageError = () => {
+  if (imageSrc.value !== fallbackPlaceholder) {
+    imageSrc.value = fallbackPlaceholder
+  }
+}
 </script>

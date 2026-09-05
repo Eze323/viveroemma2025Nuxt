@@ -18,10 +18,14 @@ export default defineNuxtConfig({
 
   icon: {
     provider: 'server',
-    fallbackToApi: false,
+    localApiEndpoint: '/_nuxt_icon',
+    fallbackToApi: true,
     serverBundle: {
       collections: ['heroicons', 'mdi'],
       externalizeIconsJson: false
+    },
+    clientBundle: {
+      scan: true
     }
   },
   content: {
@@ -42,7 +46,34 @@ export default defineNuxtConfig({
     //provider: 'netlify',
     formats: ['webp', 'jpg'],
     //dir: 'assets/images',
-    domains: ['images.pexels.com'],
+    domains: [
+      'images.pexels.com',
+      'images.unsplash.com',
+      'www.floreslosan.com',
+      'www.hola.com',
+      'acdn-us.mitiendanube.com',
+      'dcdn-us.mitiendanube.com',
+      'm.media-amazon.com',
+      'cdn0.ecologiaverde.com',
+      'habitanica.com',
+      'http2.mlstatic.com',
+      'cdn11.bigcommerce.com',
+      'viverolasmargaritas.com.ar',
+      'plumeriami.com',
+      'upload.wikimedia.org',
+      'viveroloscerezos.uy',
+      'naturnoa.com',
+      'catalogovallsgarden.com.ar',
+      'www.provenwinners.com',
+      'viverolosaromos.com',
+      'viveroazahares.com.ar',
+      'defeder.es',
+      'static.bainet.es',
+      'd22fxaf9t8d39k.cloudfront.net',
+      'res.cloudinary.com',
+      'www.lasaponaria.es',
+      'content.elmueble.com'
+    ],
   },
   // Google Fonts configuration
   googleFonts: {
