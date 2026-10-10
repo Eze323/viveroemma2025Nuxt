@@ -22,6 +22,16 @@ interface SaleBody {
   subtotal?: number
   iva?: number
   total?: number
+  invoiceType?: number
+  pointOfSale?: number
+  invoiceNumber?: number
+  customerIvaCondition?: string
+  docType?: number
+  docNumber?: string
+  fiscalAddress?: string
+  netAmount?: number
+  vatAmount?: number
+  billingStatus?: string
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'temp-secret'
@@ -116,8 +126,11 @@ export default defineEventHandler(async (event) => {
               name: customer,
               address: address || null,
               email: email || null,
+              taxId: body.docNumber || null,
+              ivaCondition: body.customerIvaCondition || 'Consumidor Final',
+              fiscalAddress: body.fiscalAddress || null,
             })
-            .$returningId()
+            .returning({ id: customers.id })
 
           finalCustomerId = newCustomer.id
           console.log('Nuevo cliente creado, ID:', finalCustomerId)
@@ -133,13 +146,21 @@ export default defineEventHandler(async (event) => {
           customer,
           email: email || null,
           seller: decoded.email,
-          date: new Date(),
+          date: new Date().toISOString().split('T')[0],
           time: new Date().toLocaleTimeString('en-GB', { hour12: false }),
           status: 'Completada',
           totalPrice: totals.total.toString(),
-          // created_at will be set automatically by defaultNow
+          invoiceType: body.invoiceType ?? 99,
+          pointOfSale: body.pointOfSale ?? 1,
+          invoiceNumber: body.invoiceNumber ?? null,
+          customerIvaCondition: body.customerIvaCondition || 'Consumidor Final',
+          docType: body.docType ?? 99,
+          docNumber: body.docNumber || null,
+          netAmount: (body.netAmount ?? totals.subtotal).toString(),
+          vatAmount: (body.vatAmount ?? totals.iva).toString(),
+          billingStatus: body.billingStatus || 'unbilled',
         })
-        .$returningId()
+        .returning({ id: sales.id })
 
       // 4. Create sale items and update stock atomically
       for (const item of items) {

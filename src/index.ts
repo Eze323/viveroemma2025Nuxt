@@ -1,17 +1,24 @@
-import {drizzle } from 'drizzle-orm/mysql2'; // Importa drizzle desde drizzle-orm/mysql2
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { eq } from 'drizzle-orm';
+import { users } from './db/schema';
+import 'dotenv/config';
 
-import { sql,eq, and, or } from 'drizzle-orm'; // Importa las funciones necesarias de drizzle-orm
-
-import { users } from './db/schema'; // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
-
-const db = drizzle(process.env.DATABASE_URL!);
+const connectionString = process.env.DATABASE_URL || '';
+const client = postgres(connectionString, { prepare: false });
+const db = drizzle(client);
 
 async function main() {
-   try {
-      // Realizar una consulta simple a la tabla 'users'
-      const result = await db.select().from(users).where(eq(users.id, 1));
-      console.log('Consulta exitosa:', result);
-   } catch (error) {
-      console.error('Error al realizar la consulta:', error);
-   }
+  try {
+    const result = await db.select().from(users).where(eq(users.id, 1));
+    console.log('Consulta exitosa:', result);
+  } catch (error) {
+    console.error('Error al realizar la consulta:', error);
+  } finally {
+    await client.end();
+  }
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  main();
 }

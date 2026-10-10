@@ -83,14 +83,23 @@
           >
             <div class="sale-header">
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-1">
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
                   <div class="client-avatar">
                     <Icon name="heroicons:user" class="w-4 h-4" />
                   </div>
                   <h3 class="sale-client">{{ sale.customer || 'Consumidor Final' }}</h3>
+                  <span :class="['px-2 py-0.5 rounded-full text-[11px] font-bold border', getInvoiceBadgeClass(sale.invoice_type || sale.invoiceType || 99)]">
+                    {{ getInvoiceBadgeText(sale.invoice_type || sale.invoiceType || 99) }}
+                  </span>
+                  <span v-if="sale.cae" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    CAE OK
+                  </span>
                 </div>
                 <div class="sale-meta">
                   <span class="sale-id">#{{ sale.id }}</span>
+                  <span v-if="sale.invoice_number || sale.invoiceNumber" class="text-xs font-semibold text-gray-700">
+                    • Nº {{ formatPosInvoice(sale.point_of_sale || sale.pointOfSale || 1, sale.invoice_number || sale.invoiceNumber) }}
+                  </span>
                   <span class="sale-separator">•</span>
                   <span class="sale-date">{{ formatDate(sale.date) }}</span>
                   <span class="sale-separator">•</span>
@@ -116,6 +125,37 @@
               class="sale-details"
             >
               <div class="details-divider"></div>
+
+              <!-- Desglose Fiscal ARCA si está disponible -->
+              <div v-if="sale.invoice_type || sale.doc_number || sale.cae || sale.net_amount" class="mb-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-bold text-slate-800 flex items-center gap-1">
+                    <Icon name="heroicons:receipt-percent" class="w-4 h-4 text-emerald-600" />
+                    Comprobante Fiscal Electrónico (ARCA)
+                  </span>
+                  <span :class="['px-2 py-0.5 rounded text-[10px] font-bold border', getBillingStatusBadgeClass(sale.billing_status || sale.billingStatus || 'unbilled')]">
+                    {{ getBillingStatusText(sale.billing_status || sale.billingStatus || 'unbilled') }}
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600 pt-1">
+                  <div>
+                    <span class="text-slate-400 block text-[10px]">Tipo</span>
+                    <span class="font-semibold">{{ getInvoiceBadgeText(sale.invoice_type || sale.invoiceType || 99) }}</span>
+                  </div>
+                  <div v-if="sale.doc_number || sale.docNumber">
+                    <span class="text-slate-400 block text-[10px]">{{ (sale.doc_type || sale.docType) === 80 ? 'CUIT' : 'Documento' }}</span>
+                    <span class="font-semibold">{{ sale.doc_number || sale.docNumber }}</span>
+                  </div>
+                  <div v-if="sale.cae">
+                    <span class="text-slate-400 block text-[10px]">CAE</span>
+                    <span class="font-mono font-bold text-emerald-700">{{ sale.cae }}</span>
+                  </div>
+                  <div v-if="sale.net_amount || sale.netAmount">
+                    <span class="text-slate-400 block text-[10px]">Neto / IVA</span>
+                    <span class="font-semibold">${{ sale.net_amount || sale.netAmount }} / ${{ sale.vat_amount || sale.vatAmount || 0 }}</span>
+                  </div>
+                </div>
+              </div>
               
               <div class="details-section">
                 <h4 class="details-title">Productos</h4>
@@ -248,6 +288,55 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+const getInvoiceBadgeText = (typeVal: any): string => {
+  const val = Number(typeVal || 99)
+  switch (val) {
+    case 1: return 'Factura A'
+    case 6: return 'Factura B'
+    case 11: return 'Factura C'
+    case 99:
+    default: return 'Presupuesto'
+  }
+}
+
+const getInvoiceBadgeClass = (typeVal: any): string => {
+  const val = Number(typeVal || 99)
+  switch (val) {
+    case 1: return 'bg-purple-100 text-purple-800 border-purple-200'
+    case 6: return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 11: return 'bg-emerald-100 text-emerald-800 border-emerald-200'
+    case 99:
+    default: return 'bg-slate-100 text-slate-700 border-slate-200'
+  }
+}
+
+const getBillingStatusText = (status: string): string => {
+  switch (status) {
+    case 'billed': return 'Facturado (CAE)'
+    case 'pending': return 'Pendiente ARCA'
+    case 'error': return 'Error Facturación'
+    case 'unbilled':
+    default: return 'Sin Facturar'
+  }
+}
+
+const getBillingStatusBadgeClass = (status: string): string => {
+  switch (status) {
+    case 'billed': return 'bg-emerald-100 text-emerald-800 border-emerald-300'
+    case 'pending': return 'bg-amber-100 text-amber-800 border-amber-300'
+    case 'error': return 'bg-rose-100 text-rose-800 border-rose-300'
+    case 'unbilled':
+    default: return 'bg-slate-100 text-slate-600 border-slate-200'
+  }
+}
+
+const formatPosInvoice = (pos: any, num: any): string => {
+  if (!num) return ''
+  const posFormatted = String(pos || 1).padStart(4, '0')
+  const numFormatted = String(num).padStart(8, '0')
+  return `${posFormatted}-${numFormatted}`
+}
+
 const toggleSaleDetails = (saleId: number) => {
   const index = expandedSales.value.indexOf(saleId);
   if (index > -1) {
@@ -264,13 +353,23 @@ const openSaleModal = (mode: 'create' | 'edit' | 'view', sale: any = {}) => {
   store.limpiarItems();
   
   if (mode === 'create') {
-    selectedSale.value = { items: [], clientName: '', date: '', time: '' };
+    selectedSale.value = { items: [], clientName: 'Consumidor Final', date: '', time: '' };
   } else {
-    // 🔥 CORREGIDO: Mapeamos de DB -> Formato esperado por SaleModal
+    // Mapeamos de DB -> Formato esperado por SaleModal con campos fiscales
     selectedSale.value = {
       ...sale,
-      clientName: sale.customer || 'Consumidor Final', // Mapeo para que el modal lea el input del nombre
-      clientAddress: sale.address || ''
+      clientName: sale.customer || 'Consumidor Final',
+      clientAddress: sale.address || '',
+      invoiceType: sale.invoice_type || sale.invoiceType || 99,
+      pointOfSale: sale.point_of_sale || sale.pointOfSale || 1,
+      invoiceNumber: sale.invoice_number || sale.invoiceNumber || null,
+      customerIvaCondition: sale.customer_iva_condition || sale.customerIvaCondition || 'Consumidor Final',
+      docType: sale.doc_type || sale.docType || 99,
+      docNumber: sale.doc_number || sale.docNumber || '',
+      fiscalAddress: sale.fiscal_address || sale.fiscalAddress || '',
+      cae: sale.cae || null,
+      caeExpiration: sale.cae_expiration || sale.caeExpiration || null,
+      billingStatus: sale.billing_status || sale.billingStatus || 'unbilled',
     };
 
     // Inyectamos los productos al Pinia Store para que el modal renderice las filas del "carrito"
@@ -306,14 +405,31 @@ const handleSaleSubmit = async (saleData: any) => {
           })),
           subtotal: store.subtotal,
           iva: store.ivaTotal,
-          total: store.totalFinal
+          total: store.totalFinal,
+          netAmount: store.subtotal,
+          vatAmount: store.ivaTotal,
+          invoiceType: store.invoiceType,
+          pointOfSale: store.pointOfSale,
+          customerIvaCondition: store.customerIvaCondition,
+          docType: store.docType,
+          docNumber: store.docNumber || null,
         };
       }
       
       fullPayload = {
-        customer: fullPayload.clientName,
-        address: fullPayload.clientAddress || null,
         ...payloadFromStore,
+        ...fullPayload,
+        customer: fullPayload.clientName || 'Consumidor Final',
+        address: fullPayload.clientAddress || null,
+        invoiceType: fullPayload.invoiceType ?? 99,
+        pointOfSale: fullPayload.pointOfSale ?? 1,
+        customerIvaCondition: fullPayload.customerIvaCondition || 'Consumidor Final',
+        docType: fullPayload.docType ?? 99,
+        docNumber: fullPayload.docNumber || null,
+        fiscalAddress: fullPayload.fiscalAddress || null,
+        netAmount: fullPayload.netAmount ?? payloadFromStore.subtotal,
+        vatAmount: fullPayload.vatAmount ?? payloadFromStore.iva,
+        billingStatus: 'unbilled',
       };
     }
     

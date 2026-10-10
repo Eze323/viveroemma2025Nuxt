@@ -76,7 +76,6 @@ import { useDrizzle } from '~/server/utils/drizzle';
 import { sales, sale_items, products, customers } from '~/src/db/schema';  // Sin customers/users
 import { eq, sql } from 'drizzle-orm';
 import client from '~/src/generated/prisma/client';
-import { customType } from 'drizzle-orm/mysql-core';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -88,22 +87,35 @@ export default defineEventHandler(async (event) => {
       throw new Error('DB connection failed');
     }
 
-    // Paso 1: Fetch ventas básicas (sin joins a customer/user)
+    // Paso 1: Fetch ventas básicas (con datos fiscales)
     const baseSales = await db
       .select({
         id: sales.id,
-        customer: sales.customerId,
+        customerId: sales.customerId,
+        customer: sales.customer,
         clientName: sales.customer,
         email: sales.email,
         seller: sales.seller,
-        time: sql`DATE_FORMAT(${sales.date}, '%H:%i %p')`.as('time'),
-        date: sql`DATE(${sales.date})`.as('date'),
+        time: sales.time,
+        date: sales.date,
         amount: sales.totalPrice,
+        total_price: sales.totalPrice,
         address: customers.address,
+        invoiceType: sales.invoiceType,
+        pointOfSale: sales.pointOfSale,
+        invoiceNumber: sales.invoiceNumber,
+        customerIvaCondition: sales.customerIvaCondition,
+        docType: sales.docType,
+        docNumber: sales.docNumber,
+        netAmount: sales.netAmount,
+        vatAmount: sales.vatAmount,
+        cae: sales.cae,
+        caeExpiration: sales.caeExpiration,
+        billingStatus: sales.billingStatus,
       })
       .from(sales)
       .leftJoin(customers, eq(sales.customerId, customers.id))
-      .orderBy(sql`${sales.date} DESC`); // Ordena por fecha más reciente primero
+      .orderBy(sql`${sales.date} DESC`);
 
     // Paso 2: Para cada venta, fetch sus items con join a products
     const salesWithItems = await Promise.all(

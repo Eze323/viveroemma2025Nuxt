@@ -7,15 +7,34 @@
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <p><strong>Cliente:</strong> {{ sale.customer }}</p>
-          <p><strong>Email:</strong> {{ sale.email }}</p>
+          <p><strong>Email:</strong> {{ sale.email || '-' }}</p>
           <p><strong>Vendedor:</strong> {{ sale.seller }}</p>
+          <p v-if="sale.doc_number || sale.docNumber">
+            <strong>{{ (sale.doc_type || sale.docType) === 80 ? 'CUIT:' : 'Documento:' }}</strong> 
+            {{ sale.doc_number || sale.docNumber }}
+          </p>
         </div>
         <div>
           <p><strong>Fecha:</strong> {{ formatDate(sale.date) }}</p>
-          <p><strong>Hora:</strong> {{ sale.time }}</p>
+          <p><strong>Hora:</strong> {{ sale.time || '-' }}</p>
           <p><strong>Estado:</strong> {{ sale.status }}</p>
           <p><strong>Total:</strong> ${{ sale.total_price }}</p>
+          <p v-if="sale.invoice_type || sale.invoiceType">
+            <strong>Comprobante:</strong> 
+            {{ (sale.invoice_type || sale.invoiceType) === 1 ? 'Factura A' : ((sale.invoice_type || sale.invoiceType) === 6 ? 'Factura B' : ((sale.invoice_type || sale.invoiceType) === 11 ? 'Factura C' : 'Ticket/Presupuesto')) }}
+            <span v-if="sale.invoice_number || sale.invoiceNumber">
+              (Nº {{ sale.invoice_number || sale.invoiceNumber }})
+            </span>
+          </p>
         </div>
+      </div>
+
+      <!-- CAE Info si está facturada -->
+      <div v-if="sale.cae" class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-900">
+        <p><strong>CAE ARCA:</strong> <span class="font-mono">{{ sale.cae }}</span></p>
+        <p v-if="sale.cae_expiration || sale.caeExpiration">
+          <strong>Vencimiento CAE:</strong> {{ formatDate(sale.cae_expiration || sale.caeExpiration) }}
+        </p>
       </div>
 
       <h3 class="text-lg font-semibold mb-2">Ítems</h3>

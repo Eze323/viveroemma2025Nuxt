@@ -83,7 +83,8 @@ export default defineNuxtConfig({
     families: {
       'Montserrat': [400, 500, 600, 700],
       'Poppins': [300, 400, 500],
-      'Playfair Display': [400, 700]
+      'Playfair Display': [400, 700],
+      'Material Symbols Outlined': true
     },
     display: 'swap'
   },
@@ -138,6 +139,7 @@ export default defineNuxtConfig({
     dbUsername: process.env.DB_USERNAME,
     dbPassword: process.env.DB_PASSWORD,
     dbBaseURL: process.env.DATABASE_URL,
+    directUrl: process.env.DIRECT_URL,
     jwtSecret: process.env.JWT_SECRET, // Added JWT Secret here for security
     imgbbApiKey: process.env.IMGBB_API_KEY,
 

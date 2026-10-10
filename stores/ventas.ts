@@ -21,6 +21,14 @@ export const useVentasStore = defineStore('ventas', () => {
   const ivaRate = ref(0.21)
   const syncQueue = useSyncQueueStore()
 
+  // Estado fiscal ARCA / AFIP
+  const invoiceType = ref<number>(99) // 99=Ticket/Presupuesto, 1=Factura A, 6=Factura B, 11=Factura C
+  const pointOfSale = ref<number>(1)
+  const customerIvaCondition = ref<string>('Consumidor Final')
+  const docType = ref<number>(99) // 99=Sin doc, 96=DNI, 80=CUIT, 86=CUIL
+  const docNumber = ref<string>('')
+  const fiscalAddress = ref<string>('')
+
   /**
    * Agrega un item al carrito. Si ya existe, suma la cantidad.
    */
@@ -79,10 +87,37 @@ export const useVentasStore = defineStore('ventas', () => {
   }
 
   /**
-   * Limpia todos los items del carrito
+   * Limpia todos los items del carrito y restablece valores fiscales por defecto
    */
   const limpiarItems = () => {
     items.value = []
+    invoiceType.value = 99
+    pointOfSale.value = 1
+    customerIvaCondition.value = 'Consumidor Final'
+    docType.value = 99
+    docNumber.value = ''
+    fiscalAddress.value = ''
+  }
+
+  /**
+   * Actualiza los datos de facturación electrónica
+   */
+  const setFiscalData = (data: {
+    invoiceType?: number
+    pointOfSale?: number
+    customerIvaCondition?: string
+    docType?: number
+    docNumber?: string
+    fiscalAddress?: string
+    ivaRate?: number
+  }) => {
+    if (data.invoiceType !== undefined) invoiceType.value = data.invoiceType
+    if (data.pointOfSale !== undefined) pointOfSale.value = data.pointOfSale
+    if (data.customerIvaCondition !== undefined) customerIvaCondition.value = data.customerIvaCondition
+    if (data.docType !== undefined) docType.value = data.docType
+    if (data.docNumber !== undefined) docNumber.value = data.docNumber
+    if (data.fiscalAddress !== undefined) fiscalAddress.value = data.fiscalAddress
+    if (data.ivaRate !== undefined) ivaRate.value = data.ivaRate
   }
 
   /**
@@ -98,13 +133,20 @@ export const useVentasStore = defineStore('ventas', () => {
   const guardarVenta = async (saleData: any): Promise<{ success: boolean; offline?: boolean; error?: string }> => {
     const { isOnline } = useNetworkStatus()
 
-    // Preparar payload normalizado
+    // Preparar payload normalizado con datos fiscales
     const payload = {
       ...saleData,
       items: getPayload.value.items,
       subtotal: getPayload.value.subtotal,
       iva: getPayload.value.iva,
       total: getPayload.value.total,
+      netAmount: getPayload.value.netAmount,
+      vatAmount: getPayload.value.vatAmount,
+      invoiceType: invoiceType.value,
+      pointOfSale: pointOfSale.value,
+      customerIvaCondition: customerIvaCondition.value,
+      docType: docType.value,
+      docNumber: docNumber.value || null,
     }
 
     if (!isOnline.value) {
@@ -141,7 +183,7 @@ export const useVentasStore = defineStore('ventas', () => {
   const totalFinal = computed(() => subtotal.value + ivaTotal.value)
 
   /**
-   * Genera el payload limpio para enviar al backend de Laravel
+   * Genera el payload limpio para enviar al backend
    */
   const getPayload = computed(() => ({
     items: items.value.map(i => ({
@@ -151,13 +193,27 @@ export const useVentasStore = defineStore('ventas', () => {
     })),
     subtotal: subtotal.value,
     iva: ivaTotal.value,
-    total: totalFinal.value
+    total: totalFinal.value,
+    // Campos ARCA / AFIP
+    netAmount: subtotal.value,
+    vatAmount: ivaTotal.value,
+    invoiceType: invoiceType.value,
+    pointOfSale: pointOfSale.value,
+    customerIvaCondition: customerIvaCondition.value,
+    docType: docType.value,
+    docNumber: docNumber.value || null,
   }))
 
   return {
     // State
     items,
     ivaRate,
+    invoiceType,
+    pointOfSale,
+    customerIvaCondition,
+    docType,
+    docNumber,
+    fiscalAddress,
 
     // Actions
     agregarItem,
@@ -166,6 +222,7 @@ export const useVentasStore = defineStore('ventas', () => {
     removerItem,
     limpiarItems,
     setIvaRate,
+    setFiscalData,
     guardarVenta,
 
     // Getters

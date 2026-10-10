@@ -1,5 +1,3 @@
-import type { Decimal } from "@prisma/client/runtime/library";
-
 // types/product.ts
 export interface Product {
   id: number;
@@ -51,3 +49,8 @@ export interface Sales {
   total_price: number;
   sale_date: Date;
 }
+
+export * from './billing';
+export * from './customer';
+export * from './sales';
+

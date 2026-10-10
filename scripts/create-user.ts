@@ -1,5 +1,4 @@
-// script/create-user.ts
-import { db } from '~/server/utils/drizzle';
+import { db, client } from '~/server/utils/drizzle';
 import { users } from '~/src/db/schema';
 import bcrypt from 'bcrypt';
 
@@ -30,7 +29,7 @@ async function createAdminUser() {
     console.error('Error al crear el usuario:', error);
   } finally {
     // Cerrar la conexión a la base de datos
-    await db.$client.end();
+    await client.end();
   }
 }
 
