@@ -55,6 +55,7 @@ export default defineEventHandler(async (event) => {
             product: {
               id: products.id,
               name: products.name,
+              image_url: products.image_url,
             },
             productName: sql`COALESCE(${products.name}, 'Producto eliminado')`.as('productName'),
             product_name: sql`COALESCE(${products.name}, 'Producto eliminado')`.as('product_name'),

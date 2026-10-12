@@ -18,7 +18,7 @@
               class="close-button"
               aria-label="Cerrar modal"
             >
-              <Icon name="heroicons:x-mark" class="w-6 h-6 text-slate-500 hover:text-slate-900 transition-colors" />
+              <Icon name="heroicons:x-mark" class="w-5 h-5 sm:w-6 sm:h-6 text-slate-500 hover:text-slate-900 transition-colors" />
             </button>
           </div>
 
@@ -233,7 +233,7 @@
               </div>
 
               <div v-else class="empty-cart">
-                <Icon name="heroicons:shopping-cart" class="w-16 h-16 text-slate-300 dark:text-slate-600 mb-3" />
+                <Icon name="heroicons:shopping-cart" class="w-12 h-12 sm:w-16 sm:h-16 text-slate-300 dark:text-slate-600 mb-3" />
                 <p class="text-base font-semibold text-slate-700">El carrito está vacío</p>
                 <p class="empty-cart-hint">Busca y agrega productos para continuar con la venta</p>
               </div>
@@ -241,11 +241,11 @@
 
             <!-- 5. Resumen y Desglose Fiscal de IVA -->
             <section v-if="store.items.length > 0" class="section summary-section">
-              <div class="flex items-center justify-between mb-3">
+              <div class="summary-header flex items-center justify-between mb-3">
                 <h3 class="section-title mb-0">Resumen & Desglose Fiscal</h3>
 
                 <!-- Selector de Alícuota de IVA -->
-                <div v-if="mode === 'create'" class="flex items-center gap-1.5 bg-white px-2 py-1 rounded-lg border border-gray-200">
+                <div v-if="mode === 'create'" class="iva-rate-control flex items-center gap-1.5 bg-white px-2 py-1 rounded-lg border border-gray-200">
                   <span class="text-xs font-semibold text-gray-500">Tasa IVA:</span>
                   <select
                     :value="store.ivaRate"
@@ -299,7 +299,7 @@
               class="button button-primary"
               :disabled="!canSubmit"
             >
-              <Icon name="heroicons:banknotes" class="w-5 h-5 flex-shrink-0" />
+              <Icon name="heroicons:banknotes" class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span>{{ invoiceType === 99 ? 'Cobrar Venta Rápida' : `Emitir ${getInvoiceTypeLabel(invoiceType)}` }}</span>
             </button>
           </div>
@@ -538,7 +538,7 @@ watch(() => props.isOpen, (isOpen) => {
             nombre: nombreResuelto,
             precioUnitario: precioResuelto,
             cantidad: Number(item.quantity || item.cantidad || 1),
-            image: item.image || item.image_url,
+            image: item.image || item.image_url || item.product?.image_url,
             product: { name: nombreResuelto }
           })
         })
@@ -611,6 +611,7 @@ watch(() => props.isOpen, (isOpen) => {
 .modal-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px 24px;
 }
 .section {
@@ -804,19 +805,92 @@ watch(() => props.isOpen, (isOpen) => {
   opacity: 0.7;
 }
 @media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0;
+  }
   .modal-container {
     max-height: 100vh;
+    max-height: 100dvh;
+    min-width: 0;
     border-radius: 0;
   }
   .modal-header,
   .modal-content,
   .modal-footer {
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .modal-header {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .modal-title {
+    font-size: 18px;
+  }
+  .close-button {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  .modal-content {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .section {
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 13px;
+  }
+  .summary-section {
+    padding: 10px;
+  }
+  .summary-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .iva-rate-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .summary-card {
+    padding: 10px 12px;
+  }
+  .summary-label {
+    font-size: 12px;
+  }
+  .summary-value {
+    font-size: 13px;
+  }
+  .summary-row.total .summary-label {
+    font-size: 14px;
+  }
+  .summary-row.total .summary-value {
+    font-size: 18px;
   }
   .button {
-    flex: 1;
+    height: auto;
+    min-height: 42px;
     min-width: 0;
+    padding: 7px 8px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  .button-secondary {
+    flex: 0 0 36%;
+  }
+  .button-primary {
+    flex: 1;
+    gap: 5px;
+    text-align: center;
+  }
+  .empty-cart p {
+    font-size: 14px;
+  }
+  .empty-cart-hint {
+    font-size: 12px !important;
   }
 }
 </style>

@@ -104,7 +104,7 @@ const decreaseQuantity = () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
+  padding: 12px;
   background: #f9fafb;
   border-radius: 12px;
   transition: all 0.2s;
@@ -115,8 +115,8 @@ const decreaseQuantity = () => {
 }
 
 .product-image {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
   background-size: cover;
   background-position: center;
@@ -130,23 +130,23 @@ const decreaseQuantity = () => {
 }
 
 .product-name {
-  font-size: 16px;
+  font-size: 14px; /* Fuente más chica para celular */
   font-weight: 600;
   color: #111827;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .product-unit-price {
-  font-size: 14px;
+  font-size: 12px; /* Fuente más chica */
   color: #6b7280;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
 }
 
 .product-subtotal {
-  font-size: 14px;
+  font-size: 13px; /* Fuente más chica */
   color: #374151;
   margin: 0;
 }
@@ -159,29 +159,29 @@ const decreaseQuantity = () => {
 .product-controls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: white;
   border-radius: 8px;
-  padding: 4px;
+  padding: 2px;
 }
 
 .quantity-button {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   background: #3b82f6;
   color: white;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
@@ -203,13 +203,13 @@ const decreaseQuantity = () => {
 }
 
 .quantity-button .material-symbols-outlined {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .quantity-display {
-  min-width: 32px;
+  min-width: 28px;
   text-align: center;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
 }
@@ -219,20 +219,21 @@ const decreaseQuantity = () => {
   gap: 4px;
 }
 
+/* Estilo unificado para los botones de acción (incluyendo la lupa / reemplazar) */
 .action-button {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .action-button.replace {
-  background: #f59e0b;
+  background: #f59e0b; /* Color de la lupa / reemplazar */
   color: white;
 }
 
@@ -256,7 +257,7 @@ const decreaseQuantity = () => {
 }
 
 .action-button .material-symbols-outlined {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .readonly-quantity {
@@ -265,21 +266,21 @@ const decreaseQuantity = () => {
 
 .quantity-badge {
   display: inline-block;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: #3b82f6;
   color: white;
   font-weight: 600;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-/* Mobile optimizations: Distribución en columna para evitar desbordes */
+/* Mobile optimizations: Distribución en columna fluida */
 @media (max-width: 640px) {
   .cart-item {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px;
-    gap: 12px;
+    padding: 8px;
+    gap: 8px;
   }
 
   .product-details {
@@ -292,7 +293,7 @@ const decreaseQuantity = () => {
     align-items: center;
     width: 100%;
     border-top: 1px solid #e5e7eb;
-    padding-top: 8px;
+    padding-top: 6px;
   }
 
   .quantity-controls {
@@ -302,8 +303,29 @@ const decreaseQuantity = () => {
 
   .quantity-button,
   .action-button {
-    width: 22px;
-    height: 22px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .quantity-button .material-symbols-outlined,
+  .action-button .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  .product-name {
+    font-size: 13px;
+  }
+
+  .product-unit-price {
+    font-size: 11px;
+  }
+
+  .product-subtotal {
+    font-size: 12px;
+  }
+
+  .quantity-display {
+    font-size: 14px;
   }
 }
 
