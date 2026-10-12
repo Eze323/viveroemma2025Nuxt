@@ -273,25 +273,37 @@ const decreaseQuantity = () => {
   font-size: 16px;
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations: Distribución en columna para evitar desbordes */
 @media (max-width: 640px) {
   .cart-item {
+    flex-direction: column;
+    align-items: stretch;
     padding: 12px;
+    gap: 12px;
   }
-  
-  .product-image {
-    width: 72px;
-    height: 72px;
+
+  .product-details {
+    width: 100%;
   }
-  
-  .product-name {
-    font-size: 15px;
+
+  .product-controls {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 8px;
   }
-  
+
+  .quantity-controls {
+    flex: 1;
+    justify-content: space-between;
+  }
+
   .quantity-button,
   .action-button {
-    width: 48px;
-    height: 48px;
+    width: 22px;
+    height: 22px;
   }
 }
 
