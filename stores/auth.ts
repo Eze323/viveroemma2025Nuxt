@@ -5,7 +5,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'encargado' | 'empleado';
+  role: 'admin' | 'encargado' | 'operario' | 'user' | null;
 }
 
 interface AuthState {
@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state): boolean => !!state.token,
     isAdmin: (state): boolean => state.user?.role === 'admin',
     isEncargado: (state): boolean => state.user?.role === 'encargado',
-    isEmpleado: (state): boolean => state.user?.role === 'empleado',
+    isEmpleado: (state): boolean => state.user?.role === 'operario',
   },
 
   actions: {
@@ -71,10 +71,10 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async refreshSession() {
+    async refreshSession(requestFetch = $fetch) {
       const tokenCookie = useCookie('token');
       try {
-        const response = await $fetch('/api/auth/refresh', { method: 'POST' });
+        const response = await requestFetch('/api/auth/refresh', { method: 'POST' });
         const { user, token } = response as { user: User; token: string };
 
         this.token = token;
@@ -89,19 +89,19 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async fetchUser() {
+    async fetchUser(requestFetch = $fetch) {
       if (!this.token) return;
 
       try {
-        const response = await $fetch('/api/auth/user', {
+        const response = await requestFetch<{ success: boolean; user: User }>('/api/auth/user', {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
         });
-        this.user = response as User;
+        this.user = response.user;
       } catch (error: any) {
         if (error.statusCode === 401) {
-          const refreshed = await this.refreshSession();
+          const refreshed = await this.refreshSession(requestFetch);
           if (!refreshed) throw error;
         } else {
           throw error;
@@ -109,18 +109,18 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async init() {
+    async init(requestFetch = $fetch) {
       const tokenCookie = useCookie('token');
 
       if (tokenCookie.value) {
         this.token = tokenCookie.value;
         try {
-          await this.fetchUser();
+          await this.fetchUser(requestFetch);
         } catch (e) {
-          await this.refreshSession();
+          await this.refreshSession(requestFetch);
         }
       } else {
-        await this.refreshSession();
+        await this.refreshSession(requestFetch);
       }
     },
 

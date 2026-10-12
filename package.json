@@ -5,6 +5,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "db:migrate:sales": "bun scripts/migrate-sales-schema.ts",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -22,6 +23,7 @@
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
     "baseline-browser-mapping": "^2.9.15",
+    "bcrypt": "^6.0.0",
     "caniuse-lite": "^1.0.30001765",
     "chart.js": "^4.4.2",
     "dotenv": "^17.2.3",

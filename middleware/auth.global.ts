@@ -28,8 +28,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Si ya está autenticado y va a la raíz, lo mandamos a su panel
   if (authStore.isAuthenticated && to.path === '/') {
-    const redirectPath = authStore.isAdmin ? '/admin' : '/dashboard';
-    return navigateTo(redirectPath, { redirectCode: 302 });
+    return navigateTo('/admin', { redirectCode: 302 });
   }
 
   // Si es cualquiera de las rutas públicas, lo dejamos pasar libremente

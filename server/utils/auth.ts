@@ -1,4 +1,4 @@
-import { H3Event, createError, getRequestHeaders } from 'h3'
+import { H3Event, createError, getCookie, getRequestHeaders } from 'h3'
 import jwt from 'jsonwebtoken'
 
 export async function requireAuth(event: H3Event) {
@@ -38,15 +38,15 @@ export async function requireAuth(event: H3Event) {
     }
 
     try {
-        const payload = jwt.verify(token, jwtSecret) as {
-            userId: number
-            role: string
+        const payload = jwt.verify(token, jwtSecret)
+        if (typeof payload === 'string' || payload.type !== 'access' || typeof payload.userId !== 'number') {
+            throw new Error('Invalid access token')
         }
 
         // Guardamos el usuario en el contexto de Nitro
         event.context.user = {
             id: payload.userId,
-            role: payload.role,
+            role: typeof payload.role === 'string' ? payload.role : 'user',
         }
 
         return event.context.user

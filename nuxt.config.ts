@@ -149,11 +149,6 @@ export default defineNuxtConfig({
     },
   },
 
-  routeRules: {
-    '/api/**': {
-      proxy: process.env.API_BASE_URL ? `${process.env.API_BASE_URL}/**` : 'https://inventario-fabrica-backend.onrender.com/api/**'
-    }
-  },
 
   components: [
     { path: '~/components', pathPrefix: false }, // Scans ~/components and subdirectories
