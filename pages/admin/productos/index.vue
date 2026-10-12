@@ -646,7 +646,10 @@ const createProduct = async () => {
       pot_size: newProduct.pot_size || 'Sin especificar',
       image_url: newProduct.image_url || '/placeholder.png',
     };
-    await api.createProduct(productData);
+    const response = await api.createProduct(productData);
+    if (!response.success) {
+      throw new Error(response.error || 'Error al crear el producto.');
+    }
     closeCreateModal();
     showNotification('Producto creado exitosamente!');
     // Reload products from store to get the updated list
@@ -673,7 +676,10 @@ const updateProduct = async () => {
       pot_size: editingProduct.pot_size || 'Sin especificar',
       image_url: editingProduct.image_url || '/placeholder.png',
     };
-    await api.updateProduct(editingProduct.id!, productData);
+    const response = await api.updateProduct(editingProduct.id!, productData);
+    if (!response.success) {
+      throw new Error(response.error || 'Error al actualizar el producto.');
+    }
     closeEditModal();
     showNotification('Producto actualizado exitosamente!');
     // Reload products from store to get the updated list
@@ -688,7 +694,10 @@ const deleteProduct = async (productId: number) => {
   if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
   
   try {
-    await api.deleteProduct(productId);
+    const response = await api.deleteProduct(productId);
+    if (!response.success) {
+      throw new Error(response.error || 'Error al eliminar el producto.');
+    }
     openDetails.value = openDetails.value.filter((id) => id !== productId);
     showNotification('Producto eliminado exitosamente!');
     // Reload products from store to get the updated list

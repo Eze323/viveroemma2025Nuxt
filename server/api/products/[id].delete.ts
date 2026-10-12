@@ -1,11 +1,14 @@
 // server/api/products/[id].delete.ts
 import { defineEventHandler, createError } from 'h3'
 import { useDrizzle } from '~/server/utils/drizzle'
+import { requireAuth } from '~/server/utils/auth'
 import { products, sale_items } from '~/src/db/schema'
 import { eq, count } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   try {
+    await requireAuth(event)
+
     const db = useDrizzle()
     const id = parseInt(event.context.params?.id || '')
 

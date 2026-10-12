@@ -36,6 +36,11 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, statusMessage: 'Credenciales inválidas.' })
     }
 
+    const userId = Number(user.id)
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
+      throw createError({ statusCode: 500, statusMessage: 'ID de usuario inválido.' })
+    }
+
     const compatiblePasswordHash = user.password.replace(/^\$2y\$/, '$2b$')
     const isPasswordValid = await bcrypt.compare(password, compatiblePasswordHash)
     if (!isPasswordValid) {
@@ -44,14 +49,14 @@ export default defineEventHandler(async (event) => {
 
     // Access Token (15 minutos)
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, name: user.name, type: 'access' },
+      { userId, email: user.email, role: user.role, name: user.name, type: 'access' },
       JWT_SECRET,
       { expiresIn: '15m' }
     )
 
     // Refresh Token (7 días)
     const refreshToken = jwt.sign(
-      { userId: user.id, type: 'refresh' },
+      { userId, type: 'refresh' },
       JWT_SECRET,
       { expiresIn: '7d' }
     )
@@ -74,7 +79,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { id: userId, name: user.name, email: user.email, role: user.role },
       token: accessToken,
     }
   } catch (error: any) {

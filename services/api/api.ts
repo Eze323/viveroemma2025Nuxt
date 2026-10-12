@@ -9,6 +9,7 @@ interface ApiResponse<T> {
 
 export const useApiService = () => {
   const baseUrl = '/api'
+  const requestFetch = useRequestFetch()
 
   // 👉 Ahora esta función sí agrega el token
   const getAuthHeaders = () => {
@@ -22,6 +23,14 @@ export const useApiService = () => {
   }
 
   const normalizeResponse = <T>(response: any): ApiResponse<T> => {
+    if (response?.success === false) {
+      return {
+        success: false,
+        data: (response.data ?? []) as T,
+        error: response.error || response.message || 'La solicitud no pudo completarse',
+      }
+    }
+
     if (response && response.success !== undefined && response.data !== undefined) {
       return { success: response.success, data: response.data } as ApiResponse<T>
     }
@@ -44,14 +53,26 @@ export const useApiService = () => {
   const request = async <T>(url: string, options: any = {}): Promise<ApiResponse<T>> => {
     try {
       const fullUrl = `${baseUrl}${url}`
-
-      const response = await $fetch(fullUrl, {
+      const sendRequest = () => $fetch(fullUrl, {
         ...options,
         headers: {
           ...getAuthHeaders(),
           ...(options.headers || {}),
         },
       })
+
+      let response
+      try {
+        response = await sendRequest()
+      } catch (error: any) {
+        if (error.statusCode !== 401) throw error
+
+        const auth = useAuthStore()
+        const refreshed = await auth.refreshSession(requestFetch)
+        if (!refreshed) throw error
+
+        response = await sendRequest()
+      }
 
       return normalizeResponse<T>(response)
     } catch (error: any) {
@@ -60,7 +81,7 @@ export const useApiService = () => {
       return {
         success: false,
         data: [] as T,
-        error: error.data?.message || error.message || 'Error de conexión',
+        error: error.data?.statusMessage || error.data?.message || error.message || 'Error de conexión',
       }
     }
   }

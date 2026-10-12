@@ -39,13 +39,14 @@ export async function requireAuth(event: H3Event) {
 
     try {
         const payload = jwt.verify(token, jwtSecret)
-        if (typeof payload === 'string' || payload.type !== 'access' || typeof payload.userId !== 'number') {
+        const userId = typeof payload === 'string' ? Number.NaN : Number(payload.userId)
+        if (typeof payload === 'string' || payload.type !== 'access' || !Number.isSafeInteger(userId) || userId <= 0) {
             throw new Error('Invalid access token')
         }
 
         // Guardamos el usuario en el contexto de Nitro
         event.context.user = {
-            id: payload.userId,
+            id: userId,
             role: typeof payload.role === 'string' ? payload.role : 'user',
         }
 

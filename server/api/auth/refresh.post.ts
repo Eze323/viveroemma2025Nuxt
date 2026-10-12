@@ -20,10 +20,11 @@ export default defineEventHandler(async (event) => {
   let payload: jwt.JwtPayload
   try {
     const verified = jwt.verify(refreshToken, jwtSecret)
-    if (typeof verified === 'string' || verified.type !== 'refresh' || typeof verified.userId !== 'number') {
+    const userId = typeof verified === 'string' ? Number.NaN : Number(verified.userId)
+    if (typeof verified === 'string' || verified.type !== 'refresh' || !Number.isSafeInteger(userId) || userId <= 0) {
       throw new Error('Invalid refresh token')
     }
-    payload = verified
+    payload = { ...verified, userId }
   } catch {
     throw createError({ statusCode: 401, statusMessage: 'Sesión expirada.' })
   }
@@ -39,12 +40,12 @@ export default defineEventHandler(async (event) => {
   }
 
   const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role, name: user.name, type: 'access' },
+    { userId: Number(user.id), email: user.email, role: user.role, name: user.name, type: 'access' },
     jwtSecret,
     { expiresIn: '15m' }
   )
   const nextRefreshToken = jwt.sign(
-    { userId: user.id, type: 'refresh' },
+    { userId: Number(user.id), type: 'refresh' },
     jwtSecret,
     { expiresIn: '7d' }
   )
@@ -66,7 +67,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    user,
+    user: { ...user, id: Number(user.id) },
     token,
   }
 })

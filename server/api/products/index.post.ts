@@ -14,7 +14,6 @@ import { validateProductData, ValidationError } from '~/server/utils/validation'
  * @apiPermission admin, encargado
  */
 
-const JWT_SECRET = process.env.JWT_SECRET || 'temp-secret'
 export default defineEventHandler(async (event) => {
   try {
     await requireAuth(event)
@@ -68,32 +67,23 @@ export default defineEventHandler(async (event) => {
         created_at: new Date(),
         updated_at: new Date(),
       })
-      .$returningId()
+      .returning()
 
     return {
       success: true,
-      data: {
-        id: product.id,
-        name: body.name,
-        category: body.category,
-        precio_venta: body.precio_venta,
-        stock: body.stock,
-      },
+      message: 'Producto creado con éxito',
+      data: product,
     }
   } catch (error) {
     console.error('Error in /api/products POST:', error)
 
     if (error instanceof ValidationError) {
-      return {
-        success: false,
-        error: error.message,
-      }
+      throw createError({ statusCode: 400, statusMessage: error.message })
     }
 
     const err = error as { statusCode?: number; statusMessage?: string }
-    return {
-      success: false,
-      error: err.statusMessage || 'Error al crear producto',
-    }
+    if (err.statusCode) throw error
+
+    throw createError({ statusCode: 500, statusMessage: 'Error al crear producto' })
   }
 })
