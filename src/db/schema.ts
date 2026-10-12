@@ -27,6 +27,11 @@ export const users = pgTable('users', {
   password: varchar('password', { length: 255 }).notNull(),
   role: roleEnum('role').default('user'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+
+  // Columnas heredadas de Laravel (protegidas como opcionales para evitar pérdida de datos)
+  emailVerifiedAt: timestamp('email_verified_at'),
+  rememberToken: varchar('remember_token', { length: 100 }),
+  updatedAt: timestamp('updated_at'),
 });
 
 // Tabla: products

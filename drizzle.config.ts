@@ -9,4 +9,14 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DIRECT_URL || process.env.DATABASE_URL || '',
   },
+  // Agregamos 'plant_pot_prices' y el resto de tablas del sistema
+  tablesFilter: [
+    'users',
+    'customers',
+    'sales',
+    'sale_items',
+    'products',
+    'categories',
+    'plant_pot_prices'
+  ],
 });
