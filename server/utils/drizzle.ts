@@ -8,9 +8,18 @@ import * as schema from '~/src/db/schema';
 function getDatabaseUrl(): string {
   try {
     const config = useRuntimeConfig();
-    return (config.dbBaseURL as string) || process.env.DATABASE_URL || '';
+    return (
+      (config.databaseUrl as string) ||
+      (config.directUrl as string) ||
+      (config.dbBaseURL as string) ||
+      process.env.DATABASE_URL ||
+      process.env.DIRECT_URL ||
+      process.env.NUXT_DATABASE_URL ||
+      process.env.NUXT_DIRECT_URL ||
+      ''
+    );
   } catch {
-    return process.env.DATABASE_URL || '';
+    return process.env.DATABASE_URL || process.env.DIRECT_URL || process.env.NUXT_DATABASE_URL || process.env.NUXT_DIRECT_URL || '';
   }
 }
 
