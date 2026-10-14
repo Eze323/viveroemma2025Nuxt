@@ -216,6 +216,10 @@
             <input v-model="newProduct.name" type="text" class="input w-full text-sm py-1 px-2" required />
           </div>
           <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">SKU (opcional)</label>
+            <input v-model="newProduct.sku" type="text" maxlength="50" class="input w-full text-sm py-1 px-2" placeholder="Ej. VIV-ACE-001" />
+          </div>
+          <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
             <select v-model="newProduct.category" class="input w-full text-sm py-1 px-2" required>
               <option value="" disabled>Seleccione una categoría</option>
@@ -545,7 +549,7 @@ const openCreateModal = () => {
 
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  Object.assign(newProduct, { name: '', category: null, description: '', precio_venta: 0, precio_compra: 0, stock: 0, pot_size: '', image_url: '' });
+  Object.assign(newProduct, { name: '', category: null, description: '', precio_venta: 0, precio_compra: 0, publicado: false, sku: null, stock: 0, pot_size: '', image_url: '' });
 };
 
 const openEditModal = (product: Product) => {

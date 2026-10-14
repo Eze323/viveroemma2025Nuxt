@@ -32,7 +32,7 @@
       <div class="flex items-baseline gap-1">
         <p class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
           <span v-if="prefix" class="text-emerald-600 dark:text-emerald-400 font-bold mr-0.5">{{ prefix }}</span>
-          <CountUp :end-value="numericValue" :duration="1500" />
+          {{ displayValue.toLocaleString() }}
           <span v-if="suffix" class="text-xs font-bold text-slate-400 ml-1">{{ suffix }}</span>
         </p>
       </div>
@@ -45,8 +45,8 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue';
 
 const props = defineProps({
   title: {
@@ -90,6 +90,35 @@ const numericValue = computed(() => {
   return parseFloat(cleaned) || 0;
 });
 
+const displayValue = ref(numericValue.value);
+let animationFrame: number | undefined;
+
+const animateValue = () => {
+  if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+
+  const startTime = performance.now();
+  const update = (currentTime: number) => {
+    const progress = Math.min((currentTime - startTime) / 1500, 1);
+    const easedProgress = 1 - Math.pow(1 - progress, 4);
+    displayValue.value = Math.floor(numericValue.value * easedProgress);
+
+    if (progress < 1) {
+      animationFrame = requestAnimationFrame(update);
+    } else {
+      displayValue.value = numericValue.value;
+      animationFrame = undefined;
+    }
+  };
+
+  animationFrame = requestAnimationFrame(update);
+};
+
+onMounted(animateValue);
+watch(numericValue, animateValue);
+onBeforeUnmount(() => {
+  if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+});
+
 const gradientClass = computed(() => {
   const gradients = {
     primary: 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30',
@@ -107,61 +136,6 @@ const trendClass = computed(() => {
     ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
     : 'bg-rose-500/10 text-rose-600 border-rose-500/20';
 });
-</script>
-
-<script>
-import { defineComponent, ref, watch, onMounted } from 'vue';
-
-const CountUp = defineComponent({
-  name: 'CountUp',
-  props: {
-    endValue: {
-      type: Number,
-      required: true
-    },
-    duration: {
-      type: Number,
-      default: 1000
-    }
-  },
-  setup(props) {
-    const displayValue = ref(0);
-    
-    const animate = () => {
-      const startValue = 0;
-      const startTime = Date.now();
-      
-      const updateValue = () => {
-        const currentTime = Date.now();
-        const elapsed = currentTime - startTime;
-        
-        if (elapsed < props.duration) {
-          const progress = elapsed / props.duration;
-          const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-          displayValue.value = Math.floor(startValue + (props.endValue - startValue) * easeOutQuart);
-          requestAnimationFrame(updateValue);
-        } else {
-          displayValue.value = props.endValue;
-        }
-      };
-      
-      requestAnimationFrame(updateValue);
-    };
-    
-    onMounted(() => {
-      animate();
-    });
-    
-    watch(() => props.endValue, () => {
-      animate();
-    });
-    
-    return { displayValue };
-  },
-  template: '<span>{{ displayValue.toLocaleString() }}</span>'
-});
-
-export { CountUp };
 </script>
 
 <style scoped>

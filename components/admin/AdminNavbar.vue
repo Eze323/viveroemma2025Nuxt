@@ -261,7 +261,7 @@ const openNotification = (note) => {
   notificationsStore.markAsRead(note.id);
   isNotificationsOpen.value = false;
   if (note.type === 'order' && note.meta?.orderId) {
-    navigateTo(`/admin/ventas/${note.meta.orderId}`);
+    navigateTo('/admin/ventas');
   }
 };
 
